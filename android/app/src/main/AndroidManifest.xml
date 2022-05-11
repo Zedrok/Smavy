@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.smavy">
+
+   <uses-permission android:name="android.permission.INTERNET" />
    <application
         android:label="smavy"
         android:name="${applicationName}"
@@ -30,5 +32,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyCZWR9O1Nb7U0CcXVJqwAGqOU8CjaQX4h0"/>
     </application>
 </manifest>

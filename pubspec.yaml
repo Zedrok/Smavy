@@ -34,7 +34,13 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-
+  flutter_custom_clippers: ^2.0.0
+  firebase_auth: ^3.3.17
+  firebase_core: ^1.16.0
+  cloud_firestore: ^3.1.14
+  progress_dialog: ^1.2.4
+  google_maps_flutter: ^2.1.5
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -85,5 +91,20 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
+  fonts:
+    - family: SonsieOne
+      fonts:
+        - asset: assets/fonts/SonsieOne-Regular.ttf
+    - family: Tangerine
+      fonts:
+        - asset: assets/fonts/Tangerine-Bold.ttf
+        - asset: assets/fonts/Tangerine-Regular.ttf
+    - family: NimbusSans
+      fonts:
+        - asset: assets/fonts/NimbusSans/NimbusSanL-Bol.otf
+        - asset: assets/fonts/NimbusSans/NimbusSanL-BolIta.otf
+        - asset: assets/fonts/NimbusSans/NimbusSanL-Reg.otf
+        - asset: assets/fonts/NimbusSans/NimbusSanL-RegIta.otf
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

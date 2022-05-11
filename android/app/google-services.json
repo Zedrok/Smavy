@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "453785284748",
+    "project_id": "smavy-4c6f1",
+    "storage_bucket": "smavy-4c6f1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453785284748:android:15389dcd691007318f0ba9",
+        "android_client_info": {
+          "package_name": "com.example.smavy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "453785284748-70ef144fds5kr4nmk3skt9s98fli9u5m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.smavy",
+            "certificate_hash": "efa5f12ad36e053fa81b1e92a93a7bf074d56923"
+          }
+        },
+        {
+          "client_id": "453785284748-0jknguhjhh1peclat1mfqbi0krag725c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAx-H95dw8-D1kRTGkwtyukEID3wNGXx7k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "453785284748-0jknguhjhh1peclat1mfqbi0krag725c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
