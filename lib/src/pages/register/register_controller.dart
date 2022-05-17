@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 // ignore: import_of_legacy_library_into_null_safe
-import 'package:progress_dialog/progress_dialog.dart';
+import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
 import 'package:smavy/src/models/app_user.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
 import 'package:smavy/src/providers/user_provider.dart';

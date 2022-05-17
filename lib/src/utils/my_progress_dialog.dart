@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // ignore: import_of_legacy_library_into_null_safe
-import 'package:progress_dialog/progress_dialog.dart';
+import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
+
 
 class MyProgressDialog{
   
@@ -8,7 +9,7 @@ class MyProgressDialog{
 
     ProgressDialog progressDialog = ProgressDialog(
       context,
-      type: ProgressDialogType.Normal,
+      type: ProgressDialogType.normal,
       isDismissible: false,
       showLogs: false,
     );
@@ -27,12 +28,6 @@ class MyProgressDialog{
       messageTextStyle: const TextStyle(
         color: Colors.black, fontSize: 17.0, fontWeight: FontWeight.w600)
     );
-
     return progressDialog;
-
-
-
   }
-
-  
 }
