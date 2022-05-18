@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
 import 'package:smavy/src/models/app_user.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
@@ -68,6 +67,14 @@ class LoginController {
       return;
     }
 
+    if(!email.isValidEmail()){
+      String msgError = 'Por favor, ingrese un email válido.';
+      // ignore: avoid_print
+      print(msgError);
+      Snackbar.showSnackbar(context, msgError );
+      return;
+    }
+
     _progressDialog.show();
 
     try {
@@ -96,5 +103,14 @@ class LoginController {
       Snackbar.showSnackbar(context, 'El usuario ya se encuentra registrado');
     }
     _progressDialog.hide();
+    
+  }
+}
+
+extension EmailValidator on String {
+  bool isValidEmail() {
+    return RegExp(
+            r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
+        .hasMatch(this);
   }
 }

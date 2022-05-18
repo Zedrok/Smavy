@@ -37,9 +37,10 @@ dependencies:
   flutter_custom_clippers: ^2.0.0
   firebase_auth: ^3.3.17
   firebase_core: ^1.16.0
-  cloud_firestore: ^3.1.14
+  cloud_firestore: ^3.1.15
   google_maps_flutter: ^2.1.5
   progress_dialog_null_safe: ^1.0.7
+  shared_preferences: ^2.0.15
   
 dev_dependencies:
   flutter_test:

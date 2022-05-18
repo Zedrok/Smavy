@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 
 class AuthProvider {
 
@@ -10,6 +11,20 @@ class AuthProvider {
 
   User? getUser(){
     return _firebaseAuth.currentUser;
+  }
+
+  void checkIfUserIsLogged(BuildContext context){
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null){
+        // ignore: avoid_print
+        print('El usuario está logeado de antes');
+        Navigator.pushNamedAndRemoveUntil(context, 'homeMap', (route) => false);
+      }else{
+        // ignore: avoid_print
+        print('El usuario no está logeado');
+        Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+      }
+    });
   }
 
   Future<bool> login(String email, String password) async {
