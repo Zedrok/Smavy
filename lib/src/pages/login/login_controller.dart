@@ -77,6 +77,6 @@ class LoginController {
   }
 
   void goToHomePage(){
-    Navigator.pushNamed(context, 'home');
+    Navigator.pushNamed(context, 'mainMap');
   }
 }

@@ -13,12 +13,13 @@ class AuthProvider {
     return _firebaseAuth.currentUser;
   }
 
-  void checkIfUserIsLogged(BuildContext context){
+  void checkIfUserIsLogged(BuildContext context) {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user != null){
         // ignore: avoid_print
         print('El usuario está logeado de antes');
-        Navigator.pushNamedAndRemoveUntil(context, 'homeMap', (route) => false);
+        Navigator.pushNamedAndRemoveUntil(context, 'mainMap', (route) => false);
+        // Navigator.pushNamed(context, 'login');
       }else{
         // ignore: avoid_print
         print('El usuario no está logeado');

@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smavy/src/pages/home/home_page.dart';
 import 'package:smavy/src/pages/login/login_page.dart';
+import 'package:smavy/src/pages/main_map/main_map_page.dart';
 import 'package:smavy/src/pages/register/register_page.dart';
 
 void main() async {
@@ -23,9 +24,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.teal,
         appBarTheme: const AppBarTheme(elevation: 0)
       ),
-      initialRoute: 'login',
+      initialRoute: 'home',
       routes: {
         'home': (BuildContext context) => const HomePage(),
+        'mainMap': (BuildContext context) => const MainMapPage(),
         'login': (BuildContext context) => const LoginPage(),
         'register': (BuildContext context) => const RegisterPage(), 
       },
