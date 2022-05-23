@@ -6,7 +6,7 @@ import 'package:smavy/src/providers/user_provider.dart';
 import 'package:smavy/src/utils/my_progress_dialog.dart';
 import 'package:smavy/src/utils/snackbar.dart';
 
-class LoginController {
+class RegisterController {
   
   late BuildContext context;
 
@@ -30,7 +30,6 @@ class LoginController {
   void goToLogin(){
     Navigator.pushNamed(context, 'login');
   }
-
 
   void register() async {
     String username = usernameController.text;

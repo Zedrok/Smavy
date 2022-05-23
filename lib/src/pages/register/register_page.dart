@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-// import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:smavy/src/pages/register/register_controller.dart';
 import 'package:smavy/src/widgets/button_app.dart';
 
@@ -13,7 +12,7 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
 
-  final LoginController _con = LoginController();
+  final RegisterController _con = RegisterController();
 
   @override
   void initState() {
@@ -106,7 +105,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
           )
-          
         ],
       ),
     );
@@ -182,11 +180,14 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buttonRegister(){
-    return Container(
-      margin: const EdgeInsets.only(top: 30),
-      child: ButtonApp(
-        text: 'Continuar',
-        onPressed: _con.register,
+    return GestureDetector(
+      onTap: _con.goToLogin,
+      child: Container(
+        margin: const EdgeInsets.only(top: 30),
+        child: ButtonApp(
+          text: 'Continuar',
+          onPressed: _con.register,
+        ),
       ),
     );
   }
