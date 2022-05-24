@@ -45,43 +45,9 @@ class _MainMapPageState extends State<MainMapPage> {
             style: TextStyle(color: Colors.white),
           ),
         ),
-        body: Stack(children: [
-          _googleMapsWidget(),
-          SafeArea(
-              child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.all(10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _buttonCenterPosition(),
-                  ],
-                ),
-              )
-            ],
-          ))
-        ]),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 77, 236, 213),
-                ),
-                child: Text(
-                  'Drawer Header',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              _menusDrawer(context, 'Perfil'),
-              _menusDrawer(context, 'Historial'),
-              _menusDrawer(context, 'Direcciones Guardadas'),
-              _menusDrawer(context, 'Ajustes'),
-            ],
-          ),
-        ),
+        body: _bodyPart(), //body guardado en funcion manteniendo stack
+        drawer: _drawer(
+            context), //drawer guardado en funcion para simplificar codigo
       ),
     );
   }
@@ -100,6 +66,25 @@ class _MainMapPageState extends State<MainMapPage> {
         ));
   }
 
+//funcion para el body
+  Widget _bodyPart() => Stack(children: [
+        _googleMapsWidget(),
+        SafeArea(
+            child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _buttonCenterPosition(),
+                ],
+              ),
+            )
+          ],
+        ))
+      ]);
+
   Widget _googleMapsWidget() {
     return GoogleMap(
       mapType: MapType.normal,
@@ -111,6 +96,30 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
+//funcion de drawer lateral izquierdo.
+  Drawer _drawer(BuildContext context) {
+    return Drawer(
+        child: ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        const DrawerHeader(
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 77, 236, 213),
+          ),
+          child: Text(
+            'Drawer Header',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        _menusDrawer(context, 'Perfil'),
+        _menusDrawer(context, 'Historial'),
+        _menusDrawer(context, 'Direcciones Guardadas'),
+        _menusDrawer(context, 'Ajustes'),
+      ],
+    ));
+  }
+
+//funcion destinada para cada menu del drawer
   ListTile _menusDrawer(BuildContext context, String mensaje) {
     return ListTile(
       title: Text(
