@@ -4,6 +4,10 @@ import 'package:smavy/src/pages/home/home_page.dart';
 import 'package:smavy/src/pages/login/login_page.dart';
 import 'package:smavy/src/pages/main_map/main_map_page.dart';
 import 'package:smavy/src/pages/register/register_page.dart';
+import 'package:smavy/src/utils/ajustesPage.dart';
+import 'package:smavy/src/utils/historial.dart';
+import 'package:smavy/src/utils/perfil.dart';
+import 'package:smavy/src/utils/save_adresses.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,15 +25,18 @@ class MyApp extends StatelessWidget {
       title: 'Smavy',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.teal,
-        appBarTheme: const AppBarTheme(elevation: 0)
-      ),
+          primarySwatch: Colors.teal,
+          appBarTheme: const AppBarTheme(elevation: 0)),
       initialRoute: 'home',
       routes: {
         'home': (BuildContext context) => const HomePage(),
         'mainMap': (BuildContext context) => const MainMapPage(),
         'login': (BuildContext context) => const LoginPage(),
-        'register': (BuildContext context) => const RegisterPage(), 
+        'register': (BuildContext context) => const RegisterPage(),
+        'perfil': (BuildContext context) => const PerfilPage(),
+        'historial': (BuildContext context) => const HistorialPage(),
+        'dir_guardadas': (BuildContext context) => const SaveAdressPage(),
+        'ajustes_page': (BuildContext context) => const AjustesPage(),
       },
     );
   }

@@ -1,5 +1,8 @@
 // ignore_for_file: avoid_print
-
+import 'package:smavy/src/utils/ajustesPage.dart';
+import 'package:smavy/src/utils/historial.dart';
+import 'package:smavy/src/utils/perfil.dart';
+import 'package:smavy/src/utils/save_adresses.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -111,16 +114,17 @@ class _MainMapPageState extends State<MainMapPage> {
             style: TextStyle(color: Colors.white),
           ),
         ),
-        _menusDrawer(context, 'Perfil'),
-        _menusDrawer(context, 'Historial'),
-        _menusDrawer(context, 'Direcciones Guardadas'),
-        _menusDrawer(context, 'Ajustes'),
+        _menusDrawer(context, 'Perfil', 'perfil'),
+        _menusDrawer(context, 'Historial', 'historial'),
+        _menusDrawer(context, 'Direcciones Guardadas', 'dir_guardadas'),
+        _menusDrawer(context, 'Ajustes', 'ajustes_page'),
       ],
     ));
   }
 
 //funcion destinada para cada menu del drawer
-  ListTile _menusDrawer(BuildContext context, String mensaje) {
+  ListTile _menusDrawer(
+      BuildContext context, String mensaje, String routeName) {
     return ListTile(
       title: Text(
         mensaje,
@@ -128,6 +132,7 @@ class _MainMapPageState extends State<MainMapPage> {
       ),
       onTap: () {
         Navigator.pop(context);
+        Navigator.pushNamed(context, routeName);
       },
     );
   }
