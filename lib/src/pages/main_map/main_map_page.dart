@@ -4,23 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
+import 'dart:io';
 
 class MainMapPage extends StatefulWidget {
-  const MainMapPage({ Key? key }) : super(key: key);
+  const MainMapPage({Key? key}) : super(key: key);
 
   @override
   State<MainMapPage> createState() => _MainMapPageState();
 }
 
 class _MainMapPageState extends State<MainMapPage> {
-
   final MainMapController _con = MainMapController();
 
   @override
   void initState() {
     super.initState();
-    
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
   }
@@ -36,50 +36,71 @@ class _MainMapPageState extends State<MainMapPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children:[
+    return WillPopScope(
+      onWillPop: () async => _onWillPopScope(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'prueba',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        body: Stack(children: [
           _googleMapsWidget(),
           SafeArea(
-            child: Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      _buttonCenterPosition(),
-                    ],
-                  ),
-                )
-              ],
-            )
-          )
-        ]
+              child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _buttonCenterPosition(),
+                  ],
+                ),
+              )
+            ],
+          ))
+        ]),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 77, 236, 213),
+                ),
+                child: Text(
+                  'Drawer Header',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              _menusDrawer(context, 'Perfil'),
+              _menusDrawer(context, 'Historial'),
+              _menusDrawer(context, 'Direcciones Guardadas'),
+              _menusDrawer(context, 'Ajustes'),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buttonCenterPosition(){
+  Widget _buttonCenterPosition() {
     return Container(
-      alignment: Alignment.centerRight,
-      child: Card(
-        elevation: 3,
-        color: Colors.teal[400],
-        shape: const CircleBorder(),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: const Icon(
-            Icons.location_searching_outlined,
-            color: Colors.white,
-            size: 25
-          )
-        ),
-      )  
-    );
+        alignment: Alignment.centerRight,
+        child: Card(
+          elevation: 3,
+          color: Colors.teal[400],
+          shape: const CircleBorder(),
+          child: Container(
+              padding: const EdgeInsets.all(10),
+              child: const Icon(Icons.location_searching_outlined,
+                  color: Colors.white, size: 25)),
+        ));
   }
 
-  Widget _googleMapsWidget(){
+  Widget _googleMapsWidget() {
     return GoogleMap(
       mapType: MapType.normal,
       initialCameraPosition: _con.initialPosition,
@@ -90,9 +111,35 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
-  void refresh (){
-    setState((){
+  ListTile _menusDrawer(BuildContext context, String mensaje) {
+    return ListTile(
+      title: Text(
+        mensaje,
+        style: const TextStyle(color: Colors.black),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+      },
+    );
+  }
 
-    });
+  Future<bool> _onWillPopScope() async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('¿Desea salir de la aplicación?'),
+        actions: [
+          FloatingActionButton(
+              onPressed: () => exit(0), child: const Text('Si')),
+          FloatingActionButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('No')),
+        ],
+      ),
+    );
+  }
+
+  void refresh() {
+    setState(() {});
   }
 }

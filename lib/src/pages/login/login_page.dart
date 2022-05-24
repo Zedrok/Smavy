@@ -5,14 +5,13 @@ import 'package:smavy/src/pages/login/login_controller.dart';
 import 'package:smavy/src/widgets/button_app.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({ Key? key }) : super(key: key);
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final LoginController _con = LoginController();
 
   @override
@@ -24,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     print('INIT STATE');
     _con.init(context);
 
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
       _con.init(context);
       // ignore: avoid_print
       print('METODO SCHEDULER');
@@ -33,7 +32,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-
     // ignore: avoid_print
     print('METODO BUILD');
 
@@ -69,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _textDontHaveAccount(){
+  Widget _textDontHaveAccount() {
     return GestureDetector(
       onTap: _con.goToRegisterPage,
       child: Container(
@@ -77,16 +75,13 @@ class _LoginPageState extends State<LoginPage> {
         margin: const EdgeInsets.only(right: 40),
         child: const Text(
           'Crear cuenta',
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.teal
-          ),
+          style: TextStyle(fontSize: 15, color: Colors.teal),
         ),
       ),
     );
   }
 
-  Widget _buttonLogin(){
+  Widget _buttonLogin() {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       child: ButtonApp(
@@ -96,56 +91,51 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _textFieldPassword(){
+  Widget _textFieldPassword() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
       child: TextField(
         controller: _con.passwordController,
         obscureText: true,
         decoration: const InputDecoration(
-          labelText: 'Contraseña',
-          suffixIcon: Icon(
-            Icons.lock_open_outlined,
-            color: Colors.black38,
-          )
-        ),
+            labelText: 'Contraseña',
+            suffixIcon: Icon(
+              Icons.lock_open_outlined,
+              color: Colors.black38,
+            )),
       ),
     );
   }
 
-  Widget _textFieldEmail(){
+  Widget _textFieldEmail() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 40),
       child: TextField(
         controller: _con.emailController,
         decoration: const InputDecoration(
-          hintText: 'ejemplo@gmail.com',
-          labelText: 'Correo electrónico',
-          suffixIcon: Icon(
-            Icons.email_outlined,
-            color: Colors.black38,
-          )
-        ),
+            hintText: 'ejemplo@gmail.com',
+            labelText: 'Correo electrónico',
+            suffixIcon: Icon(
+              Icons.email_outlined,
+              color: Colors.black38,
+            )),
       ),
     );
   }
 
-  Widget _textLogin(){
+  Widget _textLogin() {
     return Container(
       alignment: Alignment.centerLeft,
-      margin: const EdgeInsets.only(top: 30, left:40),
+      margin: const EdgeInsets.only(top: 30, left: 40),
       child: const Text(
         'Inicio de Sesión',
         style: TextStyle(
-          color: Colors.black54,
-          fontSize: 28,
-          fontFamily: 'NimbusSans'
-        ),
+            color: Colors.black54, fontSize: 28, fontFamily: 'NimbusSans'),
       ),
     );
   }
 
-  Widget _textDescription(){
+  Widget _textDescription() {
     return Container(
       alignment: Alignment.centerLeft,
       margin: const EdgeInsets.only(left: 40, bottom: 40),
@@ -160,12 +150,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _bannerApp(BuildContext context){
+  Widget _bannerApp(BuildContext context) {
     return ClipPath(
       clipper: OvalBottomBorderClipper(),
       child: Container(
         color: Colors.teal,
-        height: MediaQuery.of(context).size.height*0.2,
+        height: MediaQuery.of(context).size.height * 0.2,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -173,11 +163,10 @@ class _LoginPageState extends State<LoginPage> {
             Text(
               'Smavy',
               style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'Tangerine-Regular',
-                fontSize: 40,
-                fontWeight: FontWeight.w600
-              ),
+                  color: Colors.white,
+                  fontFamily: 'Tangerine-Regular',
+                  fontSize: 40,
+                  fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -185,4 +174,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-

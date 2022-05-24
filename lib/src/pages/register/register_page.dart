@@ -4,14 +4,13 @@ import 'package:smavy/src/pages/register/register_controller.dart';
 import 'package:smavy/src/widgets/button_app.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({ Key? key }) : super(key: key);
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-
   final RegisterController _con = RegisterController();
 
   @override
@@ -23,7 +22,7 @@ class _RegisterPageState extends State<RegisterPage> {
     print('INIT STATE');
     _con.init(context);
 
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
       _con.init(context);
       // ignore: avoid_print
       print('METODO SCHEDULER');
@@ -32,19 +31,18 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-
     // ignore: avoid_print
     print('METODO BUILD');
 
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
-        title: Row( //Esto es para que se alinien a la izquierda
-          children: const <Widget>[
-            Text('Registro'),
-          ],
-        )
-      ),
+          elevation: 0,
+          title: Row(
+            //Esto es para que se alinien a la izquierda
+            children: const <Widget>[
+              Text('Registro'),
+            ],
+          )),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -64,22 +62,19 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _textRegister(){
+  Widget _textRegister() {
     return Container(
       alignment: Alignment.centerLeft,
-      margin: const EdgeInsets.only(top: 30, left:40),
+      margin: const EdgeInsets.only(top: 30, left: 40),
       child: const Text(
         'Crear cuenta',
         style: TextStyle(
-          color: Colors.black54,
-          fontSize: 28,
-          fontFamily: 'NimbusSans'
-        ),
+            color: Colors.black54, fontSize: 28, fontFamily: 'NimbusSans'),
       ),
     );
   }
 
-  Widget _textHaveAccount(){
+  Widget _textHaveAccount() {
     return Container(
       alignment: Alignment.center,
       margin: const EdgeInsets.symmetric(vertical: 30, horizontal: 40),
@@ -91,7 +86,7 @@ class _RegisterPageState extends State<RegisterPage> {
             style: TextStyle(
               fontSize: 15,
               color: Colors.black54,
-              fontWeight: FontWeight.w500, 
+              fontWeight: FontWeight.w500,
             ),
           ),
           GestureDetector(
@@ -110,76 +105,71 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-
-  Widget _textFieldConfirmPassword(){
+  Widget _textFieldConfirmPassword() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
       child: TextField(
         controller: _con.confirmPasswordController,
         obscureText: true,
         decoration: const InputDecoration(
-          labelText: 'Confirmar Contraseña',
-          suffixIcon: Icon(
-            Icons.lock_open_outlined,
-            color: Colors.black38,
-          )
-        ),
+            labelText: 'Confirmar Contraseña',
+            suffixIcon: Icon(
+              Icons.lock_open_outlined,
+              color: Colors.black38,
+            )),
       ),
     );
   }
 
-  Widget _textFieldPassword(){
+  Widget _textFieldPassword() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
       child: TextField(
         controller: _con.passwordController,
         obscureText: true,
         decoration: const InputDecoration(
-          labelText: 'Contraseña',
-          suffixIcon: Icon(
-            Icons.lock_open_outlined,
-            color: Colors.black38,
-          )
-        ),
+            labelText: 'Contraseña',
+            suffixIcon: Icon(
+              Icons.lock_open_outlined,
+              color: Colors.black38,
+            )),
       ),
     );
   }
 
-  Widget _textFieldEmail(){
+  Widget _textFieldEmail() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
       child: TextField(
         controller: _con.emailController,
         decoration: const InputDecoration(
-          hintText: 'ejemplo@gmail.com',
-          labelText: 'Email',
-          suffixIcon: Icon(
-            Icons.email_outlined,
-            color: Colors.black38,
-          )
-        ),
+            hintText: 'ejemplo@gmail.com',
+            labelText: 'Email',
+            suffixIcon: Icon(
+              Icons.email_outlined,
+              color: Colors.black38,
+            )),
       ),
     );
   }
 
-  Widget _textFieldName(){
+  Widget _textFieldName() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
       child: TextField(
         controller: _con.usernameController,
         decoration: const InputDecoration(
-          labelText: 'Nombre',
-          hintText: 'Tu nombre',
-          suffixIcon: Icon(
-            Icons.account_circle,
-            color: Colors.black38,
-          )
-        ),
+            labelText: 'Nombre',
+            hintText: 'Tu nombre',
+            suffixIcon: Icon(
+              Icons.account_circle,
+              color: Colors.black38,
+            )),
       ),
     );
   }
 
-  Widget _buttonRegister(){
+  Widget _buttonRegister() {
     return GestureDetector(
       onTap: _con.goToLogin,
       child: Container(
@@ -232,4 +222,3 @@ class _RegisterPageState extends State<RegisterPage> {
   //   );
   // }
 }
-
