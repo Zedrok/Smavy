@@ -128,7 +128,7 @@ class _MainMapPageState extends State<MainMapPage> {
         onPressed: (){},
         text: 'X lugares seleccionados',
         color: Colors.teal,
-        textColor: Colors.white
+        textColor: Colors.white,
       )
     );
   }
@@ -136,14 +136,20 @@ class _MainMapPageState extends State<MainMapPage> {
   Widget _buttonCenterPosition() {
     return Container(
       alignment: Alignment.centerRight,
-      child: Card(
-        elevation: 3,
-        color: Colors.teal[400],
-        shape: const CircleBorder(),
-        child: Container(
+      child: GestureDetector(
+        onTap: _con.centerPosition,
+        child: Card(
+          elevation: 3,
+          color: Colors.teal[400],
+          shape: const CircleBorder(),
+          child: Container(
             padding: const EdgeInsets.all(10),
-            child: const Icon(Icons.my_location,
-            color: Colors.white, size: 25)),
+            child: const Icon(
+              Icons.my_location,
+            color: Colors.white, size: 25
+            )
+          ),
+        ),
       )
     );
   }
@@ -157,7 +163,7 @@ class _MainMapPageState extends State<MainMapPage> {
         shape: const CircleBorder(),
         child: Container(
           padding: const EdgeInsets.all(10),
-          child: const Icon(Icons.location_searching_outlined,
+          child: const Icon(Icons.search_outlined,
           color: Colors.white, size: 25)),
       )
     );
