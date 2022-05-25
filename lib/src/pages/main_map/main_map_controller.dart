@@ -3,9 +3,10 @@
 import 'dart:ui' as ui;
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart'; //Utilizado en driver - check connect
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geocode/geocode.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart' as location;
@@ -14,6 +15,8 @@ import 'package:smavy/src/providers/auth_provider.dart';
 import 'package:smavy/src/providers/geofire_provider.dart';
 import 'package:smavy/src/utils/my_progress_dialog.dart';
 import 'package:smavy/src/utils/snackbar.dart';
+import 'package:yandex_geocoder/yandex_geocoder.dart';
+import 'package:geocoding/geocoding.dart';
 
 class MainMapController{
   late BuildContext context;
@@ -21,35 +24,39 @@ class MainMapController{
   final Completer<GoogleMapController> _mapController = Completer();
 
   CameraPosition initialPosition = const CameraPosition(
-    target: LatLng(	-33.044632, -71.612442),
+    target: LatLng(-33.0452126,-71.6151596),
     zoom: 14.4746,
   );
 
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   late Position? _position;
-  late StreamSubscription<Position> _positionStream;
+  // late StreamSubscription<Position> _positionStream;
   late BitmapDescriptor markerDriver;
   late GeoFireProvider _geoFireProvider;
   late AuthProvider _authProvider;
   bool isConnect = false;
   late ProgressDialog _progressDialog;
   
-  late StreamSubscription<DocumentSnapshot> _statusSuscription;
+  // late StreamSubscription<DocumentSnapshot> _statusSuscription; //Utilizado en driver - check connect
+  late String from = '';
+  late LatLng fromLatLng;
 
   Future init(BuildContext context, Function refresh) async {
+    
     this.refresh = refresh;
     this.context = context;
     _geoFireProvider = GeoFireProvider();
     _authProvider = AuthProvider();
     _progressDialog = MyProgressDialog.createProgressDialog(context, 'Conectándose...');
+    _position = await Geolocator.getCurrentPosition();
     markerDriver = await createMarkerImageFromAsset('assets/img/gpsDriver.png');
     checkGPS();
   }
 
-  void dispose(){
-    _positionStream.cancel();
-    _statusSuscription.cancel();
-  }
+  // void dispose(){
+  //   // _positionStream.cancel();
+  //   // _statusSuscription.cancel(); //Utilizado en driver - check connect
+  // }
 
   void onMapCreated(GoogleMapController controller){
     _mapController.complete(controller);
@@ -62,13 +69,13 @@ class MainMapController{
     if(isLocationEnabled){
       print('GPS Activado');
       updateLocation();
-      checkIfIsConnect();
+      // checkIfIsConnect(); //Utilizado en driver - check connect
     }else{
       print('GPS desactivado');
       bool locationGPS = await location.Location().requestService();
       if(locationGPS){
         updateLocation();
-        checkIfIsConnect();
+        // checkIfIsConnect(); //Utilizado en driver - check connect
         print('Activó el GPS');
       }
     }
@@ -79,40 +86,92 @@ class MainMapController{
       await _determinePosition();
       _position = await Geolocator.getLastKnownPosition();
       centerPosition();
-      saveLocation();
 
-      addMarker(
-        'driver',
-        _position!.latitude,
-        _position!.longitude,
-        'Tu Posición',
-        '',
-        markerDriver
-      );
-
-      refresh();
-
-      _positionStream = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.best,
-          distanceFilter: 1
-        )
-      ).listen((Position position){
-        _position = position;
-        addMarker(
-          'driver',
-          _position!.latitude,
-          _position!.longitude,
-          'Tu Posición',
-          '',
-          markerDriver
-        );
-        animateCameraToPosition(position.latitude, position.longitude);
-        saveLocation();
-        refresh();
-      });
     }catch(error){
       print('Error en la localización: $error');
+    }
+  }
+
+  // Esta función funciona para actualizar la posición automáticamente
+  // void updateLocation() async{
+  //   try{
+  //     await _determinePosition();
+  //     _position = await Geolocator.getLastKnownPosition();
+  //     centerPosition();
+  //     // saveLocation();
+  //     addMarker(
+  //       'driver',
+  //       _position!.latitude,
+  //       _position!.longitude,
+  //       'Tu Posición',
+  //       '',
+  //       markerDriver
+  //     );
+  //     refresh();
+  //     _positionStream = Geolocator.getPositionStream(
+  //       locationSettings: const LocationSettings(
+  //         accuracy: LocationAccuracy.best,
+  //         distanceFilter: 1
+  //       )
+  //     ).listen((Position position){
+  //       _position = position;
+  //       addMarker(
+  //         'driver',
+  //         _position!.latitude,
+  //         _position!.longitude,
+  //         'Tu Posición',
+  //         '',
+  //         markerDriver
+  //       );
+  //       animateCameraToPosition(position.latitude, position.longitude);
+  //       // saveLocation();
+  //       refresh();
+  //     });
+  //   }catch(error){
+  //     print('Error en la localización: $error');
+  //   }
+  // }
+
+  Future<Null> setLocationDraggableInfo() async {
+    if(initialPosition != null){
+      print('initialPosition es $initialPosition');
+      double lat = initialPosition.target.latitude;
+      double lng = initialPosition.target.latitude;
+
+      // GeoCode geoCode = GeoCode();
+      // Address address =  await geoCode.reverseGeocoding(latitude: lat, longitude: lng);
+
+      // YandexGeocoder geocoder = YandexGeocoder(apiKey: 'AIzaSyCZWR9O1Nb7U0CcXVJqwAGqOU8CjaQX4h0');
+      // GeocodeResponse geocodeFromPoint = await geocoder.getGeocode(
+      //   GeocodeRequest(
+      //     geocode: PointGeocode(latitude: 55.771899, longitude: 37.597576),
+      //     lang: Lang.enEn,
+      // ));
+      // print('el address es $geocodeFromPoint.firstAddress!.formatted ');
+
+    List<Placemark> placemark =
+        await placemarkFromCoordinates(_position!.latitude, _position!.longitude);
+    Placemark address = placemark[0];
+    // print('Address : ${place.locality},${place.country}');
+
+      // List<Placemark> address = await placemarkFromCoordinates(lat, lng);
+
+      print('el address es : $address');
+      if(address != null){
+        // if(address.length > 0){
+          String direction = address.thoroughfare!;
+          String street = address.subThoroughfare!;
+          String city = address.locality!;
+          String department = address.administrativeArea!;
+          String country = address.country!;
+
+          from = '$direction #$street, $city, $department';
+          fromLatLng = LatLng(lat, lng);
+          print('FROM: $from');
+
+          refresh();
+        // }
+      }
     }
   }
 
@@ -165,7 +224,7 @@ class MainMapController{
       CameraPosition(
         bearing: 0,
         target: LatLng(latitude, longitude),
-        zoom: 17
+        zoom: 15
       )
     ));
   }
@@ -237,22 +296,24 @@ class MainMapController{
 
   void disconnect(){
     // Esta función deja de actualizar la posición y elimina la posición de la db
-    _positionStream.cancel();
+    // _positionStream.cancel();
     _geoFireProvider.delete(_authProvider.getUser()!.uid);
   }
 
-  void checkIfIsConnect(){
-     Stream<DocumentSnapshot> status =
-     _geoFireProvider.getLocationByIdStream(_authProvider.getUser()!.uid);
 
-     _statusSuscription = status.listen((DocumentSnapshot document) {
-       if(document.exists){
-         isConnect = true;
-       }else{
-         isConnect = false;
-       }
-     });
+  //Utilizado en driver - check connect
+  // void checkIfIsConnect(){
+  //    Stream<DocumentSnapshot> status =
+  //    _geoFireProvider.getLocationByIdStream(_authProvider.getUser()!.uid);
 
-     refresh();
-  }
+  //    _statusSuscription = status.listen((DocumentSnapshot document) {
+  //      if(document.exists){
+  //        isConnect = true;
+  //      }else{
+  //        isConnect = false;
+  //      }
+  //    });
+
+  //    refresh();
+  // }
 }

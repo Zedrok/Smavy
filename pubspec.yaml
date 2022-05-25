@@ -44,6 +44,10 @@ dependencies:
   geolocator: ^8.2.1
   location: ^4.4.0 
   geoflutterfire: ^3.0.3
+  geocode: 1.0.1
+  yandex_geocoder: ^2.0.1
+  # geocoder: ^0.2.1
+  geocoding: ^2.0.4
   
 dev_dependencies:
   flutter_test:
