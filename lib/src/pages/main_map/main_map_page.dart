@@ -1,5 +1,8 @@
 // ignore_for_file: avoid_print
-
+import 'package:smavy/src/utils/ajustesPage.dart';
+import 'package:smavy/src/utils/historial.dart';
+import 'package:smavy/src/utils/perfil.dart';
+import 'package:smavy/src/utils/save_adresses.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
@@ -48,26 +51,7 @@ class _MainMapPageState extends State<MainMapPage> {
             style: TextStyle(color: Colors.white),
           ),
         ),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                ),
-                child: Text(
-                  'Drawer Header',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              _menusDrawer(context, 'Perfil'),
-              _menusDrawer(context, 'Historial'),
-              _menusDrawer(context, 'Direcciones Guardadas'),
-              _menusDrawer(context, 'Ajustes'),
-            ],
-          ),
-        ),
+        drawer: _drawer(context), //drawer guardado en funcion para simplificar codigo
         body: Stack(children: [
           _googleMapsWidget(),
           SafeArea(
@@ -277,6 +261,25 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
+//funcion para el body
+  // Widget _bodyPart() => Stack(children: [
+  //       _googleMapsWidget(),
+  //       SafeArea(
+  //           child: Column(
+  //         children: [
+  //           Container(
+  //             margin: const EdgeInsets.all(10),
+  //             child: Row(
+  //               mainAxisAlignment: MainAxisAlignment.end,
+  //               children: [
+  //                 _buttonCenterPosition(),
+  //               ],
+  //             ),
+  //           )
+  //         ],
+  //       ))
+  //     ]);
+
   Widget _googleMapsWidget() {
     return GoogleMap(
       mapType: MapType.normal,
@@ -295,7 +298,32 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
-  ListTile _menusDrawer(BuildContext context, String mensaje) {
+//funcion de drawer lateral izquierdo.
+  Drawer _drawer(BuildContext context) {
+    return Drawer(
+        child: ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        const DrawerHeader(
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 77, 236, 213),
+          ),
+          child: Text(
+            'Drawer Header',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        _menusDrawer(context, 'Perfil', 'perfil'),
+        _menusDrawer(context, 'Historial', 'historial'),
+        _menusDrawer(context, 'Direcciones Guardadas', 'dir_guardadas'),
+        _menusDrawer(context, 'Ajustes', 'ajustes_page'),
+      ],
+    ));
+  }
+
+//funcion destinada para cada menu del drawer
+  ListTile _menusDrawer(
+      BuildContext context, String mensaje, String routeName) {
     return ListTile(
       title: Text(
         mensaje,
@@ -303,6 +331,7 @@ class _MainMapPageState extends State<MainMapPage> {
       ),
       onTap: () {
         Navigator.pop(context);
+        Navigator.pushNamed(context, routeName);
       },
     );
   }
