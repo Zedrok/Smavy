@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, unnecessary_string_escapes
 import 'package:smavy/src/utils/ajustesPage.dart';
 import 'package:smavy/src/utils/historial.dart';
 import 'package:smavy/src/utils/perfil.dart';
@@ -26,10 +26,12 @@ class _MainMapPageState extends State<MainMapPage> {
   void initState() {
     super.initState();
 
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
   }
+
+  final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
   @override
   void dispose() {
@@ -45,221 +47,186 @@ class _MainMapPageState extends State<MainMapPage> {
     return WillPopScope(
       onWillPop: () async => _onWillPopScope(),
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'prueba',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        drawer: _drawer(context), //drawer guardado en funcion para simplificar codigo
+        key: _globalKey,
+        drawer: _drawer(
+            context), //drawer guardado en funcion para simplificar codigo
         body: Stack(children: [
           _googleMapsWidget(),
+          _buttonMenu(),
           SafeArea(
-            child: Column(
-              children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10),
-                        child: _cardGooglePlaces(),
-                      ),
-                    ],
+            child: Column(children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    child: _cardGooglePlaces(),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 15),
-                        child: _buttonSwitchToSearch()
-                      ),
-                    ]
-                  ),
-                  Expanded(child: Container()),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 15),
-                        child: _buttonCenterPosition()
-                      ),
-                    ]
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 15),
-                        child: _buttonSavedLocations()
-                      ),
-                    ]
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 15),
-                        child: _buttonAddLocation()
-                      ),
-                    ]
-                  ),
-                  _buttonStartRoute()
-                ]
+                ],
               ),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Container(
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
+                    child: _buttonSwitchToSearch()),
+              ]),
+              Expanded(child: Container()),
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
+                    child: _buttonCenterPosition()),
+              ]),
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
+                    child: _buttonSavedLocations()),
+              ]),
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
+                    child: _buttonAddLocation()),
+              ]),
+              _buttonStartRoute()
+            ]),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Container(
                 margin: const EdgeInsets.fromLTRB(0, 0, 0, 50),
-                child: _iconMyLocation()
-              ),
-            )
+                child: _iconMyLocation()),
+          )
         ]),
       ),
     );
   }
 
-  Widget _buttonStartRoute(){
-    return Container(
-      height: 50,
-      alignment: Alignment.bottomCenter,
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-      child: ButtonApp(
-        onPressed: (){},
-        text: 'X lugares seleccionados',
-        color: Colors.teal,
-        textColor: Colors.white,
-      )
+  Widget _buttonMenu() {
+    return IconButton(
+      icon: const Icon(Icons.menu),
+      padding: const EdgeInsets.all(10),
+      color: Colors.teal,
+      onPressed: () {
+        _globalKey.currentState?.openDrawer();
+      },
     );
+  }
+
+  Widget _buttonStartRoute() {
+    return Container(
+        height: 50,
+        alignment: Alignment.bottomCenter,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+        child: ButtonApp(
+          onPressed: () {},
+          text: 'X lugares seleccionados',
+          color: Colors.teal,
+          textColor: Colors.white,
+        ));
   }
 
   Widget _buttonCenterPosition() {
     return Container(
-      alignment: Alignment.centerRight,
-      child: GestureDetector(
-        onTap: _con.centerPosition,
+        alignment: Alignment.centerRight,
+        child: GestureDetector(
+          onTap: _con.centerPosition,
+          child: Card(
+            elevation: 3,
+            color: Colors.teal[400],
+            shape: const CircleBorder(),
+            child: Container(
+                padding: const EdgeInsets.all(10),
+                child: const Icon(Icons.my_location,
+                    color: Colors.white, size: 25)),
+          ),
+        ));
+  }
+
+  Widget _buttonSwitchToSearch() {
+    return Container(
+        alignment: Alignment.centerRight,
         child: Card(
           elevation: 3,
           color: Colors.teal[400],
           shape: const CircleBorder(),
           child: Container(
-            padding: const EdgeInsets.all(10),
-            child: const Icon(
-              Icons.my_location,
-            color: Colors.white, size: 25
-            )
-          ),
-        ),
-      )
-    );
-  }
-
-  Widget _buttonSwitchToSearch() {
-    return Container(
-      alignment: Alignment.centerRight,
-      child: Card(
-        elevation: 3,
-        color: Colors.teal[400],
-        shape: const CircleBorder(),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: const Icon(Icons.search_outlined,
-          color: Colors.white, size: 25)),
-      )
-    );
+              padding: const EdgeInsets.all(10),
+              child: const Icon(Icons.search_outlined,
+                  color: Colors.white, size: 25)),
+        ));
   }
 
   Widget _buttonSavedLocations() {
     return Container(
-      alignment: Alignment.centerRight,
-      child: Card(
-        elevation: 3,
-        color: Colors.teal[400],
-        shape: const CircleBorder(),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: const Icon(Icons.where_to_vote,
-          color: Colors.white, size: 25)
-        ),
-      )
-    );
+        alignment: Alignment.centerRight,
+        child: Card(
+          elevation: 3,
+          color: Colors.teal[400],
+          shape: const CircleBorder(),
+          child: Container(
+              padding: const EdgeInsets.all(10),
+              child: const Icon(Icons.where_to_vote,
+                  color: Colors.white, size: 25)),
+        ));
   }
 
   Widget _buttonAddLocation() {
     return Container(
-      alignment: Alignment.centerRight,
-      child: Card(
-        elevation: 3,
-        color: Colors.teal[400],
-        shape: const CircleBorder(),
-        child: Container(
-          padding: const EdgeInsets.all(5),
-          child: const Icon(Icons.add,
-          color: Colors.white, size: 35)
-        ),
-      )
-    );
+        alignment: Alignment.centerRight,
+        child: Card(
+          elevation: 3,
+          color: Colors.teal[400],
+          shape: const CircleBorder(),
+          child: Container(
+              padding: const EdgeInsets.all(5),
+              child: const Icon(Icons.add, color: Colors.white, size: 35)),
+        ));
   }
 
-  Widget _cardGooglePlaces(){
+  Widget _cardGooglePlaces() {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.9,
       child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          ),        
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children:  [
-                const Text(
-                  'Origen',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 10
-                  )
-                ),
-                Text(
-                  _con.from,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold
-                  ),
-                  maxLines: 2,
-                ),
-                const SizedBox(width: 5),
-                const SizedBox(
-                  width: double.infinity,
-                  child: Divider(color: Colors.black87, height: 10),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'Destino',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 10
-                  ),
-                  maxLines: 2,
-                ),
-                const Text(
-                  'Seleccionar destino',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold
-                  ),
-                  maxLines: 2,
-                ),
-              ]
-            )
-        )
-      ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Origen',
+                        style: TextStyle(color: Colors.grey, fontSize: 10)),
+                    Text(
+                      _con.from,
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                    ),
+                    const SizedBox(width: 5),
+                    const SizedBox(
+                      width: double.infinity,
+                      child: Divider(color: Colors.black87, height: 10),
+                    ),
+                    const SizedBox(height: 5),
+                    const Text(
+                      'Destino',
+                      style: TextStyle(color: Colors.grey, fontSize: 10),
+                      maxLines: 2,
+                    ),
+                    const Text(
+                      'Seleccionar destino',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                    ),
+                  ]))),
     );
   }
 
-  Widget _iconMyLocation(){
+  Widget _iconMyLocation() {
     return Image.asset(
       'assets/img/location_smavy.png',
       width: 65,
@@ -310,21 +277,59 @@ class _MainMapPageState extends State<MainMapPage> {
         child: ListView(
       padding: EdgeInsets.zero,
       children: [
-        const DrawerHeader(
-          decoration: BoxDecoration(
-            color: Color.fromARGB(255, 77, 236, 213),
-          ),
-          child: Text(
-            'Drawer Header',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
+        DrawerHeader(
+            decoration: const BoxDecoration(color: Colors.teal),
+            child: _drawerHeader()),
         _menusDrawer(context, 'Perfil', 'perfil'),
+        const Divider(
+          thickness: 1,
+          height: 10,
+          color: Colors.grey,
+        ),
         _menusDrawer(context, 'Historial', 'historial'),
+        const Divider(
+          thickness: 1,
+          height: 10,
+          color: Colors.grey,
+        ),
         _menusDrawer(context, 'Direcciones Guardadas', 'dir_guardadas'),
+        const Divider(
+          thickness: 1,
+          height: 10,
+          color: Colors.grey,
+        ),
         _menusDrawer(context, 'Ajustes', 'ajustes_page'),
       ],
     ));
+  }
+
+  Widget _drawerHeader() {
+    return Row(
+      children: [
+        const CircleAvatar(
+            radius: 40, backgroundImage: AssetImage('assets\img\profile.png')),
+        const SizedBox(
+          width: 20,
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: const [
+            Text('usuario',
+                style: TextStyle(fontSize: 14, color: Colors.white)),
+            SizedBox(
+              width: 10,
+            ),
+            Text(
+              'coreeo@mail.com',
+              style: TextStyle(fontSize: 14, color: Colors.white),
+            )
+          ],
+        )
+      ],
+    );
   }
 
 //funcion destinada para cada menu del drawer
