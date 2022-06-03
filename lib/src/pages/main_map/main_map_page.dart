@@ -1,11 +1,6 @@
 // ignore_for_file: avoid_print, unnecessary_string_escapes
-import 'package:smavy/src/utils/ajustesPage.dart';
-import 'package:smavy/src/utils/historial.dart';
-import 'package:smavy/src/utils/perfil.dart';
-import 'package:smavy/src/utils/save_adresses.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
 import 'dart:io';
@@ -26,7 +21,7 @@ class _MainMapPageState extends State<MainMapPage> {
   void initState() {
     super.initState();
 
-    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
   }
@@ -55,6 +50,7 @@ class _MainMapPageState extends State<MainMapPage> {
           _buttonMenu(),
           SafeArea(
             child: Column(children: [
+              // CardBoard de ubicaciones
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -64,40 +60,60 @@ class _MainMapPageState extends State<MainMapPage> {
                   ),
                 ],
               ),
+
+              // Botón de Búsqueda y Cambio origen/destino
               Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                 Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 15),
-                    child: _buttonSwitchToSearch()),
+                  margin: const EdgeInsets.symmetric(horizontal: 15),
+                  child: _buttonSwitchToSearch()
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 15),
+                  child: _buttonChangeTo()
+                ),
               ]),
+
               Expanded(child: Container()),
+
+              // Boton Centrar mapa
               Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                 Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 15),
-                    child: _buttonCenterPosition()),
+                  margin: const EdgeInsets.symmetric(horizontal: 15),
+                  child: _buttonCenterPosition()
+                ),
               ]),
+
+              // Boton direcciones guardadas
               Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                 Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 15),
-                    child: _buttonSavedLocations()),
+                  margin: const EdgeInsets.symmetric(horizontal: 15),
+                  child: _buttonSavedLocations()
+                ),
               ]),
+
+              // Boton Agregar dirección
               Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                 Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 15),
-                    child: _buttonAddLocation()),
+                  margin: const EdgeInsets.symmetric(horizontal: 15),
+                  child: _buttonAddLocation()
+                ),
               ]),
+
               _buttonStartRoute()
             ]),
           ),
           Align(
             alignment: Alignment.center,
             child: Container(
-                margin: const EdgeInsets.fromLTRB(0, 0, 0, 50),
-                child: _iconMyLocation()),
+              margin: const EdgeInsets.fromLTRB(0, 0, 0, 50),
+              child: _iconMyLocation()
+            ),
           )
         ]),
       ),
     );
   }
+
 
   Widget _buttonMenu() {
     return IconButton(
@@ -125,33 +141,62 @@ class _MainMapPageState extends State<MainMapPage> {
 
   Widget _buttonCenterPosition() {
     return Container(
-        alignment: Alignment.centerRight,
-        child: GestureDetector(
-          onTap: _con.centerPosition,
-          child: Card(
-            elevation: 3,
-            color: Colors.teal[400],
-            shape: const CircleBorder(),
-            child: Container(
-                padding: const EdgeInsets.all(10),
-                child: const Icon(Icons.my_location,
-                    color: Colors.white, size: 25)),
+      alignment: Alignment.centerRight,
+      child: GestureDetector(
+        onTap: _con.centerPosition,
+        child: Card(
+          elevation: 3,
+          color: Colors.teal[400],
+          shape: const CircleBorder(),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: const Icon(
+              Icons.my_location,
+              color: Colors.white, size: 25
+            )
           ),
-        ));
+        ),
+      )
+    );
   }
 
   Widget _buttonSwitchToSearch() {
     return Container(
+      alignment: Alignment.centerRight,
+      child: Card(
+        elevation: 3,
+        color: Colors.teal[400],
+        shape: const CircleBorder(),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          child: const Icon(
+            Icons.search_outlined,
+            color: Colors.white, size: 25
+          )
+        ),
+      )
+    );
+  }
+
+  Widget _buttonChangeTo() {
+    return GestureDetector(
+      onTap: _con.changeFromTo,
+      child: Container(
         alignment: Alignment.centerRight,
         child: Card(
           elevation: 3,
           color: Colors.teal[400],
           shape: const CircleBorder(),
           child: Container(
-              padding: const EdgeInsets.all(10),
-              child: const Icon(Icons.search_outlined,
-                  color: Colors.white, size: 25)),
-        ));
+            padding: const EdgeInsets.all(10),
+            child: const Icon(
+              Icons.restart_alt,
+              color: Colors.white, size: 25
+            )
+          ),
+        )
+      ),
+    );
   }
 
   Widget _buttonSavedLocations() {
@@ -170,59 +215,69 @@ class _MainMapPageState extends State<MainMapPage> {
 
   Widget _buttonAddLocation() {
     return Container(
-        alignment: Alignment.centerRight,
-        child: Card(
-          elevation: 3,
-          color: Colors.teal[400],
-          shape: const CircleBorder(),
-          child: Container(
-              padding: const EdgeInsets.all(5),
-              child: const Icon(Icons.add, color: Colors.white, size: 35)),
-        ));
+      alignment: Alignment.centerRight,
+      child: Card(
+        elevation: 3,
+        color: Colors.teal[400],
+        shape: const CircleBorder(),
+        child: Container(
+          padding: const EdgeInsets.all(5),
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+            size: 35
+          )
+        ),
+      )
+    );
   }
 
   Widget _cardGooglePlaces() {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.9,
       child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Origen',
-                        style: TextStyle(color: Colors.grey, fontSize: 10)),
-                    Text(
-                      _con.from,
-                      style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold),
-                      maxLines: 2,
-                    ),
-                    const SizedBox(width: 5),
-                    const SizedBox(
-                      width: double.infinity,
-                      child: Divider(color: Colors.black87, height: 10),
-                    ),
-                    const SizedBox(height: 5),
-                    const Text(
-                      'Destino',
-                      style: TextStyle(color: Colors.grey, fontSize: 10),
-                      maxLines: 2,
-                    ),
-                    const Text(
-                      'Seleccionar destino',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold),
-                      maxLines: 2,
-                    ),
-                  ]))),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Origen',
+                  style: TextStyle(color: Colors.grey, fontSize: 10)),
+              Text(
+                _con.from,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold),
+                maxLines: 2,
+              ),
+              const SizedBox(width: 5),
+              const SizedBox(
+                width: double.infinity,
+                child: Divider(color: Colors.black87, height: 10),
+              ),
+              const SizedBox(height: 5),
+              const Text(
+                'Destino',
+                style: TextStyle(color: Colors.grey, fontSize: 10),
+                maxLines: 2,
+              ),
+              Text(
+                _con.to,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold
+                  ),
+                maxLines: 2,
+              ),
+            ]
+          )
+        )
+      ),
     );
   }
 
@@ -234,25 +289,6 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
-//funcion para el body
-  // Widget _bodyPart() => Stack(children: [
-  //       _googleMapsWidget(),
-  //       SafeArea(
-  //           child: Column(
-  //         children: [
-  //           Container(
-  //             margin: const EdgeInsets.all(10),
-  //             child: Row(
-  //               mainAxisAlignment: MainAxisAlignment.end,
-  //               children: [
-  //                 _buttonCenterPosition(),
-  //               ],
-  //             ),
-  //           )
-  //         ],
-  //       ))
-  //     ]);
-
   Widget _googleMapsWidget() {
     return GoogleMap(
       mapType: MapType.normal,
@@ -263,6 +299,7 @@ class _MainMapPageState extends State<MainMapPage> {
       markers: Set<Marker>.of(_con.markers.values),
       onCameraMove: (position) {
         _con.initialPosition = position;
+        _con.screenCenter = position.target;
         print('ON CAMERA MOVE: $position');
       },
       onCameraIdle: () async {
@@ -274,40 +311,44 @@ class _MainMapPageState extends State<MainMapPage> {
 //funcion de drawer lateral izquierdo.
   Drawer _drawer(BuildContext context) {
     return Drawer(
-        child: ListView(
-      padding: EdgeInsets.zero,
-      children: [
-        DrawerHeader(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
             decoration: const BoxDecoration(color: Colors.teal),
-            child: _drawerHeader()),
-        _menusDrawer(context, 'Perfil', 'perfil'),
-        const Divider(
-          thickness: 1,
-          height: 10,
-          color: Colors.grey,
-        ),
-        _menusDrawer(context, 'Historial', 'historial'),
-        const Divider(
-          thickness: 1,
-          height: 10,
-          color: Colors.grey,
-        ),
-        _menusDrawer(context, 'Direcciones Guardadas', 'dir_guardadas'),
-        const Divider(
-          thickness: 1,
-          height: 10,
-          color: Colors.grey,
-        ),
-        _menusDrawer(context, 'Ajustes', 'ajustes_page'),
-      ],
-    ));
+            child: _drawerHeader()
+          ),
+          _menusDrawer(context, 'Perfil', 'perfil'),
+          const Divider(
+            thickness: 1,
+            height: 10,
+            color: Colors.grey,
+          ),
+          _menusDrawer(context, 'Historial', 'historial'),
+          const Divider(
+            thickness: 1,
+            height: 10,
+            color: Colors.grey,
+          ),
+          _menusDrawer(context, 'Direcciones Guardadas', 'dir_guardadas'),
+          const Divider(
+            thickness: 1,
+            height: 10,
+            color: Colors.grey,
+          ),
+          _menusDrawer(context, 'Ajustes', 'ajustes_page'),
+        ],
+      )
+    );
   }
 
   Widget _drawerHeader() {
     return Row(
       children: [
         const CircleAvatar(
-            radius: 40, backgroundImage: AssetImage('assets\img\profile.png')),
+          radius: 40,
+          backgroundImage: AssetImage('assets\img\profile.png')
+        ),
         const SizedBox(
           width: 20,
         ),
@@ -317,14 +358,22 @@ class _MainMapPageState extends State<MainMapPage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: const [
-            Text('usuario',
-                style: TextStyle(fontSize: 14, color: Colors.white)),
+            Text(
+              'usuario',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white
+              )
+            ),
             SizedBox(
               width: 10,
             ),
             Text(
               'coreeo@mail.com',
-              style: TextStyle(fontSize: 14, color: Colors.white),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white
+              ),
             )
           ],
         )
@@ -333,8 +382,7 @@ class _MainMapPageState extends State<MainMapPage> {
   }
 
 //funcion destinada para cada menu del drawer
-  ListTile _menusDrawer(
-      BuildContext context, String mensaje, String routeName) {
+  ListTile _menusDrawer( BuildContext context, String mensaje, String routeName) {
     return ListTile(
       title: Text(
         mensaje,
@@ -366,4 +414,23 @@ class _MainMapPageState extends State<MainMapPage> {
   void refresh() {
     setState(() {});
   }
+
+  //funcion para el body
+  // Widget _bodyPart() => Stack(children: [
+  //       _googleMapsWidget(),
+  //       SafeArea(
+  //           child: Column(
+  //         children: [
+  //           Container(
+  //             margin: const EdgeInsets.all(10),
+  //             child: Row(
+  //               mainAxisAlignment: MainAxisAlignment.end,
+  //               children: [
+  //                 _buttonCenterPosition(),
+  //               ],
+  //             ),
+  //           )
+  //         ],
+  //       ))
+  //     ]);
 }

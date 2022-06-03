@@ -6,7 +6,6 @@ import 'dart:typed_data';
 // import 'package:cloud_firestore/cloud_firestore.dart'; //Utilizado en driver - check connect
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:geocode/geocode.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart' as location;
@@ -15,7 +14,6 @@ import 'package:smavy/src/providers/auth_provider.dart';
 import 'package:smavy/src/providers/geofire_provider.dart';
 import 'package:smavy/src/utils/my_progress_dialog.dart';
 import 'package:smavy/src/utils/snackbar.dart';
-import 'package:yandex_geocoder/yandex_geocoder.dart';
 import 'package:geocoding/geocoding.dart';
 
 class MainMapController{
@@ -36,10 +34,16 @@ class MainMapController{
   late AuthProvider _authProvider;
   bool isConnect = false;
   late ProgressDialog _progressDialog;
+  late LatLng screenCenter;
   
   // late StreamSubscription<DocumentSnapshot> _statusSuscription; //Utilizado en driver - check connect
   late String from = '';
   late LatLng fromLatLng;
+
+  late String to = '';
+  late LatLng toLatLng;
+
+  bool isFromSelected = true;
 
   Future init(BuildContext context, Function refresh) async {
     
@@ -92,88 +96,45 @@ class MainMapController{
     }
   }
 
-  // Esta función funciona para actualizar la posición automáticamente
-  // void updateLocation() async{
-  //   try{
-  //     await _determinePosition();
-  //     _position = await Geolocator.getLastKnownPosition();
-  //     centerPosition();
-  //     // saveLocation();
-  //     addMarker(
-  //       'driver',
-  //       _position!.latitude,
-  //       _position!.longitude,
-  //       'Tu Posición',
-  //       '',
-  //       markerDriver
-  //     );
-  //     refresh();
-  //     _positionStream = Geolocator.getPositionStream(
-  //       locationSettings: const LocationSettings(
-  //         accuracy: LocationAccuracy.best,
-  //         distanceFilter: 1
-  //       )
-  //     ).listen((Position position){
-  //       _position = position;
-  //       addMarker(
-  //         'driver',
-  //         _position!.latitude,
-  //         _position!.longitude,
-  //         'Tu Posición',
-  //         '',
-  //         markerDriver
-  //       );
-  //       animateCameraToPosition(position.latitude, position.longitude);
-  //       // saveLocation();
-  //       refresh();
-  //     });
-  //   }catch(error){
-  //     print('Error en la localización: $error');
-  //   }
-  // }
-
+  // ignore: prefer_void_to_null
   Future<Null> setLocationDraggableInfo() async {
+    // ignore: unnecessary_null_comparison
     if(initialPosition != null){
-      print('initialPosition es $initialPosition');
-      double lat = initialPosition.target.latitude;
-      double lng = initialPosition.target.latitude;
-
-      // GeoCode geoCode = GeoCode();
-      // Address address =  await geoCode.reverseGeocoding(latitude: lat, longitude: lng);
-
-      // YandexGeocoder geocoder = YandexGeocoder(apiKey: 'AIzaSyCZWR9O1Nb7U0CcXVJqwAGqOU8CjaQX4h0');
-      // GeocodeResponse geocodeFromPoint = await geocoder.getGeocode(
-      //   GeocodeRequest(
-      //     geocode: PointGeocode(latitude: 55.771899, longitude: 37.597576),
-      //     lang: Lang.enEn,
-      // ));
-      // print('el address es $geocodeFromPoint.firstAddress!.formatted ');
-
-    List<Placemark> placemark =
-        await placemarkFromCoordinates(_position!.latitude, _position!.longitude);
-    Placemark address = placemark[0];
-    // print('Address : ${place.locality},${place.country}');
-
-      // List<Placemark> address = await placemarkFromCoordinates(lat, lng);
+      List<Placemark> placemark = await placemarkFromCoordinates(screenCenter.latitude, screenCenter.longitude);
+      Placemark address = placemark[0];
 
       print('el address es : $address');
-      if(address != null){
-        // if(address.length > 0){
-          String direction = address.thoroughfare!;
-          String street = address.subThoroughfare!;
-          String city = address.locality!;
-          String department = address.administrativeArea!;
-          String country = address.country!;
 
-          from = '$direction #$street, $city, $department';
-          fromLatLng = LatLng(lat, lng);
-          print('FROM: $from');
+      String direction = address.thoroughfare!;
+      String street = address.subThoroughfare!;
+      String city = address.locality!;
+      String department = address.administrativeArea!;
+      // String country = address.country!;
 
-          refresh();
-        // }
+      if (isFromSelected){
+        from = '$direction #$street, $city, $department';
+        fromLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
+        print('FROM: $from');
+      }else{
+        to = '$direction #$street, $city, $department';
+        toLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
+        print('FROM: $from');
       }
+
+      refresh();
     }
   }
+
+  void changeFromTo(){
+    isFromSelected = !isFromSelected;
+
+    if(isFromSelected){
+      Snackbar.showSnackbar(context, 'Estas seleccionando el lugar de Origen', true);
+    }else{
+      Snackbar.showSnackbar(context, 'Estas seleccionando el lugar de Destino', true);
+    }
+  }
+  
 
   void saveLocation() async {
     await _geoFireProvider.create(
@@ -315,5 +276,45 @@ class MainMapController{
   //    });
 
   //    refresh();
+  // }
+
+  // Esta función funciona para actualizar la posición automáticamente
+  // void updateLocation() async{
+  //   try{
+  //     await _determinePosition();
+  //     _position = await Geolocator.getLastKnownPosition();
+  //     centerPosition();
+  //     // saveLocation();
+  //     addMarker(
+  //       'driver',
+  //       _position!.latitude,
+  //       _position!.longitude,
+  //       'Tu Posición',
+  //       '',
+  //       markerDriver
+  //     );
+  //     refresh();
+  //     _positionStream = Geolocator.getPositionStream(
+  //       locationSettings: const LocationSettings(
+  //         accuracy: LocationAccuracy.best,
+  //         distanceFilter: 1
+  //       )
+  //     ).listen((Position position){
+  //       _position = position;
+  //       addMarker(
+  //         'driver',
+  //         _position!.latitude,
+  //         _position!.longitude,
+  //         'Tu Posición',
+  //         '',
+  //         markerDriver
+  //       );
+  //       animateCameraToPosition(position.latitude, position.longitude);
+  //       // saveLocation();
+  //       refresh();
+  //     });
+  //   }catch(error){
+  //     print('Error en la localización: $error');
+  //   }
   // }
 }

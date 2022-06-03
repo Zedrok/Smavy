@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
     print('INIT STATE - HomePage');
     _con.init(context);
 
-    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       _con.init(context);
       // ignore: avoid_print
       print('METODO SCHEDULER - HomePage');
