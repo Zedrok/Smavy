@@ -5,9 +5,12 @@ class PerfilPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-        body: Center(
-      child: Text('Pagina de perfil'),
-    ));
+    return Column(
+      children: const [
+        ListTile(
+          title: Text('item 1'),
+        )
+      ],
+    );
   }
 }
