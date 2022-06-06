@@ -1,10 +1,10 @@
 // ignore_for_file: avoid_print, unnecessary_string_escapes
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
 import 'dart:io';
-
 import 'package:smavy/src/widgets/button_app.dart';
 
 class MainMapPage extends StatefulWidget {
@@ -19,11 +19,13 @@ class _MainMapPageState extends State<MainMapPage> {
 
   @override
   void initState() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     super.initState();
 
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
+
   }
 
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
@@ -41,79 +43,197 @@ class _MainMapPageState extends State<MainMapPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async => _onWillPopScope(),
-      child: Scaffold(
-        key: _globalKey,
-        drawer: _drawer(
-            context), //drawer guardado en funcion para simplificar codigo
-        body: Stack(children: [
-          _googleMapsWidget(),
-          _buttonMenu(),
-          SafeArea(
-            child: Column(children: [
-              // CardBoard de ubicaciones
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          key: _globalKey,
+          drawer: _drawer(context), //drawer guardado en funcion para simplificar codigo
+          body: Stack(children: [
+            _googleMapsWidget(),
+            SafeArea(
+              child: Column(children: [
+                // CardBoard de ubicaciones
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 5),
+                      child: ((){
+                        if(!_con.isSearchSelected){
+                          return _cardGooglePlacesFromTo();
+                        }else{
+                          return _cardGooglePlacesSearch();
+                        }
+                      }()),
+                    ),
+                  ],
+                ),
+      
+                // Botón de Búsqueda y Cambio origen/destino
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    child: _cardGooglePlaces(),
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
+                    child: _buttonSwitchToSearch()
                   ),
-                ],
-              ),
-
-              // Botón de Búsqueda y Cambio origen/destino
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15),
-                  child: _buttonSwitchToSearch()
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15),
-                  child: _buttonChangeTo()
-                ),
+                ]),
+      
+                Expanded(child: Container()),
+      
+                // Boton Centrar mapa
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
+                    child: _buttonCenterPosition()
+                  ),
+                ]),
+      
+                // Boton direcciones guardadas
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
+                    child: _buttonSavedLocations()
+                  ),
+                ]),
+      
+                // Boton Agregar dirección
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
+                    child: _buttonAddLocation()
+                  ),
+                ]),
+                _buttonStartRoute()
               ]),
-
-              Expanded(child: Container()),
-
-              // Boton Centrar mapa
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15),
-                  child: _buttonCenterPosition()
-                ),
-              ]),
-
-              // Boton direcciones guardadas
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15),
-                  child: _buttonSavedLocations()
-                ),
-              ]),
-
-              // Boton Agregar dirección
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15),
-                  child: _buttonAddLocation()
-                ),
-              ]),
-
-              _buttonStartRoute()
-            ]),
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              margin: const EdgeInsets.fromLTRB(0, 0, 0, 50),
-              child: _iconMyLocation()
             ),
-          )
-        ]),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(0, 0, 0, 50),
+                child: _iconMyLocation()
+              ),
+            )
+          ]),
+        ),
       ),
     );
   }
 
+  Widget _fromTextField() {
+    return Container(
+      padding: const EdgeInsets.symmetric(),
+      child: _con.showGoogleAutoCompleteFrom(_con.isFromSelected, MediaQuery.of(context).size.width * 0.75)
+    );
+  }
+
+  Widget _toTextField() {
+    return Container(
+      padding: const EdgeInsets.symmetric(),
+      child: _con.showGoogleAutoCompleteTo(_con.isFromSelected, MediaQuery.of(context).size.width * 0.75),
+    );
+  }
+
+  Widget _searchTextField() {
+    return Container(
+      padding: const EdgeInsets.symmetric(),
+      child: _con.showGoogleAutoCompleteSearch(MediaQuery.of(context).size.width * 0.75),
+    );
+  }
+
+  Widget _cardGooglePlacesFromTo() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.95,
+      child: Card(
+        shadowColor: Colors.teal,
+        elevation: 5, 
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Colors.teal, width: 0.2)
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            children: [
+              SizedBox(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buttonMenu(),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.75,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Origen',
+                      style: TextStyle(color: Colors.grey[750] , fontSize: 13)
+                    ),
+                    _fromTextField(),
+                    const SizedBox(height: 3),
+                     SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.75,
+                      child: const Divider(color: Colors.teal, thickness: 1 , height: 10),
+                    ),
+                    Text(
+                      'Destino',
+                      style: TextStyle(color: Colors.grey[750], fontSize: 13),
+                      maxLines: 2,
+                    ),
+                    _toTextField(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+      ),
+    );
+  }
+
+  Widget _cardGooglePlacesSearch() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.95,
+      child: Card(
+        shadowColor: Colors.teal,
+        elevation: 5, 
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Colors.teal, width: 0.2)
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            children: [
+              SizedBox(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buttonMenu(),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.75,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Dirección por visitar',
+                      style: TextStyle(color: Colors.grey[750] , fontSize: 13)
+                    ),
+                    _searchTextField(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+      ),
+    );
+  }
 
   Widget _buttonMenu() {
     return IconButton(
@@ -163,39 +283,30 @@ class _MainMapPageState extends State<MainMapPage> {
   Widget _buttonSwitchToSearch() {
     return Container(
       alignment: Alignment.centerRight,
-      child: Card(
-        elevation: 3,
-        color: Colors.teal[400],
-        shape: const CircleBorder(),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: const Icon(
-            Icons.search_outlined,
-            color: Colors.white, size: 25
-          )
-        ),
-      )
-    );
-  }
-
-  Widget _buttonChangeTo() {
-    return GestureDetector(
-      onTap: _con.changeFromTo,
-      child: Container(
-        alignment: Alignment.centerRight,
+      child: GestureDetector(
+        onTap: () {
+          _con.changeCardBoard(2);
+          refresh();
+        },
         child: Card(
           elevation: 3,
           color: Colors.teal[400],
           shape: const CircleBorder(),
           child: Container(
             padding: const EdgeInsets.all(10),
-            child: const Icon(
-              Icons.restart_alt,
+            child: Icon(
+              ((){
+                if(!_con.isSearchSelected){
+                  return Icons.search_outlined;
+                }else{
+                  return Icons.house;
+                }
+              }()),
               color: Colors.white, size: 25
             )
           ),
-        )
-      ),
+        ),
+      )
     );
   }
 
@@ -232,55 +343,6 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
-  Widget _cardGooglePlaces() {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.9,
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Origen',
-                  style: TextStyle(color: Colors.grey, fontSize: 10)),
-              Text(
-                _con.from,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold),
-                maxLines: 2,
-              ),
-              const SizedBox(width: 5),
-              const SizedBox(
-                width: double.infinity,
-                child: Divider(color: Colors.black87, height: 10),
-              ),
-              const SizedBox(height: 5),
-              const Text(
-                'Destino',
-                style: TextStyle(color: Colors.grey, fontSize: 10),
-                maxLines: 2,
-              ),
-              Text(
-                _con.to,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold
-                  ),
-                maxLines: 2,
-              ),
-            ]
-          )
-        )
-      ),
-    );
-  }
-
   Widget _iconMyLocation() {
     return Image.asset(
       'assets/img/location_smavy.png',
@@ -291,6 +353,10 @@ class _MainMapPageState extends State<MainMapPage> {
 
   Widget _googleMapsWidget() {
     return GoogleMap(
+      trafficEnabled: true,
+      rotateGesturesEnabled: false,
+      tiltGesturesEnabled: false,
+      zoomControlsEnabled: false,
       mapType: MapType.normal,
       initialCameraPosition: _con.initialPosition,
       onMapCreated: _con.onMapCreated,
@@ -298,6 +364,7 @@ class _MainMapPageState extends State<MainMapPage> {
       myLocationButtonEnabled: false,
       markers: Set<Marker>.of(_con.markers.values),
       onCameraMove: (position) {
+        FocusManager.instance.primaryFocus?.unfocus();
         _con.initialPosition = position;
         _con.screenCenter = position.target;
         print('ON CAMERA MOVE: $position');
@@ -305,6 +372,7 @@ class _MainMapPageState extends State<MainMapPage> {
       onCameraIdle: () async {
         await _con.setLocationDraggableInfo();
       },
+      onTap: (argument) => FocusManager.instance.primaryFocus?.unfocus(),
     );
   }
 
@@ -369,7 +437,7 @@ class _MainMapPageState extends State<MainMapPage> {
               width: 10,
             ),
             Text(
-              'coreeo@mail.com',
+              'correo@mail.com',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.white
@@ -412,6 +480,8 @@ class _MainMapPageState extends State<MainMapPage> {
   }
 
   void refresh() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+
     setState(() {});
   }
 

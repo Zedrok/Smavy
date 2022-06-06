@@ -8,10 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 import 'package:location/location.dart' as location;
 import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
+import 'package:smavy/src/pages/api/environment.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
 import 'package:smavy/src/providers/geofire_provider.dart';
+
+import 'package:smavy/src/models/google_places_flutter2.dart';
+
 import 'package:smavy/src/utils/my_progress_dialog.dart';
 import 'package:smavy/src/utils/snackbar.dart';
 import 'package:geocoding/geocoding.dart';
@@ -34,27 +39,35 @@ class MainMapController{
   late AuthProvider _authProvider;
   bool isConnect = false;
   late ProgressDialog _progressDialog;
-  late LatLng screenCenter;
+  
+  late LatLng screenCenter = const LatLng(-33.0452126,-71.6151596);
   
   // late StreamSubscription<DocumentSnapshot> _statusSuscription; //Utilizado en driver - check connect
-  late String from = '';
-  late LatLng fromLatLng;
+  late LatLng fromLatLng = const LatLng(-33.0452126,-71.6151596);
+  TextEditingController fromText = TextEditingController();
+  LatLng fromPrev = const LatLng(-33.0452126,-71.6151596);
 
-  late String to = '';
-  late LatLng toLatLng;
+  late LatLng toLatLng = const LatLng(-33.0452126,-71.6151596);
+  TextEditingController toText = TextEditingController();
+  LatLng toPrev = const LatLng(-33.0452126,-71.6151596);
+
+  late LatLng searchLatLng = const LatLng(-33.0452126,-71.6151596);
+  TextEditingController searchText = TextEditingController();
+  LatLng searchPrev = const LatLng(-33.0452126,-71.6151596);
 
   bool isFromSelected = true;
+  bool isToSelected = false;
+  bool isSearchSelected = false;
 
   Future init(BuildContext context, Function refresh) async {
-    
     this.refresh = refresh;
     this.context = context;
     _geoFireProvider = GeoFireProvider();
     _authProvider = AuthProvider();
     _progressDialog = MyProgressDialog.createProgressDialog(context, 'Conectándose...');
+    checkGPS();
     _position = await Geolocator.getCurrentPosition();
     markerDriver = await createMarkerImageFromAsset('assets/img/gpsDriver.png');
-    checkGPS();
   }
 
   // void dispose(){
@@ -112,29 +125,285 @@ class MainMapController{
       // String country = address.country!;
 
       if (isFromSelected){
-        from = '$direction #$street, $city, $department';
-        fromLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
-        print('FROM: $from');
+        if(screenCenter.latitude.compareTo(fromPrev.latitude) != 0 || screenCenter.longitude.compareTo(fromPrev.longitude) !=0 ){
+          fromPrev = screenCenter;
+          fromText.text = '$direction #$street, $city, $department';
+          fromLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
+          print('FROM: $fromText.text');
+        }
       }else{
-        to = '$direction #$street, $city, $department';
-        toLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
-        print('FROM: $from');
+        if(isToSelected){
+          if(screenCenter.latitude.compareTo(toPrev.latitude) != 0 || screenCenter.longitude.compareTo(toPrev.longitude) != 0){
+            toPrev = screenCenter;
+            toText.text = '$direction #$street, $city, $department';
+            toLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
+            print('TO: $toText.text');
+          }
+        }else{
+          if(screenCenter.latitude.compareTo(searchPrev.latitude) != 0 || screenCenter.longitude.compareTo(searchPrev.longitude) != 0){
+            searchPrev = screenCenter;
+            searchText.text = '$direction #$street, $city, $department';
+            searchLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
+            print('TO: $toText.text');
+          }
+        }
       }
-
       refresh();
     }
   }
 
-  void changeFromTo(){
-    isFromSelected = !isFromSelected;
-
-    if(isFromSelected){
-      Snackbar.showSnackbar(context, 'Estas seleccionando el lugar de Origen', true);
+  void changeCardBoard(int option){
+    // 0 = From
+    // 1 = To
+    // 2 = Search
+    
+    if(option == 0){
+      if(!isFromSelected)
+      {
+        isFromSelected = true;
+        isToSelected = false;
+        isSearchSelected = false;
+        Snackbar.showSnackbar(context, 'Estas seleccionando el lugar de Origen', true);
+      }
     }else{
-      Snackbar.showSnackbar(context, 'Estas seleccionando el lugar de Destino', true);
+      if(option == 1){
+        if(!isToSelected){
+          isFromSelected = false;
+          isToSelected = true;
+          isSearchSelected = false;
+          Snackbar.showSnackbar(context, 'Estas seleccionando el lugar de Destino', true);
+        }
+      }else{
+        if(option == 2){
+          if(!isSearchSelected){
+            
+            animateCameraToPosition(searchLatLng.latitude, searchLatLng.longitude);
+            isFromSelected = false;
+            isToSelected = false;
+            isSearchSelected = true;
+            Snackbar.showSnackbar(context, 'Estas seleccionando la dirección por visitar', true);
+          }else{
+            animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
+            isFromSelected = true;
+            isToSelected = false;
+            isSearchSelected = false;
+            Snackbar.showSnackbar(context, 'Estas seleccionando el lugar de Origen', true);
+          }
+        }
+      }
     }
   }
+
+  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteFrom(bool isFrom, double sizeWidth) {
+    return GooglePlaceAutoCompleteTextField(
+      textEditingController: fromText,
+
+      googleAPIKey: Environment.API_KEY_MAPS,
+
+      debounceTime: 800,
+      countries: const ["cl"],
+      isLatLngRequired: true,
+
+      onTap: () {
+        changeCardBoard(0);
+        animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
+        fromText.addListener(() {
+          print('TextFrom');
+          print(fromText);
+        });
+      },
+
+      inputDecoration: InputDecoration(
+        hintText: "Buscar dirección...",
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(7)),
+        ),
+        enabledBorder: ((){
+          if(isFromSelected){
+            return (const OutlineInputBorder(
+            borderSide: BorderSide( color: Colors.teal, width: 2 )
+          ));
+          }
+        }()),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide( color: Colors.teal, width: 2 ),
+        ),
+        contentPadding: const EdgeInsets.all(5),
+        constraints: BoxConstraints(maxWidth: sizeWidth),
+        isDense: true,
+        prefixIconConstraints: const BoxConstraints(minHeight: 35),
+        prefixIcon: const Padding(
+          padding: EdgeInsetsDirectional.only(start: 5, end: 2),
+          child: Icon(Icons.location_pin)
+        ),
+
+        prefixIconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          if (isFromSelected) {
+            return Colors.teal;
+          }
+          return Colors.grey;
+        }),
+      ),
+
+      textStyle: const TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+
+      getPlaceDetailWithLatLng: (Prediction prediction) {
+        fromLatLng = LatLng(double.parse(prediction.lat!), double.parse(prediction.lng!));
+        animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
+        print("placeDetails " + fromLatLng.toString());
+      },
+      
+      itmClick: (Prediction prediction) {
+        fromText.text = prediction.description!;
+        fromText.selection = TextSelection.fromPosition(
+          TextPosition(
+            offset: prediction.description!.length
+          )
+        );
+      }
+      // default 600 ms ,
+    );
+  }  
+
+  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteTo(bool isFrom, double sizeWidth)  {
+    return GooglePlaceAutoCompleteTextField(
+      textEditingController: toText,
+
+      googleAPIKey: Environment.API_KEY_MAPS,
+      
+      onTap: () {
+        changeCardBoard(1);
+        animateCameraToPosition(toLatLng.latitude, toLatLng.longitude);
+      },
+
+      inputDecoration: InputDecoration(
+        hintText: "Buscar dirección...",
+        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
+        enabledBorder: ((){
+          if(!isFromSelected){
+            return (const OutlineInputBorder(
+            borderSide: BorderSide( color: Colors.teal, width: 2 )
+          ));
+          }
+        }()),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide( color: Colors.teal, width: 2 ),
+        ),
+        contentPadding: const EdgeInsets.all(5),
+        constraints: BoxConstraints(maxWidth: sizeWidth),
+        isDense: true,
+        prefixIconConstraints: const BoxConstraints(minHeight: 35),
+        prefixIcon: const Padding(
+          padding: EdgeInsetsDirectional.only(start: 5, end: 2),
+          child: Icon(Icons.location_pin)
+        ),
+        prefixIconColor:
+          MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.focused)) {
+            return Colors.teal;
+          }
+          return Colors.grey;
+        }),
+      ),
+
+      textStyle: const TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+      
+      debounceTime: 800,
+      countries: const ["cl"],
+      isLatLngRequired: true,
+
+      getPlaceDetailWithLatLng: (Prediction prediction) {
+        toLatLng = LatLng(double.parse(prediction.lat!), double.parse(prediction.lng!));
+        animateCameraToPosition(toLatLng.latitude, toLatLng.longitude);
+        print("placeDetails " + toLatLng.toString());
+      },
+      
+      itmClick: (Prediction prediction) {
+        changeCardBoard(1);
+        toText.text = prediction.description!;
+        toText.selection = TextSelection.fromPosition(
+          TextPosition(
+            offset: prediction.description!.length
+          )
+        );
+      }
+      // default 600 ms ,
+    );
+  }  
+
+  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteSearch(double sizeWidth)  {
+    return GooglePlaceAutoCompleteTextField(
+      textEditingController: searchText,
+
+      googleAPIKey: Environment.API_KEY_MAPS,
+      
+      onTap: () {
+        changeCardBoard(3);
+        animateCameraToPosition(searchLatLng.latitude, searchLatLng.longitude);
+      },
+
+      inputDecoration: InputDecoration(
+        hintText: "Buscar dirección...",
+        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
+        enabledBorder: ((){
+          if(isSearchSelected){
+            return (const OutlineInputBorder(
+            borderSide: BorderSide( color: Colors.teal, width: 2 )
+          ));
+          }
+        }()),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide( color: Colors.teal, width: 2 ),
+        ),
+        contentPadding: const EdgeInsets.all(5),
+        constraints: BoxConstraints(maxWidth: sizeWidth),
+        isDense: true,
+        prefixIconConstraints: const BoxConstraints(minHeight: 35),
+        prefixIcon: const Padding(
+          padding: EdgeInsetsDirectional.only(start: 5, end: 2),
+          child: Icon(Icons.location_pin)
+        ),
+        prefixIconColor:
+          MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          if (states.contains(MaterialState.focused)) {
+            return Colors.teal;
+          }
+          return Colors.grey;
+        }),
+      ),
+
+      textStyle: const TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+      
+      debounceTime: 800,
+      countries: const ["cl"],
+      isLatLngRequired: true,
+
+      getPlaceDetailWithLatLng: (Prediction prediction) {
+        toLatLng = LatLng(double.parse(prediction.lat!), double.parse(prediction.lng!));
+        animateCameraToPosition(searchLatLng.latitude, searchLatLng.longitude);
+        print("placeDetails " + searchLatLng.toString());
+      },
+      
+      itmClick: (Prediction prediction) {
+        changeCardBoard(1);
+        searchText.text = prediction.description!;
+        searchText.selection = TextSelection.fromPosition(
+          TextPosition(
+            offset: prediction.description!.length
+          )
+        );
+      }
+      // default 600 ms ,
+    );
+  }  
   
+
 
   void saveLocation() async {
     await _geoFireProvider.create(
