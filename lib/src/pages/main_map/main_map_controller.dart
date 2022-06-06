@@ -322,7 +322,6 @@ class MainMapController {
       },
       
       itmClick: (Prediction prediction) {
-        changeCardBoard(1);
         toText.text = prediction.description!;
         toText.selection = TextSelection.fromPosition(
           TextPosition(

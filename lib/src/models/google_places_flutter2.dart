@@ -2,6 +2,7 @@
 
 library google_places_flutter2;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:dio/dio.dart';
 import 'package:rxdart/rxdart.dart';
 
 class GooglePlaceAutoCompleteTextField extends StatefulWidget {
+  
   InputDecoration inputDecoration;
   ItemClick? itmClick;
   GetPlaceDetailswWithLatLng? getPlaceDetailWithLatLng;
@@ -47,6 +49,8 @@ class GooglePlaceAutoCompleteTextField extends StatefulWidget {
 
 class _GooglePlaceAutoCompleteTextFieldState
     extends State<GooglePlaceAutoCompleteTextField> {
+      
+  late FocusNode focusNode;
   final subject = new PublishSubject<String>();
   OverlayEntry? _overlayEntry;
   List<Prediction> alPredictions = [];
@@ -62,6 +66,7 @@ class _GooglePlaceAutoCompleteTextFieldState
       child: GestureDetector(
         onTap: widget.onTap,
         child: TextFormField(
+          focusNode: focusNode,
           onTap: widget.onTap,
           decoration: widget.inputDecoration,
           style: widget.textStyle,
@@ -121,6 +126,15 @@ class _GooglePlaceAutoCompleteTextFieldState
         .distinct()
         .debounceTime(Duration(milliseconds: widget.debounceTime))
         .listen(textChanged);
+
+    focusNode = FocusNode();
+
+    focusNode.addListener(() {
+      if(!focusNode.hasFocus){
+        removeOverlay();
+      }
+    });
+    
   }
 
   textChanged(String text) async {
