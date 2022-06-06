@@ -21,13 +21,13 @@ import 'package:smavy/src/utils/my_progress_dialog.dart';
 import 'package:smavy/src/utils/snackbar.dart';
 import 'package:geocoding/geocoding.dart';
 
-class MainMapController{
+class MainMapController {
   late BuildContext context;
   late Function refresh;
   final Completer<GoogleMapController> _mapController = Completer();
 
   CameraPosition initialPosition = const CameraPosition(
-    target: LatLng(-33.0452126,-71.6151596),
+    target: LatLng(-33.0452126, -71.6151596),
     zoom: 14.4746,
   );
 
@@ -75,7 +75,7 @@ class MainMapController{
   //   // _statusSuscription.cancel(); //Utilizado en driver - check connect
   // }
 
-  void onMapCreated(GoogleMapController controller){
+  void onMapCreated(GoogleMapController controller) {
     _mapController.complete(controller);
     // controller.setMapStyle('[{"stylers":[{"saturation":25}]},{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"labels.text","stylers":[{"visibility":"off"}]}]');
     // controller.setMapStyle('[{"stylers":[{"saturation":25}]},{"elementType":"geometry","stylers":[{"color":"#242f3e"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#746855"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#242f3e"}]},{"featureType":"administrative.locality","elementType":"labels.text.fill","stylers":[{"color":"#d59563"}]},{"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#d59563"}]},{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#263c3f"}]},{"featureType":"poi.park","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"labels.text.fill","stylers":[{"color":"#6b9a76"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#38414e"}]},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#212a37"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#9ca5b3"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#746855"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#1f2835"}]},{"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#f3d19c"}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#2f3948"}]},{"featureType":"transit.station","elementType":"labels.text.fill","stylers":[{"color":"#d59563"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#17263c"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#515c6d"}]},{"featureType":"water","elementType":"labels.text.stroke","stylers":[{"color":"#17263c"}]}]');
@@ -83,14 +83,14 @@ class MainMapController{
 
   void checkGPS() async {
     bool isLocationEnabled = await Geolocator.isLocationServiceEnabled();
-    if(isLocationEnabled){
+    if (isLocationEnabled) {
       print('GPS Activado');
       updateLocation();
       // checkIfIsConnect(); //Utilizado en driver - check connect
-    }else{
+    } else {
       print('GPS desactivado');
       bool locationGPS = await location.Location().requestService();
-      if(locationGPS){
+      if (locationGPS) {
         updateLocation();
         // checkIfIsConnect(); //Utilizado en driver - check connect
         print('Activó el GPS');
@@ -98,13 +98,12 @@ class MainMapController{
     }
   }
 
-  void updateLocation() async{
-    try{
+  void updateLocation() async {
+    try {
       await _determinePosition();
       _position = await Geolocator.getLastKnownPosition();
       centerPosition();
-
-    }catch(error){
+    } catch (error) {
       print('Error en la localización: $error');
     }
   }
@@ -112,8 +111,9 @@ class MainMapController{
   // ignore: prefer_void_to_null
   Future<Null> setLocationDraggableInfo() async {
     // ignore: unnecessary_null_comparison
-    if(initialPosition != null){
-      List<Placemark> placemark = await placemarkFromCoordinates(screenCenter.latitude, screenCenter.longitude);
+    if (initialPosition != null) {
+      List<Placemark> placemark = await placemarkFromCoordinates(
+          screenCenter.latitude, screenCenter.longitude);
       Placemark address = placemark[0];
 
       print('el address es : $address');
@@ -156,7 +156,6 @@ class MainMapController{
     // 0 = From
     // 1 = To
     // 2 = Search
-    
     if(option == 0){
       if(!isFromSelected)
       {
@@ -403,22 +402,24 @@ class MainMapController{
     );
   }  
   
+  String getDir(address) {
+    String direction = address.thoroughfare!;
+    return direction;
+  }
 
 
   void saveLocation() async {
-    await _geoFireProvider.create(
-      _authProvider.getUser()!.uid,
-      _position!.latitude,
-      _position!.longitude
-    );
+    await _geoFireProvider.create(_authProvider.getUser()!.uid,
+        _position!.latitude, _position!.longitude);
     _progressDialog.hide();
   }
 
-  void centerPosition(){
-    if(_position != null){
+  void centerPosition() {
+    if (_position != null) {
       animateCameraToPosition(_position!.latitude, _position!.longitude);
-    }else{
-      Snackbar.showSnackbar(context, 'Por favor, activa el GPS para obtener la posición', false);
+    } else {
+      Snackbar.showSnackbar(
+          context, 'Por favor, activa el GPS para obtener la posición', false);
     }
   }
 
@@ -441,8 +442,8 @@ class MainMapController{
     }
     if (permission == LocationPermission.deniedForever) {
       return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.');
-    } 
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
 
     return await Geolocator.getCurrentPosition();
   }
@@ -450,43 +451,32 @@ class MainMapController{
   Future animateCameraToPosition(double latitude, double longitude) async {
     // Función para animar la cámara a la posición indicada
     GoogleMapController controller = await _mapController.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(
-        bearing: 0,
-        target: LatLng(latitude, longitude),
-        zoom: 15
-      )
-    ));
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        bearing: 0, target: LatLng(latitude, longitude), zoom: 15)));
   }
 
-  void addMarker(
-    String markerId,
-    double lat,
-    double lng,
-    String title,
-    String context,
-    BitmapDescriptor iconMarker) {
+  void addMarker(String markerId, double lat, double lng, String title,
+      String context, BitmapDescriptor iconMarker) {
     // Función para crear Marker() con las propiedades indicadas, aquí se recibe
     // el iconMarker ya modificado en getBytesFromAsset
     MarkerId id = MarkerId(markerId);
-    
+
     Marker marker = Marker(
-      markerId: id,
-      icon: iconMarker,
-      position: LatLng(lat,lng),
-      infoWindow: InfoWindow(title: title, snippet: context),
-      draggable: false,
-      zIndex: 2,
-      flat: true,
-      anchor: const Offset(0.5, 0.5),
-      rotation: _position!.heading
-    );
+        markerId: id,
+        icon: iconMarker,
+        position: LatLng(lat, lng),
+        infoWindow: InfoWindow(title: title, snippet: context),
+        draggable: false,
+        zIndex: 2,
+        flat: true,
+        anchor: const Offset(0.5, 0.5),
+        rotation: _position!.heading);
 
     markers[id] = marker;
   }
 
   Future<BitmapDescriptor> createMarkerImageFromAsset(String path) async {
-    // Función para crear un marcador desde una imagen en los assets, 
+    // Función para crear un marcador desde una imagen en los assets,
     // el comentario corresponde a la creación de un marker a partir de una imagen sin editar
     final Uint8List markerIcon = await getBytesFromAsset(path);
     // ImageConfiguration configuration = const ImageConfiguration();
@@ -500,12 +490,12 @@ class MainMapController{
     // y después insertarlo en la propiedad icon de un Marker()
     double pixelRatio = MediaQuery.of(context).devicePixelRatio;
     ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(
-        data.buffer.asUint8List(),
-        targetWidth: pixelRatio.round() * 25
-    );
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: pixelRatio.round() * 25);
     ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
   }
 
   // De aquí hacia abajo hay funciones relacionadas a compartir
@@ -513,25 +503,24 @@ class MainMapController{
   // los datos de Firestore, un botón debería ejecutar la función connect()
   // y esto ejecutaría el código que hay hacia abajo.
 
-  void connect(){
+  void connect() {
     // Esta función se ejecuta cuando se presiona un botón, esto
     // habilita o deshabilita el rastreo del dispositivo.
-    if(isConnect){
+    if (isConnect) {
       disconnect();
-    }else{
+    } else {
       _progressDialog.show();
       updateLocation();
     }
   }
 
-  void disconnect(){
+  void disconnect() {
     // Esta función deja de actualizar la posición y elimina la posición de la db
     // _positionStream.cancel();
     _geoFireProvider.delete(_authProvider.getUser()!.uid);
   }
 
-
-  //Utilizado en driver - check connect
+  // Utilizado en driver - check connect
   // void checkIfIsConnect(){
   //    Stream<DocumentSnapshot> status =
   //    _geoFireProvider.getLocationByIdStream(_authProvider.getUser()!.uid);

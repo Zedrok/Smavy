@@ -4,10 +4,10 @@ import 'package:smavy/src/pages/home/home_page.dart';
 import 'package:smavy/src/pages/login/login_page.dart';
 import 'package:smavy/src/pages/main_map/main_map_page.dart';
 import 'package:smavy/src/pages/register/register_page.dart';
-import 'package:smavy/src/utils/ajustesPage.dart';
-import 'package:smavy/src/utils/historial.dart';
-import 'package:smavy/src/utils/perfil.dart';
-import 'package:smavy/src/utils/save_adresses.dart';
+import 'package:smavy/src/pages/ajustes/ajustes_page.dart';
+import 'package:smavy/src/pages/historial/historial.dart';
+import 'package:smavy/src/pages/Profile/perfil.dart';
+import 'package:smavy/src/pages/direcciones_guardadas/save_adresses.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
