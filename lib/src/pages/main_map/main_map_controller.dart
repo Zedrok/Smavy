@@ -39,21 +39,21 @@ class MainMapController {
   late AuthProvider _authProvider;
   bool isConnect = false;
   late ProgressDialog _progressDialog;
-  
-  late LatLng screenCenter = const LatLng(-33.0452126,-71.6151596);
-  
+
+  late LatLng screenCenter = const LatLng(-33.0452126, -71.6151596);
+
   // late StreamSubscription<DocumentSnapshot> _statusSuscription; //Utilizado en driver - check connect
-  late LatLng fromLatLng = const LatLng(-33.0452126,-71.6151596);
+  late LatLng fromLatLng = const LatLng(-33.0452126, -71.6151596);
   TextEditingController fromText = TextEditingController();
-  LatLng fromPrev = const LatLng(-33.0452126,-71.6151596);
+  LatLng fromPrev = const LatLng(-33.0452126, -71.6151596);
 
-  late LatLng toLatLng = const LatLng(-33.0452126,-71.6151596);
+  late LatLng toLatLng = const LatLng(-33.0452126, -71.6151596);
   TextEditingController toText = TextEditingController();
-  LatLng toPrev = const LatLng(-33.0452126,-71.6151596);
+  LatLng toPrev = const LatLng(-33.0452126, -71.6151596);
 
-  late LatLng searchLatLng = const LatLng(-33.0452126,-71.6151596);
+  late LatLng searchLatLng = const LatLng(-33.0452126, -71.6151596);
   TextEditingController searchText = TextEditingController();
-  LatLng searchPrev = const LatLng(-33.0452126,-71.6151596);
+  LatLng searchPrev = const LatLng(-33.0452126, -71.6151596);
 
   bool isFromSelected = true;
   bool isToSelected = false;
@@ -64,7 +64,8 @@ class MainMapController {
     this.context = context;
     _geoFireProvider = GeoFireProvider();
     _authProvider = AuthProvider();
-    _progressDialog = MyProgressDialog.createProgressDialog(context, 'Conectándose...');
+    _progressDialog =
+        MyProgressDialog.createProgressDialog(context, 'Conectándose...');
     checkGPS();
     _position = await Geolocator.getCurrentPosition();
     markerDriver = await createMarkerImageFromAsset('assets/img/gpsDriver.png');
@@ -128,22 +129,25 @@ class MainMapController {
       String department = address.administrativeArea!;
       // String country = address.country!;
 
-      if (isFromSelected){
-        if(screenCenter.latitude.compareTo(fromPrev.latitude) != 0 || screenCenter.longitude.compareTo(fromPrev.longitude) !=0 ){
+      if (isFromSelected) {
+        if (screenCenter.latitude.compareTo(fromPrev.latitude) != 0 ||
+            screenCenter.longitude.compareTo(fromPrev.longitude) != 0) {
           fromPrev = screenCenter;
           fromText.text = '$direction #$street, $city, $department';
           fromLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
           print('FROM: $fromText.text');
         }
-      }else{
-        if(isToSelected){
-          if(screenCenter.latitude.compareTo(toPrev.latitude) != 0 || screenCenter.longitude.compareTo(toPrev.longitude) != 0){
+      } else {
+        if (isToSelected) {
+          if (screenCenter.latitude.compareTo(toPrev.latitude) != 0 ||
+              screenCenter.longitude.compareTo(toPrev.longitude) != 0) {
             toPrev = screenCenter;
             toText.text = '$direction #$street, $city, $department';
             toLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
           }
-        }else{
-          if(screenCenter.latitude.compareTo(searchPrev.latitude) != 0 || screenCenter.longitude.compareTo(searchPrev.longitude) != 0){
+        } else {
+          if (screenCenter.latitude.compareTo(searchPrev.latitude) != 0 ||
+              screenCenter.longitude.compareTo(searchPrev.longitude) != 0) {
             searchPrev = screenCenter;
             searchText.text = '$direction #$street, $city, $department';
             searchLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
@@ -154,260 +158,236 @@ class MainMapController {
     }
   }
 
-  void changeCardBoard(int option){
+  void changeCardBoard(int option) {
     // 0 = From
     // 1 = To
     // 2 = Search
-    if(option == 0){
-      if(!isFromSelected)
-      {
+    if (option == 0) {
+      if (!isFromSelected) {
         isFromSelected = true;
         isToSelected = false;
         isSearchSelected = false;
-        Snackbar.showSnackbar(context, 'Estas seleccionando el lugar de Origen', true);
+        Snackbar.showSnackbar(
+            context, 'Estas seleccionando el lugar de Origen', true);
       }
-    }else{
-      if(option == 1){
-        if(!isToSelected){
+    } else {
+      if (option == 1) {
+        if (!isToSelected) {
           isFromSelected = false;
           isToSelected = true;
           isSearchSelected = false;
-          Snackbar.showSnackbar(context, 'Estas seleccionando el lugar de Destino', true);
+          Snackbar.showSnackbar(
+              context, 'Estas seleccionando el lugar de Destino', true);
         }
-      }else{
-        if(option == 2){
-          if(!isSearchSelected){
-            
-            animateCameraToPosition(searchLatLng.latitude, searchLatLng.longitude);
+      } else {
+        if (option == 2) {
+          if (!isSearchSelected) {
+            animateCameraToPosition(
+                searchLatLng.latitude, searchLatLng.longitude);
             isFromSelected = false;
             isToSelected = false;
             isSearchSelected = true;
-            Snackbar.showSnackbar(context, 'Estas seleccionando la dirección por visitar', true);
-          }else{
+            Snackbar.showSnackbar(
+                context, 'Estas seleccionando la dirección por visitar', true);
+          } else {
             animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
             isFromSelected = true;
             isToSelected = false;
             isSearchSelected = false;
-            Snackbar.showSnackbar(context, 'Estas seleccionando el lugar de Origen', true);
+            Snackbar.showSnackbar(
+                context, 'Estas seleccionando el lugar de Origen', true);
           }
         }
       }
     }
   }
 
-  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteFrom(bool isFrom, double sizeWidth) {
+  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteFrom(
+      bool isFrom, double sizeWidth) {
     return GooglePlaceAutoCompleteTextField(
-      textEditingController: fromText,
-
-      googleAPIKey: Environment.API_KEY_MAPS,
-
-      debounceTime: 800,
-      countries: const ["cl"],
-      isLatLngRequired: true,
-
-      onTap: () {
-        changeCardBoard(0);
-        animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
-        fromText.addListener(() {
-          print('TextFrom');
-          print(fromText);
-        });
-      },
-
-      inputDecoration: InputDecoration(
-        hintText: "Buscar dirección...",
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(7)),
+        textEditingController: fromText,
+        googleAPIKey: Environment.API_KEY_MAPS,
+        debounceTime: 800,
+        countries: const ["cl"],
+        isLatLngRequired: true,
+        onTap: () {
+          changeCardBoard(0);
+          animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
+          fromText.addListener(() {
+            print('TextFrom');
+            print(fromText);
+          });
+        },
+        inputDecoration: InputDecoration(
+          hintText: "Buscar dirección...",
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(7)),
+          ),
+          enabledBorder: (() {
+            if (isFromSelected) {
+              return (const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.teal, width: 2)));
+            }
+          }()),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.teal, width: 2),
+          ),
+          contentPadding: const EdgeInsets.all(5),
+          constraints: BoxConstraints(maxWidth: sizeWidth),
+          isDense: true,
+          prefixIconConstraints: const BoxConstraints(minHeight: 35),
+          prefixIcon: const Padding(
+              padding: EdgeInsetsDirectional.only(start: 5, end: 2),
+              child: Icon(Icons.location_pin)),
+          prefixIconColor:
+              MaterialStateColor.resolveWith((Set<MaterialState> states) {
+            if (isFromSelected) {
+              return Colors.teal;
+            }
+            return Colors.grey;
+          }),
         ),
-        enabledBorder: ((){
-          if(isFromSelected){
-            return (const OutlineInputBorder(
-            borderSide: BorderSide( color: Colors.teal, width: 2 )
-          ));
-          }
-        }()),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide( color: Colors.teal, width: 2 ),
+        textStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
         ),
-        contentPadding: const EdgeInsets.all(5),
-        constraints: BoxConstraints(maxWidth: sizeWidth),
-        isDense: true,
-        prefixIconConstraints: const BoxConstraints(minHeight: 35),
-        prefixIcon: const Padding(
-          padding: EdgeInsetsDirectional.only(start: 5, end: 2),
-          child: Icon(Icons.location_pin)
-        ),
-
-        prefixIconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-          if (isFromSelected) {
-            return Colors.teal;
-          }
-          return Colors.grey;
-        }),
-      ),
-
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.bold,
-      ),
-
-      getPlaceDetailWithLatLng: (Prediction prediction) {
-        fromLatLng = LatLng(double.parse(prediction.lat!), double.parse(prediction.lng!));
-        animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
-        print("placeDetails " + fromLatLng.toString());
-      },
-      
-      itmClick: (Prediction prediction) {
-        fromText.text = prediction.description!;
-        fromText.selection = TextSelection.fromPosition(
-          TextPosition(
-            offset: prediction.description!.length
-          )
+        getPlaceDetailWithLatLng: (Prediction prediction) {
+          fromLatLng = LatLng(
+              double.parse(prediction.lat!), double.parse(prediction.lng!));
+          animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
+          print("placeDetails " + fromLatLng.toString());
+        },
+        itmClick: (Prediction prediction) {
+          fromText.text = prediction.description!;
+          fromText.selection = TextSelection.fromPosition(
+              TextPosition(offset: prediction.description!.length));
+        }
+        // default 600 ms ,
         );
-      }
-      // default 600 ms ,
-    );
-  }  
+  }
 
-  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteTo(bool isFrom, double sizeWidth)  {
+  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteTo(
+      bool isFrom, double sizeWidth) {
     return GooglePlaceAutoCompleteTextField(
-      textEditingController: toText,
-
-      googleAPIKey: Environment.API_KEY_MAPS,
-      
-      onTap: () {
-        changeCardBoard(1);
-        animateCameraToPosition(toLatLng.latitude, toLatLng.longitude);
-      },
-
-      inputDecoration: InputDecoration(
-        hintText: "Buscar dirección...",
-        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
-        enabledBorder: ((){
-          if(!isFromSelected){
-            return (const OutlineInputBorder(
-            borderSide: BorderSide( color: Colors.teal, width: 2 )
-          ));
-          }
-        }()),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide( color: Colors.teal, width: 2 ),
+        textEditingController: toText,
+        googleAPIKey: Environment.API_KEY_MAPS,
+        onTap: () {
+          changeCardBoard(1);
+          animateCameraToPosition(toLatLng.latitude, toLatLng.longitude);
+        },
+        inputDecoration: InputDecoration(
+          hintText: "Buscar dirección...",
+          border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(7))),
+          enabledBorder: (() {
+            if (!isFromSelected) {
+              return (const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.teal, width: 2)));
+            }
+          }()),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.teal, width: 2),
+          ),
+          contentPadding: const EdgeInsets.all(5),
+          constraints: BoxConstraints(maxWidth: sizeWidth),
+          isDense: true,
+          prefixIconConstraints: const BoxConstraints(minHeight: 35),
+          prefixIcon: const Padding(
+              padding: EdgeInsetsDirectional.only(start: 5, end: 2),
+              child: Icon(Icons.location_pin)),
+          prefixIconColor:
+              MaterialStateColor.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.focused)) {
+              return Colors.teal;
+            }
+            return Colors.grey;
+          }),
         ),
-        contentPadding: const EdgeInsets.all(5),
-        constraints: BoxConstraints(maxWidth: sizeWidth),
-        isDense: true,
-        prefixIconConstraints: const BoxConstraints(minHeight: 35),
-        prefixIcon: const Padding(
-          padding: EdgeInsetsDirectional.only(start: 5, end: 2),
-          child: Icon(Icons.location_pin)
+        textStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
         ),
-        prefixIconColor:
-          MaterialStateColor.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused)) {
-            return Colors.teal;
-          }
-          return Colors.grey;
-        }),
-      ),
-
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.bold,
-      ),
-      
-      debounceTime: 800,
-      countries: const ["cl"],
-      isLatLngRequired: true,
-
-      getPlaceDetailWithLatLng: (Prediction prediction) {
-        toLatLng = LatLng(double.parse(prediction.lat!), double.parse(prediction.lng!));
-        animateCameraToPosition(toLatLng.latitude, toLatLng.longitude);
-        print("placeDetails " + toLatLng.toString());
-      },
-      
-      itmClick: (Prediction prediction) {
-        toText.text = prediction.description!;
-        toText.selection = TextSelection.fromPosition(
-          TextPosition(
-            offset: prediction.description!.length
-          )
+        debounceTime: 800,
+        countries: const ["cl"],
+        isLatLngRequired: true,
+        getPlaceDetailWithLatLng: (Prediction prediction) {
+          toLatLng = LatLng(
+              double.parse(prediction.lat!), double.parse(prediction.lng!));
+          animateCameraToPosition(toLatLng.latitude, toLatLng.longitude);
+          print("placeDetails " + toLatLng.toString());
+        },
+        itmClick: (Prediction prediction) {
+          toText.text = prediction.description!;
+          toText.selection = TextSelection.fromPosition(
+              TextPosition(offset: prediction.description!.length));
+        }
+        // default 600 ms ,
         );
-      }
-      // default 600 ms ,
-    );
-  }  
+  }
 
-  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteSearch(double sizeWidth)  {
+  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteSearch(
+      double sizeWidth) {
     return GooglePlaceAutoCompleteTextField(
-      textEditingController: searchText,
-
-      googleAPIKey: Environment.API_KEY_MAPS,
-      
-      onTap: () {
-        changeCardBoard(3);
-        animateCameraToPosition(searchLatLng.latitude, searchLatLng.longitude);
-      },
-
-      inputDecoration: InputDecoration(
-        hintText: "Buscar dirección...",
-        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
-        enabledBorder: ((){
-          if(isSearchSelected){
-            return (const OutlineInputBorder(
-            borderSide: BorderSide( color: Colors.teal, width: 2 )
-          ));
-          }
-        }()),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide( color: Colors.teal, width: 2 ),
+        textEditingController: searchText,
+        googleAPIKey: Environment.API_KEY_MAPS,
+        onTap: () {
+          changeCardBoard(3);
+          animateCameraToPosition(
+              searchLatLng.latitude, searchLatLng.longitude);
+        },
+        inputDecoration: InputDecoration(
+          hintText: "Buscar dirección...",
+          border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(7))),
+          enabledBorder: (() {
+            if (isSearchSelected) {
+              return (const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.teal, width: 2)));
+            }
+          }()),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.teal, width: 2),
+          ),
+          contentPadding: const EdgeInsets.all(5),
+          constraints: BoxConstraints(maxWidth: sizeWidth),
+          isDense: true,
+          prefixIconConstraints: const BoxConstraints(minHeight: 35),
+          prefixIcon: const Padding(
+              padding: EdgeInsetsDirectional.only(start: 5, end: 2),
+              child: Icon(Icons.location_pin)),
+          prefixIconColor:
+              MaterialStateColor.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.focused)) {
+              return Colors.teal;
+            }
+            return Colors.grey;
+          }),
         ),
-        contentPadding: const EdgeInsets.all(5),
-        constraints: BoxConstraints(maxWidth: sizeWidth),
-        isDense: true,
-        prefixIconConstraints: const BoxConstraints(minHeight: 35),
-        prefixIcon: const Padding(
-          padding: EdgeInsetsDirectional.only(start: 5, end: 2),
-          child: Icon(Icons.location_pin)
+        textStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
         ),
-        prefixIconColor:
-          MaterialStateColor.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused)) {
-            return Colors.teal;
-          }
-          return Colors.grey;
-        }),
-      ),
-
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.bold,
-      ),
-      
-      debounceTime: 800,
-      countries: const ["cl"],
-      isLatLngRequired: true,
-
-      getPlaceDetailWithLatLng: (Prediction prediction) {
-        toLatLng = LatLng(double.parse(prediction.lat!), double.parse(prediction.lng!));
-        animateCameraToPosition(searchLatLng.latitude, searchLatLng.longitude);
-        print("placeDetails " + searchLatLng.toString());
-      },
-      
-      itmClick: (Prediction prediction) {
-        changeCardBoard(1);
-        searchText.text = prediction.description!;
-        searchText.selection = TextSelection.fromPosition(
-          TextPosition(
-            offset: prediction.description!.length
-          )
+        debounceTime: 800,
+        countries: const ["cl"],
+        isLatLngRequired: true,
+        getPlaceDetailWithLatLng: (Prediction prediction) {
+          toLatLng = LatLng(
+              double.parse(prediction.lat!), double.parse(prediction.lng!));
+          animateCameraToPosition(
+              searchLatLng.latitude, searchLatLng.longitude);
+          print("placeDetails " + searchLatLng.toString());
+        },
+        itmClick: (Prediction prediction) {
+          changeCardBoard(1);
+          searchText.text = prediction.description!;
+          searchText.selection = TextSelection.fromPosition(
+              TextPosition(offset: prediction.description!.length));
+        }
+        // default 600 ms ,
         );
-      }
-      // default 600 ms ,
-    );
-  }  
-  
+  }
+
   String getDir(address) {
     String direction = address.thoroughfare!;
     return direction;
   }
-
 
   void saveLocation() async {
     await _geoFireProvider.create(_authProvider.getUser()!.uid,

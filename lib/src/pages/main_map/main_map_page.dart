@@ -5,8 +5,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:smavy/src/utils/panel_widget.dart';
+import 'package:smavy/src/providers/lista_direcciones_provider.dart';
+import 'package:smavy/src/widgets/button_app.dart';
 import 'dart:io';
 import '../../utils/ubicaciones.dart';
 
@@ -19,8 +19,6 @@ class MainMapPage extends StatefulWidget {
 
 class _MainMapPageState extends State<MainMapPage> {
   final MainMapController _con = MainMapController();
-  final panelController = PanelController();
-  late PanelWidget panelw;
   bool isVisible = true;
 
   @override
@@ -28,7 +26,7 @@ class _MainMapPageState extends State<MainMapPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     super.initState();
 
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
   }
@@ -46,9 +44,6 @@ class _MainMapPageState extends State<MainMapPage> {
 
   @override
   Widget build(BuildContext context) {
-    final panelHeightOpen = MediaQuery.of(context).size.height * 0.7;
-    final panelHeightClosed = MediaQuery.of(context).size.height * 0.1;
-
     return WillPopScope(
       onWillPop: () async => _onWillPopScope(),
       child: GestureDetector(
@@ -56,9 +51,10 @@ class _MainMapPageState extends State<MainMapPage> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           key: _globalKey,
-          drawer: _drawer(context), //drawer guardado en funcion para simplificar codigo
+          drawer: _drawer(
+              context), //drawer guardado en funcion para simplificar codigo
           body: Stack(children: [
-            _slidingupPanel(panelController, panelHeightOpen, panelHeightClosed),
+            _googleMapsWidget(),
             SafeArea(
               child: Column(children: [
                 // CardBoard de ubicaciones
@@ -67,43 +63,40 @@ class _MainMapPageState extends State<MainMapPage> {
                   children: [
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 5),
-                      child: ((){
-                        if(!_con.isSearchSelected){
+                      child: (() {
+                        if (!_con.isSearchSelected) {
                           return _cardGooglePlacesFromTo();
-                        }else{
+                        } else {
                           return _cardGooglePlacesSearch();
                         }
                       }()),
                     ),
                   ],
                 ),
-      
+
                 // Botón de Búsqueda y Cambio origen/destino
                 Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 15),
-                    child: _buttonSwitchToSearch()
-                  ),
+                      margin: const EdgeInsets.symmetric(horizontal: 15),
+                      child: _buttonSwitchToSearch()),
                 ]),
-      
+
                 Expanded(child: Container()),
-      
+
                 // Boton Centrar mapa
                 Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 15),
-                    child: _buttonCenterPosition()
-                  ),
+                      margin: const EdgeInsets.symmetric(horizontal: 15),
+                      child: _buttonCenterPosition()),
                 ]),
-      
+
                 // Boton direcciones guardadas
                 Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 15),
-                    child: _buttonSavedLocations()
-                  ),
+                      margin: const EdgeInsets.symmetric(horizontal: 15),
+                      child: _buttonSavedLocations()),
                 ]),
-      
+
                 // Boton Agregar dirección
                 (){
                   if(_con.isSearchSelected){
@@ -123,10 +116,10 @@ class _MainMapPageState extends State<MainMapPage> {
             Align(
               alignment: Alignment.center,
               child: Container(
-                margin: const EdgeInsets.fromLTRB(0, 0, 0, 50),
-                child: _iconMyLocation()
-              ),
-            )
+                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 50),
+                  child: _iconMyLocation()),
+            ),
+            _builderBottomSheet(),
           ]),
         ),
       ),
@@ -135,23 +128,24 @@ class _MainMapPageState extends State<MainMapPage> {
 
   Widget _fromTextField() {
     return Container(
-      padding: const EdgeInsets.symmetric(),
-      child: _con.showGoogleAutoCompleteFrom(_con.isFromSelected, MediaQuery.of(context).size.width * 0.75)
-    );
+        padding: const EdgeInsets.symmetric(),
+        child: _con.showGoogleAutoCompleteFrom(
+            _con.isFromSelected, MediaQuery.of(context).size.width * 0.75));
   }
-
 
   Widget _toTextField() {
     return Container(
       padding: const EdgeInsets.symmetric(),
-      child: _con.showGoogleAutoCompleteTo(_con.isFromSelected, MediaQuery.of(context).size.width * 0.75),
+      child: _con.showGoogleAutoCompleteTo(
+          _con.isFromSelected, MediaQuery.of(context).size.width * 0.75),
     );
   }
 
   Widget _searchTextField() {
     return Container(
       padding: const EdgeInsets.symmetric(),
-      child: _con.showGoogleAutoCompleteSearch(MediaQuery.of(context).size.width * 0.75),
+      child: _con.showGoogleAutoCompleteSearch(
+          MediaQuery.of(context).size.width * 0.75),
     );
   }
 
@@ -159,52 +153,50 @@ class _MainMapPageState extends State<MainMapPage> {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.95,
       child: Card(
-        shadowColor: Colors.teal,
-        elevation: 5, 
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Colors.teal, width: 0.2)
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            children: [
-              SizedBox(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buttonMenu(),
-                  ],
+          shadowColor: Colors.teal,
+          elevation: 5,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: Colors.teal, width: 0.2)),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                SizedBox(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buttonMenu(),
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.75,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Origen',
-                      style: TextStyle(color: Colors.grey[750] , fontSize: 13)
-                    ),
-                    _fromTextField(),
-                    const SizedBox(height: 3),
-                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.75,
-                      child: const Divider(color: Colors.teal, thickness: 1 , height: 10),
-                    ),
-                    Text(
-                      'Destino',
-                      style: TextStyle(color: Colors.grey[750], fontSize: 13),
-                      maxLines: 2,
-                    ),
-                    _toTextField(),
-                  ],
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.75,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Origen',
+                          style:
+                              TextStyle(color: Colors.grey[750], fontSize: 13)),
+                      _fromTextField(),
+                      const SizedBox(height: 3),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.75,
+                        child: const Divider(
+                            color: Colors.teal, thickness: 1, height: 10),
+                      ),
+                      Text(
+                        'Destino',
+                        style: TextStyle(color: Colors.grey[750], fontSize: 13),
+                        maxLines: 2,
+                      ),
+                      _toTextField(),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        )
-      ),
+              ],
+            ),
+          )),
     );
   }
 
@@ -212,41 +204,38 @@ class _MainMapPageState extends State<MainMapPage> {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.95,
       child: Card(
-        shadowColor: Colors.teal,
-        elevation: 5, 
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Colors.teal, width: 0.2)
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            children: [
-              SizedBox(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buttonMenu(),
-                  ],
+          shadowColor: Colors.teal,
+          elevation: 5,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: Colors.teal, width: 0.2)),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                SizedBox(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buttonMenu(),
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.75,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Dirección por visitar',
-                      style: TextStyle(color: Colors.grey[750] , fontSize: 13)
-                    ),
-                    _searchTextField(),
-                  ],
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.75,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Dirección por visitar',
+                          style:
+                              TextStyle(color: Colors.grey[750], fontSize: 13)),
+                      _searchTextField(),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        )
-      ),
+              ],
+            ),
+          )),
     );
   }
 
@@ -283,7 +272,6 @@ class _MainMapPageState extends State<MainMapPage> {
         ));
   }
 
-
   Widget _buttonSwitchToSearch() {
     return Container(
       alignment: Alignment.centerRight,
@@ -297,46 +285,21 @@ class _MainMapPageState extends State<MainMapPage> {
           color: Colors.teal[400],
           shape: const CircleBorder(),
           child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Icon(
-              ((){
-                if(!_con.isSearchSelected){
-                  return Icons.search_outlined;
-                }else{
-                  return Icons.house;
-                }
-              }()),
-              color: Colors.white, size: 25
-            )
-          ),
+              padding: const EdgeInsets.all(10),
+              child: Icon(
+                  (() {
+                    if (!_con.isSearchSelected) {
+                      return Icons.search_outlined;
+                    } else {
+                      return Icons.house;
+                    }
+                  }()),
+                  color: Colors.white,
+                  size: 25)),
         ),
       ),
     );
   }
-
-  // Widget _buttonChangeTo() {
-  //   return GestureDetector(
-  //     onTap: _changeto,
-  //     child: Container(
-  //         alignment: Alignment.centerRight,
-  //         child: Card(
-  //           elevation: 3,
-  //           color: Colors.teal[400],
-  //           shape: const CircleBorder(),
-  //           child: Container(
-  //               padding: const EdgeInsets.all(10),
-  //               child: const Icon(Icons.restart_alt,
-  //                   color: Colors.white, size: 25)),
-  //         )),
-  //   );
-  // }
-
-  // void _changeto() {
-  //   Ubicaciones direccion = Ubicaciones(_con.fromLatLng, _con.fromText.text);
-  //   panelw.agregarItem(direccion);
-  //   print(direccion);
-  //   _con.changeFromTo();
-  // }
 
   Widget _buttonSavedLocations() {
     return Container(
@@ -369,10 +332,9 @@ class _MainMapPageState extends State<MainMapPage> {
   }
 
   void _agregarItemLista() => () {
-    Ubicaciones direccion = Ubicaciones(_con.toLatLng, _con.toText.text);
-    print(direccion);
-    panelw.agregarItem(direccion);
-  };
+        Ubicaciones direccion = Ubicaciones(_con.toLatLng, _con.toText.text);
+        print(direccion);
+      };
 
   Widget _iconMyLocation() {
     return Image.asset(
@@ -410,12 +372,12 @@ class _MainMapPageState extends State<MainMapPage> {
 //funcion de drawer lateral izquierdo.
   Drawer _drawer(BuildContext context) {
     return Drawer(
-      child: ListView(
+        child: ListView(
       padding: EdgeInsets.zero,
       children: [
         DrawerHeader(
-          decoration: const BoxDecoration(color: Colors.teal),
-          child: _drawerHeader()),
+            decoration: const BoxDecoration(color: Colors.teal),
+            child: _drawerHeader()),
         _menusDrawer(context, 'Perfil', 'perfil'),
         const Divider(
           thickness: 1,
@@ -460,35 +422,13 @@ class _MainMapPageState extends State<MainMapPage> {
             ),
             Text(
               'correo@mail.com',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.white),
             )
           ],
         )
       ],
     );
   }
-
-  Widget _slidingupPanel(PanelController panelController, panelHeightOpen, panelHeightClosed) =>
-  SlidingUpPanel(
-    controller: panelController,
-    maxHeight: panelHeightOpen,
-    minHeight: panelHeightClosed,
-    body: _googleMapsWidget(),
-    panelBuilder: (controller) => panelw = 
-      PanelWidget(controller: controller, panelController: panelController),
-    
-    borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-    
-    onPanelOpened: () => setState(() {
-      isVisible = !isVisible;
-    }),
-    onPanelClosed: () => setState(() {
-      isVisible = !isVisible;
-    }),
-  );
 
 //funcion destinada para cada menu del drawer
   ListTile _menusDrawer(
@@ -521,12 +461,111 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
+  Widget panelUp() {
+    return DraggableScrollableSheet(
+        maxChildSize: 0.9,
+        minChildSize: 0.1,
+        initialChildSize: 0.1,
+        builder: (context, scrollController) {
+          return Material(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+              color: Colors.white,
+              child: /*(ListaDireccionesProvider().listaDirecciones.isNotEmpty)
+                  ? */
+                  ListView(
+                padding: EdgeInsets.zero,
+                controller: scrollController,
+                children: [
+                  Container(
+                    alignment: Alignment.topCenter,
+                    child: const Text('Cabecera'),
+                  ),
+                  ..._crearItem(),
+                  Container(
+                    child: FloatingActionButton.extended(
+                      elevation: 0,
+                      highlightElevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.arrow_forward_ios),
+                      label: const Text(
+                        'TRAZAR RUTA',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: Colors.teal,
+                    ),
+                  ),
+                ],
+              ));
+        } //: _else(scrollController));
+        );
+  }
+
+  Widget _else(ScrollController scrollController) {
+    return ListView(
+      controller: scrollController,
+      children: const [
+        Center(
+          child: Text('No se han agregado direcciones'),
+        ),
+      ],
+    );
+  }
+
+  void _scrollOpen() {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return panelUp();
+        });
+  }
+
+  Widget _builderBottomSheet() => Container(
+        alignment: Alignment.bottomCenter,
+        child: FloatingActionButton.extended(
+          elevation: 0,
+          highlightElevation: 0,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          onPressed: () {
+            _scrollOpen();
+          },
+          icon: const Icon(Icons.arrow_forward_ios),
+          label: const Text(
+            'COMENZAR RUTA',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.teal,
+        ),
+      );
+
+  List<Widget> _crearItem() {
+    List<Widget> temporal = [];
+
+    for (Map<String, dynamic> listaDirecciones
+        in ListaDireccionesProvider().listaDirecciones) {
+      Widget item = ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text("${listaDirecciones['nombre']}"),
+        leading: const Icon(Icons.location_on_outlined),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: () {},
+        ),
+      );
+      temporal.add(item);
+    }
+
+    return temporal;
+  }
+
   void refresh() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
     setState(() {});
   }
-
-  //void _togglePanel() => _pc.isPanelOpen ? _pc.close() : _pc.open();
-  //void _togglePanel2() => _pc.isAttached ? _pc.open() : _pc.close();
 }
