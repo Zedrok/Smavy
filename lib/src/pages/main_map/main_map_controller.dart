@@ -75,6 +75,10 @@ class MainMapController {
   //   // _statusSuscription.cancel(); //Utilizado en driver - check connect
   // }
 
+  void goToTravelInfoPage(){
+    Navigator.pushNamed(context, 'travelInfo');
+  }
+
   void onMapCreated(GoogleMapController controller) {
     _mapController.complete(controller);
     // controller.setMapStyle('[{"stylers":[{"saturation":25}]},{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"labels.text","stylers":[{"visibility":"off"}]}]');
@@ -137,14 +141,12 @@ class MainMapController {
             toPrev = screenCenter;
             toText.text = '$direction #$street, $city, $department';
             toLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
-            print('TO: $toText.text');
           }
         }else{
           if(screenCenter.latitude.compareTo(searchPrev.latitude) != 0 || screenCenter.longitude.compareTo(searchPrev.longitude) != 0){
             searchPrev = screenCenter;
             searchText.text = '$direction #$street, $city, $department';
             searchLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
-            print('TO: $toText.text');
           }
         }
       }

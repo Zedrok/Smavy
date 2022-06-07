@@ -15,19 +15,19 @@ class PanelWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildAboutText();
+    return _buildAboutText(context);
   }
 
   final List<Ubicaciones> _direcciones = [];
 
-  Widget _buildAboutText() => ListView(
+  Widget _buildAboutText(context) => ListView(
         padding: EdgeInsets.zero,
         controller: controller,
         children: [
           const SizedBox(
             height: 5,
           ),
-          _buildDragHandle(),
+          _buildDragHandle(context),
           const SizedBox(
             height: 18,
           ),
@@ -40,16 +40,16 @@ class PanelWidget extends StatelessWidget {
         ],
       ); //_buildAboutText()
 
-  Widget _buildDragHandle() => Container(
+  Widget _buildDragHandle(context) => Container(
         alignment: Alignment.topCenter,
         child: GestureDetector(
           child: ButtonApp(
-            onPressed: () {},
+            onPressed: () {Navigator.pushNamed(context, 'travelInfo');},
             text: 'COMENZAR RUTA',
             color: Colors.teal,
             textColor: Colors.white,
           ),
-          onTap: _togglePanel,
+          onTap: (){_togglePanel();},
         ),
       );
 

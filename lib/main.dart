@@ -8,6 +8,7 @@ import 'package:smavy/src/pages/ajustes/ajustes_page.dart';
 import 'package:smavy/src/pages/historial/historial.dart';
 import 'package:smavy/src/pages/Profile/perfil.dart';
 import 'package:smavy/src/pages/direcciones_guardadas/save_adresses.dart';
+import 'package:smavy/src/pages/travel_info/travel_info_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
       routes: {
         'home': (BuildContext context) => const HomePage(),
         'mainMap': (BuildContext context) => const MainMapPage(),
+        'travelInfo': (BuildContext context) => const TravelInfoPage(),
         'login': (BuildContext context) => const LoginPage(),
         'register': (BuildContext context) => const RegisterPage(),
         'perfil': (BuildContext context) => const PerfilPage(),

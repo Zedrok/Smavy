@@ -8,20 +8,30 @@ class ButtonApp extends StatelessWidget {
   String text;
   IconData icon;
   Function onPressed;
+  double? margin;
+  bool? buttonIcon;
 
-  ButtonApp({Key? key, 
+  ButtonApp({
+    Key? key,
+    this.buttonIcon,
+    this.margin,
     this.color = Colors.teal,
     this.textColor = Colors.white,
     this.icon = Icons.arrow_forward_ios,
     this.text = "",
     required this.onPressed 
-
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 40),
+      margin: (){
+        if(margin!= null){
+          return EdgeInsets.symmetric(horizontal: margin!);
+        }else{
+          return const EdgeInsets.symmetric(horizontal: 40);
+        }
+      }(),
       child: ElevatedButton(
         onPressed: () {
           onPressed();
@@ -39,6 +49,7 @@ class ButtonApp extends StatelessWidget {
             Align(
               alignment: Alignment.center,
               child: Container(
+                color: color,
                 alignment: Alignment.center,
                 height: 40,
                 child: 
@@ -52,20 +63,43 @@ class ButtonApp extends StatelessWidget {
               ),
             ),
             
-            Align(
-              alignment: Alignment.centerRight,
-              child: SizedBox(
-                height: 38,
-                child: CircleAvatar(
-                  radius: 14,
-                  child: Icon(
-                    icon,
-                    color: textColor,
-                    size: 18
-                  ),
-                ),
-              )  
-            ),
+            (){
+              if(buttonIcon == null){
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    height: 38,
+                    child: CircleAvatar(
+                      radius: 14,
+                      child: Icon(
+                        icon,
+                        color: textColor,
+                        size: 18
+                      ),
+                    ),
+                  )  
+                );
+              }else{
+                if(buttonIcon == true){
+                  return Align(
+                    alignment: Alignment.centerRight,
+                    child: SizedBox(
+                      height: 38,
+                      child: CircleAvatar(
+                        radius: 14,
+                        child: Icon(
+                          icon,
+                          color: textColor,
+                          size: 18
+                        ),
+                      ),
+                    )  
+                  );
+                }else{
+                  return const Align();
+                }
+              }
+            }(),
           ], //children
         ),
       ),

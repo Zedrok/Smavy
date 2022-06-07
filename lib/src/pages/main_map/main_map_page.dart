@@ -31,7 +31,6 @@ class _MainMapPageState extends State<MainMapPage> {
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
-
   }
 
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
@@ -106,12 +105,18 @@ class _MainMapPageState extends State<MainMapPage> {
                 ]),
       
                 // Boton Agregar dirección
-                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 15),
-                    child: _buttonAddLocation()
-                  ),
-                ]),
+                (){
+                  if(_con.isSearchSelected){
+                    return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 15),
+                        child: _buttonAddLocation()
+                      ),
+                    ]);
+                  }else{
+                    return Row();
+                  }
+                }(),
                 // _buttonStartRoute()
               ]),
             ),
@@ -466,23 +471,24 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
-  Widget _slidingupPanel(PanelController panelController, panelHeightOpen,
-      panelHeightClosed) =>
-      SlidingUpPanel(
-        controller: panelController,
-        maxHeight: panelHeightOpen,
-        minHeight: panelHeightClosed,
-        body: _googleMapsWidget(),
-        panelBuilder: (controller) => panelw = PanelWidget(
-            controller: controller, panelController: panelController),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-        onPanelOpened: () => setState(() {
-          isVisible = !isVisible;
-        }),
-        onPanelClosed: () => setState(() {
-          isVisible = !isVisible;
-        }),
-      );
+  Widget _slidingupPanel(PanelController panelController, panelHeightOpen, panelHeightClosed) =>
+  SlidingUpPanel(
+    controller: panelController,
+    maxHeight: panelHeightOpen,
+    minHeight: panelHeightClosed,
+    body: _googleMapsWidget(),
+    panelBuilder: (controller) => panelw = 
+      PanelWidget(controller: controller, panelController: panelController),
+    
+    borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+    
+    onPanelOpened: () => setState(() {
+      isVisible = !isVisible;
+    }),
+    onPanelClosed: () => setState(() {
+      isVisible = !isVisible;
+    }),
+  );
 
 //funcion destinada para cada menu del drawer
   ListTile _menusDrawer(
