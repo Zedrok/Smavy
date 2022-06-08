@@ -13,7 +13,6 @@ class TravelInfoPage extends StatefulWidget {
 }
 
 class _TravelInfoPageState extends State<TravelInfoPage> {
-
   final TravelInfoController _con = TravelInfoController();
 
   @override
@@ -21,7 +20,7 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     super.initState();
 
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
   }
@@ -77,8 +76,8 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
             color: Colors.white,
           ),
         ),
-      )
-    );
+      ),
+    ));
   }
 
   Widget _cardTimeInfo(){
@@ -99,34 +98,31 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
             color: Colors.teal,
           ),
         ),
-      )
-    );
+      ),
+    ));
   }
 
-  Widget _buttonBack(){
+  Widget _buttonBack() {
     return SafeArea(
       child: Container(
-        margin: const EdgeInsets.only(left: 10, top: 10),
-        child: const CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.white,
-          child: Icon(
-            Icons.arrow_back,
-            color: Colors.teal,
-          )
-        )
-      ),
+          margin: const EdgeInsets.only(left: 10, top: 10),
+          child: const CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.white,
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.teal,
+              ))),
     );
   }
 
-  Widget _cardTravelInfo(){
+  Widget _cardTravelInfo() {
     return Container(
       height: MediaQuery.of(context).size.height * 0.33,
       decoration: BoxDecoration(
         color: Colors.grey[100],
         border: Border.all(color: Colors.teal.shade300),
         borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-        
       ),
       child: Column(
         children: [
@@ -226,4 +222,3 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
     }
   }
 }
-

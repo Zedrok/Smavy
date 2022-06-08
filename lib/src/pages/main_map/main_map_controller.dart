@@ -157,7 +157,8 @@ class MainMapController {
               screenCenter.longitude.compareTo(searchPrev.longitude) != 0) {
             searchPrev = screenCenter;
             searchText.text = '$direction #$street, $city, $department';
-            searchLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
+            searchLatLng =
+                LatLng(screenCenter.latitude, screenCenter.longitude);
           }
         }
       }

@@ -1,13 +1,13 @@
-// ignore_for_file: avoid_print, unnecessary_string_escapes
+// ignore_for_file: avoid_print, unnecessary_string_escapes, unnecessary_string_interpolations
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
 import 'package:smavy/src/providers/lista_direcciones_provider.dart';
 import 'dart:io';
-import '../../utils/ubicaciones.dart';
 
 class MainMapPage extends StatefulWidget {
   const MainMapPage({Key? key}) : super(key: key);
@@ -17,8 +17,11 @@ class MainMapPage extends StatefulWidget {
 }
 
 class _MainMapPageState extends State<MainMapPage> {
+  Map<String, dynamic> nuevaDireccion = {};
   final MainMapController _con = MainMapController();
-  bool isVisible = true;
+  final ScrollController scrollController = ScrollController();
+  final double heightAddLocationB = 160.0;
+  bool isTrazarB = true;
 
   @override
   void initState() {
@@ -97,19 +100,22 @@ class _MainMapPageState extends State<MainMapPage> {
                 ]),
 
                 // Boton Agregar dirección
-                (){
-                  if(_con.isSearchSelected){
-                    return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 15),
-                        child: _buttonAddLocation()
-                      ),
-                    ]);
-                  }else{
+                () {
+                  if (_con.isSearchSelected) {
+                    return Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          //_buttonAddLocation(),
+                          Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                              ),
+                              child: _buttonAddLocation()),
+                        ]);
+                  } else {
                     return Row();
                   }
                 }(),
-                // _buttonStartRoute()
               ]),
             ),
             Align(
@@ -118,7 +124,7 @@ class _MainMapPageState extends State<MainMapPage> {
                   margin: const EdgeInsets.fromLTRB(0, 0, 0, 50),
                   child: _iconMyLocation()),
             ),
-            _builderBottomSheet(),
+            _notificationButtonTrazar(),
           ]),
         ),
       ),
@@ -277,6 +283,16 @@ class _MainMapPageState extends State<MainMapPage> {
       child: GestureDetector(
         onTap: () {
           _con.changeCardBoard(2);
+          nuevaDireccion = {'direccion': '${_con.fromText.text}'};
+          setState(() {
+            ListaDireccionesProvider().agregarDireccion(nuevaDireccion);
+          });
+          refresh();
+
+          nuevaDireccion = {'direccion': '${_con.toText.text}'};
+          setState(() {
+            ListaDireccionesProvider().agregarDireccion(nuevaDireccion);
+          });
           refresh();
         },
         child: Card(
@@ -304,7 +320,7 @@ class _MainMapPageState extends State<MainMapPage> {
     return Container(
         alignment: Alignment.centerRight,
         child: Card(
-          elevation: 3,
+          elevation: 0,
           color: Colors.teal[400],
           shape: const CircleBorder(),
           child: Container(
@@ -315,25 +331,27 @@ class _MainMapPageState extends State<MainMapPage> {
   }
 
   Widget _buttonAddLocation() {
-    return GestureDetector(
-      onTap: _agregarItemLista,
-      child: Container(
-          alignment: Alignment.centerRight,
-          child: Card(
+    return Container(
+        alignment: Alignment.centerRight,
+        child: Card(
             elevation: 3,
             color: Colors.teal[400],
             shape: const CircleBorder(),
-            child: Container(
-                padding: const EdgeInsets.all(10),
-                child: const Icon(Icons.add, color: Colors.white, size: 25)),
-          )),
-    );
+            child: Positioned(
+              right: 20,
+              bottom: heightAddLocationB,
+              child: IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  setState(() {
+                    nuevaDireccion = {'direccion': '${_con.searchText.text}'};
+                    ListaDireccionesProvider().agregarDireccion(nuevaDireccion);
+                    refresh();
+                  });
+                },
+              ),
+            )));
   }
-
-  void _agregarItemLista() => () {
-        Ubicaciones direccion = Ubicaciones(_con.toLatLng, _con.toText.text);
-        print(direccion);
-      };
 
   Widget _iconMyLocation() {
     return Image.asset(
@@ -463,85 +481,117 @@ class _MainMapPageState extends State<MainMapPage> {
   Widget panelUp() {
     return DraggableScrollableSheet(
         maxChildSize: 0.9,
-        minChildSize: 0.1,
-        initialChildSize: 0.1,
+        minChildSize: 0.07,
+        initialChildSize: 0.07,
         builder: (context, scrollController) {
           return Material(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(20)),
               color: Colors.white,
-              child: /*(ListaDireccionesProvider().listaDirecciones.isNotEmpty)
-                  ? */
-                  ListView(
-                padding: EdgeInsets.zero,
-                controller: scrollController,
-                children: [
-                  Container(
-                    alignment: Alignment.topCenter,
-                    child: const Text('Cabecera'),
-                  ),
-                  ..._crearItem(),
-                  // ignore: avoid_unnecessary_containers
-                  Container(
-                    child: FloatingActionButton.extended(
-                      elevation: 0,
-                      highlightElevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      onPressed: () {
-                        _con.goToTravelInfoPage();
-                      },
-                      icon: const Icon(Icons.arrow_forward_ios),
-                      label: const Text(
-                        'TRAZAR RUTA',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: Colors.teal,
-                    ),
-                  ),
-                ],
-              ));
-        } //: _else(scrollController));
-        );
+              child: (ListaDireccionesProvider().listaDirecciones.isNotEmpty)
+                  ? ListView(
+                      padding: EdgeInsets.zero,
+                      controller: scrollController,
+                      children: [
+                        Container(child: _buttonTrazar()),
+                        const SizedBox(height: 10),
+                        const Divider(
+                          thickness: 1,
+                          indent: 10,
+                          endIndent: 10,
+                          color: Colors.grey,
+                          height: 5.0,
+                        ),
+                        ..._crearItem(),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        _buttonIniciarViaje(),
+                        // ignore: avoid_unnecessary_containers
+                      ],
+                    )
+                  : _else(scrollController));
+        });
   }
 
+  Widget _buttonTrazar() {
+    return Container(
+        alignment: Alignment.topCenter,
+        child: ButtonApp(
+          onPressed: () {},
+          color: Colors.teal,
+          text:
+              '${ListaDireccionesProvider().listaDirecciones.length} Lugares seleccionados',
+          icon: _iconButtonTrazar(),
+        ));
+  }
+
+  IconData iconOrigenDestino() {
+    IconData icon = Icons.place;
+    // ignore: prefer_is_empty
+    if (ListaDireccionesProvider().listaDirecciones.length == 0) {
+      icon = Icons.home;
+    } else if (ListaDireccionesProvider().listaDirecciones.length == 1) {
+      icon = Icons.flag;
+    }
+    return icon;
+  }
+
+  IconData _iconButtonTrazar() {
+    IconData icon = Icons.adb_rounded;
+    if (isTrazarB == true) {
+      icon = Icons.keyboard_arrow_up;
+    } else if (isTrazarB == false) {
+      icon = Icons.keyboard_arrow_down;
+    }
+    return icon;
+  }
+
+  Widget _buttonIniciarViaje() {
+    return Container(
+        alignment: Alignment.bottomCenter,
+        child: ButtonApp(
+          onPressed: () {},
+          color: Colors.teal,
+          text: 'INICIAR VIAJE',
+          icon: Icons.arrow_forward_ios,
+        ));
+  }
+
+  Widget _notificationButtonTrazar() {
+    return NotificationListener<UserScrollNotification>(
+      onNotification: (notificacion) {
+        if (notificacion.direction == ScrollDirection.forward) {
+          setState(() {
+            isTrazarB = true;
+            refresh();
+          });
+        } else if (notificacion.direction == ScrollDirection.reverse) {
+          setState(() {
+            isTrazarB = false;
+            refresh();
+          });
+        }
+        return true;
+      },
+      child: panelUp(),
+    );
+  }
+
+  // ignore: unused_element
   Widget _else(ScrollController scrollController) {
     return ListView(
       controller: scrollController,
-      children: const [
-        Center(
+      children: [
+        Container(
+          child: _buttonTrazar(),
+        ),
+        const Center(
           child: Text('No se han agregado direcciones'),
         ),
       ],
     );
   }
-
-  void _scrollOpen() {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return panelUp();
-        });
-  }
-
-  Widget _builderBottomSheet() => Container(
-        alignment: Alignment.bottomCenter,
-        child: FloatingActionButton.extended(
-          elevation: 0,
-          highlightElevation: 0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          onPressed: () {
-            _scrollOpen();
-          },
-          icon: const Icon(Icons.arrow_forward_ios),
-          label: const Text(
-            'COMENZAR RUTA',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.teal,
-        ),
-      );
 
   List<Widget> _crearItem() {
     List<Widget> temporal = [];
@@ -550,14 +600,25 @@ class _MainMapPageState extends State<MainMapPage> {
         in ListaDireccionesProvider().listaDirecciones) {
       Widget item = ListTile(
         contentPadding: EdgeInsets.zero,
-        title: Text("${listaDirecciones['nombre']}"),
-        leading: const Icon(Icons.location_on_outlined),
+        title: Text("${listaDirecciones['direccion']}"),
+        leading: Icon(iconOrigenDestino()),
         trailing: IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () {},
-        ),
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              setState(() {
+                ListaDireccionesProvider().deleteDireccion(listaDirecciones);
+              });
+              refresh();
+            }),
       );
       temporal.add(item);
+      temporal.add(const Divider(
+        indent: 10,
+        endIndent: 10,
+        color: Colors.grey,
+        height: 5.0,
+        thickness: 1,
+      ));
     }
 
     return temporal;

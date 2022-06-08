@@ -5,12 +5,23 @@ class PerfilPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        ListTile(
-          title: Text('item 1'),
-        )
-      ],
+    return Material(
+      child: ListView(
+        children: const [
+          ListTile(
+            title: Text('Item 1'),
+            subtitle: Text('xd'),
+          ),
+          ListTile(
+            title: Text('Item 2'),
+            subtitle: Text('xd'),
+          ),
+          ListTile(
+            title: Text('Item 3'),
+            subtitle: Text('xd'),
+          )
+        ],
+      ),
     );
   }
 }

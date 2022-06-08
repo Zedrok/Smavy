@@ -15,4 +15,12 @@ class ListaDireccionesProvider {
   List<Map<String, dynamic>> get listaDirecciones {
     return _listaDirecciones;
   }
+
+  void deleteDireccion(Map<String, dynamic> dir) {
+    _listaDirecciones.remove(dir);
+  }
+
+  void agregarDireccion(Map<String, dynamic> dir) {
+    _listaDirecciones.add(dir);
+  }
 }
