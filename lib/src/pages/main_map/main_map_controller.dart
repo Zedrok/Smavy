@@ -76,7 +76,7 @@ class MainMapController {
   //   // _statusSuscription.cancel(); //Utilizado en driver - check connect
   // }
 
-  void goToTravelInfoPage(){
+  void goToTravelInfoPage() {
     Navigator.pushNamed(context, 'travelInfo');
   }
 
@@ -150,7 +150,8 @@ class MainMapController {
               screenCenter.longitude.compareTo(searchPrev.longitude) != 0) {
             searchPrev = screenCenter;
             searchText.text = '$direction #$street, $city, $department';
-            searchLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
+            searchLatLng =
+                LatLng(screenCenter.latitude, screenCenter.longitude);
           }
         }
       }

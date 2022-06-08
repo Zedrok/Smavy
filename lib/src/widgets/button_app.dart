@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
 class ButtonApp extends StatelessWidget {
-
   Color color;
   Color textColor;
   String text;
@@ -11,24 +10,25 @@ class ButtonApp extends StatelessWidget {
   double? margin;
   bool? buttonIcon;
 
-  ButtonApp({
-    Key? key,
-    this.buttonIcon,
-    this.margin,
-    this.color = Colors.teal,
-    this.textColor = Colors.white,
-    this.icon = Icons.arrow_forward_ios,
-    this.text = "",
-    required this.onPressed 
-  }) : super(key: key);
+  ButtonApp(
+      {Key? key,
+      this.buttonIcon,
+      this.margin,
+      this.color = Colors.teal,
+      this.textColor = Colors.white,
+      this.icon = Icons.arrow_forward_ios,
+      this.text = "",
+      required this.onPressed,
+      child})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: (){
-        if(margin!= null){
+      margin: () {
+        if (margin != null) {
           return EdgeInsets.symmetric(horizontal: margin!);
-        }else{
+        } else {
           return const EdgeInsets.symmetric(horizontal: 40);
         }
       }(),
@@ -52,8 +52,7 @@ class ButtonApp extends StatelessWidget {
                 color: color,
                 alignment: Alignment.center,
                 height: 40,
-                child: 
-                Text(
+                child: Text(
                   text,
                   style: TextStyle(
                     color: textColor,
@@ -62,40 +61,29 @@ class ButtonApp extends StatelessWidget {
                 ),
               ),
             ),
-            
-            (){
-              if(buttonIcon == null){
+            () {
+              if (buttonIcon == null) {
                 return Align(
-                  alignment: Alignment.centerRight,
-                  child: SizedBox(
-                    height: 38,
-                    child: CircleAvatar(
-                      radius: 14,
-                      child: Icon(
-                        icon,
-                        color: textColor,
-                        size: 18
-                      ),
-                    ),
-                  )  
-                );
-              }else{
-                if(buttonIcon == true){
-                  return Align(
                     alignment: Alignment.centerRight,
                     child: SizedBox(
                       height: 38,
                       child: CircleAvatar(
                         radius: 14,
-                        child: Icon(
-                          icon,
-                          color: textColor,
-                          size: 18
-                        ),
+                        child: Icon(icon, color: textColor, size: 18),
                       ),
-                    )  
-                  );
-                }else{
+                    ));
+              } else {
+                if (buttonIcon == true) {
+                  return Align(
+                      alignment: Alignment.centerRight,
+                      child: SizedBox(
+                        height: 38,
+                        child: CircleAvatar(
+                          radius: 14,
+                          child: Icon(icon, color: textColor, size: 18),
+                        ),
+                      ));
+                } else {
                   return const Align();
                 }
               }

@@ -13,7 +13,6 @@ class TravelInfoPage extends StatefulWidget {
 }
 
 class _TravelInfoPageState extends State<TravelInfoPage> {
-
   final TravelInfoController _con = TravelInfoController();
 
   @override
@@ -21,7 +20,7 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     super.initState();
 
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
   }
@@ -56,102 +55,86 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
     );
   }
 
-  Widget _cardKmInfo(String time){
+  Widget _cardKmInfo(String time) {
     return SafeArea(
-      child: Container(
-        width: 100,
-        margin: const EdgeInsets.only(top: 10, right: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        decoration: const BoxDecoration(
-          color: Colors.teal,
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-        ),
-        child: Text(
-          time,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      )
-    );
-  }
-
-  Widget _cardTimeInfo(String km){
-    return SafeArea(
-      child: Container(
-        width: 100,
-        margin: const EdgeInsets.only(top: 40, right: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: const BoxDecoration(
-          color: Colors.white70,
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-        ),
-        child: Text(
-          km,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.teal,
-          ),
-        ),
-      )
-    );
-  }
-
-  Widget _buttonBack(){
-    return SafeArea(
-      child: Container(
-        margin: const EdgeInsets.only(left: 10, top: 10),
-        child: const CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.white,
-          child: Icon(
-            Icons.arrow_back,
-            color: Colors.teal,
-          )
-        )
+        child: Container(
+      width: 100,
+      margin: const EdgeInsets.only(top: 10, right: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      decoration: const BoxDecoration(
+        color: Colors.teal,
+        borderRadius: BorderRadius.all(Radius.circular(20)),
       ),
+      child: Text(
+        time,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.white,
+        ),
+      ),
+    ));
+  }
+
+  Widget _cardTimeInfo(String km) {
+    return SafeArea(
+        child: Container(
+      width: 100,
+      margin: const EdgeInsets.only(top: 40, right: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: const BoxDecoration(
+        color: Colors.white70,
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+      ),
+      child: Text(
+        km,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.teal,
+        ),
+      ),
+    ));
+  }
+
+  Widget _buttonBack() {
+    return SafeArea(
+      child: Container(
+          margin: const EdgeInsets.only(left: 10, top: 10),
+          child: const CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.white,
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.teal,
+              ))),
     );
   }
 
-  Widget _cardTravelInfo(){
+  Widget _cardTravelInfo() {
     return Container(
       height: MediaQuery.of(context).size.height * 0.33,
       decoration: BoxDecoration(
-        color: Colors.grey[200],
-        border: Border.all(color: Colors.teal.shade300),
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30))
-      ),
+          color: Colors.grey[200],
+          border: Border.all(color: Colors.teal.shade300),
+          borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(30), topRight: Radius.circular(30))),
       child: Column(
         children: [
           const ListTile(
             title: Text(
               'Desde',
-              style: TextStyle(
-                fontSize: 15
-              ),
+              style: TextStyle(fontSize: 15),
             ),
-            subtitle: Text(
-              'Cr falsa con calle falsa',
-              style: TextStyle(
-                fontSize: 13
-              )
-            ),
+            subtitle: Text('Cr falsa con calle falsa',
+                style: TextStyle(fontSize: 13)),
             leading: Icon(Icons.my_location),
           ),
           const ListTile(
             title: Text(
               'Hasta',
-              style: TextStyle(
-                fontSize: 15
-              ),
+              style: TextStyle(fontSize: 15),
             ),
-            subtitle: Text(
-              'Cr falsa con calle falsa',
-              style: TextStyle(
-                fontSize: 13
-              )
-            ),
+            subtitle: Text('Cr falsa con calle falsa',
+                style: TextStyle(fontSize: 13)),
             leading: Icon(Icons.location_on),
           ),
           Row(
@@ -211,10 +194,9 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
     );
   }
 
-  void refresh(){
+  void refresh() {
     setState(() {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     });
   }
 }
-
