@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smavy/src/models/directions_model.dart';
@@ -21,7 +23,7 @@ class DirectionsRepository {
         queryParameters: {
           'origin': '${origin.latitude},${origin.longitude}',
           'destination': '${destination.latitude},${destination.longitude}',
-          'waypoints': 'optimize:true|${waypoint!.latitude}, ${waypoint.longitude}',
+          'waypoints': 'optimize:true|${waypoint.latitude}, ${waypoint.longitude}',
           'key': Environment.API_KEY_MAPS
         }
       );
