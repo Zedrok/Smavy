@@ -290,15 +290,6 @@ class _MainMapPageState extends State<MainMapPage> {
       child: GestureDetector(
         onTap: () {
           _con.changeCardBoard(2);
-          nuevaDireccion = {'direccion': '${_con.fromText.text}'};
-          setState(() {
-            _con.agregarDireccion(nuevaDireccion);
-          });
-
-          nuevaDireccion = {'direccion': '${_con.toText.text}'};
-          setState(() {
-            _con.agregarDireccion(nuevaDireccion);
-          });
         },
         child: Card(
           elevation: 3,
@@ -457,7 +448,7 @@ class _MainMapPageState extends State<MainMapPage> {
 
 //funcion destinada para cada menu del drawer
   ListTile _menusDrawer(
-    BuildContext context, String mensaje, String routeName) {
+      BuildContext context, String mensaje, String routeName) {
     return ListTile(
       title: Text(
         mensaje,
@@ -528,8 +519,7 @@ class _MainMapPageState extends State<MainMapPage> {
         child: ButtonApp(
           onPressed: () {},
           color: Colors.teal,
-          text:
-              '${_con.listaDirecciones.length} Lugares seleccionados',
+          text: '${_con.listaDirecciones.length} Lugares seleccionados',
           icon: _iconButtonTrazar(),
         ));
   }
@@ -607,8 +597,7 @@ class _MainMapPageState extends State<MainMapPage> {
   List<Widget> _crearItem() {
     List<Widget> temporal = [];
 
-    for (Map<String, dynamic> listaDirecciones
-        in _con.listaDirecciones) {
+    for (Map<String, dynamic> listaDirecciones in _con.listaDirecciones) {
       Widget item = ListTile(
         contentPadding: EdgeInsets.zero,
         title: Text("${listaDirecciones['direccion']}"),
