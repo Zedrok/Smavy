@@ -106,15 +106,21 @@ class _MainMapPageState extends State<MainMapPage> {
                     return Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          //_buttonAddLocation(),
                           Container(
+                            padding: EdgeInsets.only(bottom: 60),
                               margin: const EdgeInsets.symmetric(
                                 horizontal: 15,
                               ),
                               child: _buttonAddLocation()),
                         ]);
                   } else {
-                    return Row();
+                    return Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.only(bottom: 60),
+                        )
+                      ],
+                    );
                   }
                 }(),
               ]),
@@ -325,7 +331,7 @@ class _MainMapPageState extends State<MainMapPage> {
           child: Container(
               padding: const EdgeInsets.all(10),
               child: const Icon(Icons.where_to_vote,
-                  color: Colors.white, size: 25)),
+                color: Colors.white, size: 25)),
         ));
   }
 
@@ -340,7 +346,10 @@ class _MainMapPageState extends State<MainMapPage> {
               right: 20,
               bottom: heightAddLocationB,
               child: IconButton(
-                icon: const Icon(Icons.add),
+                icon: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                  size: 35,),
                 onPressed: () {
                   setState(() {
                     nuevaDireccion = {'direccion': '${_con.searchText.text}'};
@@ -548,13 +557,16 @@ class _MainMapPageState extends State<MainMapPage> {
 
   Widget _buttonIniciarViaje() {
     return Container(
-        alignment: Alignment.bottomCenter,
-        child: ButtonApp(
-          onPressed: () {},
-          color: Colors.teal,
-          text: 'INICIAR VIAJE',
-          icon: Icons.arrow_forward_ios,
-        ));
+      alignment: Alignment.bottomCenter,
+      child: ButtonApp(
+        onPressed: () {
+          _con.goToTravelInfoPage();
+        },
+        color: Colors.teal,
+        text: 'INICIAR VIAJE',
+        icon: Icons.arrow_forward_ios,
+      )
+    );
   }
 
   Widget _notificationButtonTrazar() {
