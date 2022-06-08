@@ -51,6 +51,7 @@ dependencies:
   google_place: ^0.4.7
   sliding_up_panel: ^2.0.0+1
   flutter_polyline_points: ^1.0.0
+  google_directions_api: ^0.9.1
   
 dev_dependencies:
   flutter_test:

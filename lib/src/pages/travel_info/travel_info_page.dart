@@ -29,11 +29,15 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       body: Stack(
         children: [
-          Align(
-            child: _googleMapsWidget(),
-            alignment: Alignment.topCenter,
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.67,
+            child: Align(
+              child: _googleMapsWidget(),
+              alignment: Alignment.topCenter,
+            ),
           ),
           Align(
             child: _cardTravelInfo(),
@@ -44,11 +48,11 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
             alignment: Alignment.topLeft,
           ),
           Align(
-            child: _cardKmInfo('0 km'),
+            child: _cardKmInfo(),
             alignment: Alignment.topRight,
           ),
           Align(
-            child: _cardTimeInfo('0 min'),
+            child: _cardTimeInfo(),
             alignment: Alignment.topRight,
           )
         ],
@@ -56,7 +60,7 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
     );
   }
 
-  Widget _cardKmInfo(String time){
+  Widget _cardKmInfo(){
     return SafeArea(
       child: Container(
         width: 100,
@@ -67,7 +71,7 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
           borderRadius: BorderRadius.all(Radius.circular(20)),
         ),
         child: Text(
-          time,
+          _con.distance,
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.white,
@@ -77,7 +81,7 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
     );
   }
 
-  Widget _cardTimeInfo(String km){
+  Widget _cardTimeInfo(){
     return SafeArea(
       child: Container(
         width: 100,
@@ -88,7 +92,8 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
           borderRadius: BorderRadius.all(Radius.circular(20)),
         ),
         child: Text(
-          km,
+          // _con.info!.totalDuration ?? ' ',
+          _con.time,
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.teal,
@@ -118,41 +123,42 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.33,
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Colors.grey[100],
         border: Border.all(color: Colors.teal.shade300),
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30))
+        borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+        
       ),
       child: Column(
         children: [
-          const ListTile(
-            title: Text(
+          ListTile(
+            title: const Text(
               'Desde',
               style: TextStyle(
                 fontSize: 15
               ),
             ),
             subtitle: Text(
-              'Cr falsa con calle falsa',
-              style: TextStyle(
+              _con.fromText,
+              style: const TextStyle(
                 fontSize: 13
               )
             ),
-            leading: Icon(Icons.my_location),
+            leading: const Icon(Icons.my_location),
           ),
-          const ListTile(
-            title: Text(
+          ListTile(
+            title: const Text(
               'Hasta',
               style: TextStyle(
                 fontSize: 15
               ),
             ),
             subtitle: Text(
-              'Cr falsa con calle falsa',
-              style: TextStyle(
+              _con.toText,
+              style: const TextStyle(
                 fontSize: 13
               )
             ),
-            leading: Icon(Icons.location_on),
+            leading: const Icon(Icons.location_on),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -188,7 +194,8 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
 
   Widget _googleMapsWidget() {
     return GoogleMap(
-      trafficEnabled: true,
+      polylines: _con.polylines,
+      trafficEnabled: false,
       rotateGesturesEnabled: false,
       tiltGesturesEnabled: false,
       zoomControlsEnabled: false,
@@ -212,9 +219,11 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
   }
 
   void refresh(){
-    setState(() {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    });
+    if(mounted){
+      setState(() {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+      });
+    }
   }
 }
 

@@ -77,7 +77,14 @@ class MainMapController {
   // }
 
   void goToTravelInfoPage(){
-    Navigator.pushNamed(context, 'travelInfo');
+    Navigator.pushNamed(context, 'travelInfo', arguments:{
+      'fromText': fromText.text,
+      'toText': toText.text,
+      'searchText': searchText.text,
+      'fromLatLng': fromLatLng,
+      'toLatLng': toLatLng,
+      'searchLatLng': searchLatLng,
+    });
   }
 
   void onMapCreated(GoogleMapController controller) {
@@ -213,10 +220,6 @@ class MainMapController {
         onTap: () {
           changeCardBoard(0);
           animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
-          fromText.addListener(() {
-            print('TextFrom');
-            print(fromText);
-          });
         },
         inputDecoration: InputDecoration(
           hintText: "Buscar dirección...",
@@ -323,15 +326,13 @@ class MainMapController {
         );
   }
 
-  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteSearch(
-      double sizeWidth) {
+  GooglePlaceAutoCompleteTextField showGoogleAutoCompleteSearch(double sizeWidth) {
     return GooglePlaceAutoCompleteTextField(
         textEditingController: searchText,
         googleAPIKey: Environment.API_KEY_MAPS,
         onTap: () {
           changeCardBoard(3);
-          animateCameraToPosition(
-              searchLatLng.latitude, searchLatLng.longitude);
+          animateCameraToPosition(searchLatLng.latitude, searchLatLng.longitude);
         },
         inputDecoration: InputDecoration(
           hintText: "Buscar dirección...",
@@ -437,7 +438,7 @@ class MainMapController {
   }
 
   void addMarker(String markerId, double lat, double lng, String title,
-      String context, BitmapDescriptor iconMarker) {
+    String context, BitmapDescriptor iconMarker) {
     // Función para crear Marker() con las propiedades indicadas, aquí se recibe
     // el iconMarker ya modificado en getBytesFromAsset
     MarkerId id = MarkerId(markerId);

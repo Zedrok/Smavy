@@ -63,16 +63,13 @@ class _GooglePlaceAutoCompleteTextFieldState
   Widget build(BuildContext context) {
     return CompositedTransformTarget(
       link: _layerLink,
-      child: GestureDetector(
+      child: TextFormField(
+        focusNode: focusNode,
         onTap: widget.onTap,
-        child: TextFormField(
-          focusNode: focusNode,
-          onTap: widget.onTap,
-          decoration: widget.inputDecoration,
-          style: widget.textStyle,
-          controller: widget.textEditingController,
-          onChanged: (string) => (subject.add(string)),
-        ),
+        decoration: widget.inputDecoration,
+        style: widget.textStyle,
+        controller: widget.textEditingController,
+        onChanged: (string) => (subject.add(string)),
       ),
     );
   }

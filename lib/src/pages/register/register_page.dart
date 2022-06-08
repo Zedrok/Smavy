@@ -22,7 +22,7 @@ class _RegisterPageState extends State<RegisterPage> {
     print('INIT STATE');
     _con.init(context);
 
-    SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       _con.init(context);
       // ignore: avoid_print
       print('METODO SCHEDULER');

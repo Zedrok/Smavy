@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
 import 'package:smavy/src/providers/lista_direcciones_provider.dart';
-import 'package:smavy/src/widgets/button_app.dart';
 import 'dart:io';
 import '../../utils/ubicaciones.dart';
 
@@ -26,7 +25,7 @@ class _MainMapPageState extends State<MainMapPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     super.initState();
 
-    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
   }
@@ -482,6 +481,7 @@ class _MainMapPageState extends State<MainMapPage> {
                     child: const Text('Cabecera'),
                   ),
                   ..._crearItem(),
+                  // ignore: avoid_unnecessary_containers
                   Container(
                     child: FloatingActionButton.extended(
                       elevation: 0,
@@ -489,7 +489,7 @@ class _MainMapPageState extends State<MainMapPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       onPressed: () {
-                        Navigator.pop(context);
+                        _con.goToTravelInfoPage();
                       },
                       icon: const Icon(Icons.arrow_forward_ios),
                       label: const Text(
