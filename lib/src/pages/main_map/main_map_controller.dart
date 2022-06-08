@@ -55,6 +55,8 @@ class MainMapController {
   TextEditingController searchText = TextEditingController();
   LatLng searchPrev = const LatLng(-33.0452126, -71.6151596);
 
+  late List<Map<String, dynamic>> listaDirecciones = [];
+
   bool isFromSelected = true;
   bool isToSelected = false;
   bool isSearchSelected = false;
@@ -85,6 +87,14 @@ class MainMapController {
       'toLatLng': toLatLng,
       'searchLatLng': searchLatLng,
     });
+  }
+
+  void deleteDireccion(Map<String, dynamic> dir) {
+    listaDirecciones.remove(dir);
+  }
+
+  void agregarDireccion(Map<String, dynamic> dir) {
+    listaDirecciones.add(dir);
   }
 
   void onMapCreated(GoogleMapController controller) {

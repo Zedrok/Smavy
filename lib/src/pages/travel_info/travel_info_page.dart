@@ -20,7 +20,7 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     super.initState();
 
-    SchedulerBinding.instance?.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
   }
@@ -77,7 +77,7 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
           ),
         ),
       ),
-    ));
+    );
   }
 
   Widget _cardTimeInfo(){
@@ -99,7 +99,7 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
           ),
         ),
       ),
-    ));
+    );
   }
 
   Widget _buttonBack() {

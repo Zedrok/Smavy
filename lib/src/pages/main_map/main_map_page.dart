@@ -6,8 +6,9 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
-import 'package:smavy/src/providers/lista_direcciones_provider.dart';
 import 'dart:io';
+
+import 'package:smavy/src/widgets/button_app.dart';
 
 class MainMapPage extends StatefulWidget {
   const MainMapPage({Key? key}) : super(key: key);
@@ -285,15 +286,13 @@ class _MainMapPageState extends State<MainMapPage> {
           _con.changeCardBoard(2);
           nuevaDireccion = {'direccion': '${_con.fromText.text}'};
           setState(() {
-            ListaDireccionesProvider().agregarDireccion(nuevaDireccion);
+            _con.agregarDireccion(nuevaDireccion);
           });
-          refresh();
 
           nuevaDireccion = {'direccion': '${_con.toText.text}'};
           setState(() {
-            ListaDireccionesProvider().agregarDireccion(nuevaDireccion);
+            _con.agregarDireccion(nuevaDireccion);
           });
-          refresh();
         },
         child: Card(
           elevation: 3,
@@ -345,7 +344,7 @@ class _MainMapPageState extends State<MainMapPage> {
                 onPressed: () {
                   setState(() {
                     nuevaDireccion = {'direccion': '${_con.searchText.text}'};
-                    ListaDireccionesProvider().agregarDireccion(nuevaDireccion);
+                    _con.agregarDireccion(nuevaDireccion);
                     refresh();
                   });
                 },
@@ -449,7 +448,7 @@ class _MainMapPageState extends State<MainMapPage> {
 
 //funcion destinada para cada menu del drawer
   ListTile _menusDrawer(
-      BuildContext context, String mensaje, String routeName) {
+    BuildContext context, String mensaje, String routeName) {
     return ListTile(
       title: Text(
         mensaje,
@@ -488,7 +487,7 @@ class _MainMapPageState extends State<MainMapPage> {
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(20)),
               color: Colors.white,
-              child: (ListaDireccionesProvider().listaDirecciones.isNotEmpty)
+              child: (_con.listaDirecciones.isNotEmpty)
                   ? ListView(
                       padding: EdgeInsets.zero,
                       controller: scrollController,
@@ -521,7 +520,7 @@ class _MainMapPageState extends State<MainMapPage> {
           onPressed: () {},
           color: Colors.teal,
           text:
-              '${ListaDireccionesProvider().listaDirecciones.length} Lugares seleccionados',
+              '${_con.listaDirecciones.length} Lugares seleccionados',
           icon: _iconButtonTrazar(),
         ));
   }
@@ -529,9 +528,9 @@ class _MainMapPageState extends State<MainMapPage> {
   IconData iconOrigenDestino() {
     IconData icon = Icons.place;
     // ignore: prefer_is_empty
-    if (ListaDireccionesProvider().listaDirecciones.length == 0) {
+    if (_con.listaDirecciones.length == 0) {
       icon = Icons.home;
-    } else if (ListaDireccionesProvider().listaDirecciones.length == 1) {
+    } else if (_con.listaDirecciones.length == 1) {
       icon = Icons.flag;
     }
     return icon;
@@ -597,7 +596,7 @@ class _MainMapPageState extends State<MainMapPage> {
     List<Widget> temporal = [];
 
     for (Map<String, dynamic> listaDirecciones
-        in ListaDireccionesProvider().listaDirecciones) {
+        in _con.listaDirecciones) {
       Widget item = ListTile(
         contentPadding: EdgeInsets.zero,
         title: Text("${listaDirecciones['direccion']}"),
@@ -606,9 +605,8 @@ class _MainMapPageState extends State<MainMapPage> {
             icon: const Icon(Icons.delete),
             onPressed: () {
               setState(() {
-                ListaDireccionesProvider().deleteDireccion(listaDirecciones);
+                _con.deleteDireccion(listaDirecciones);
               });
-              refresh();
             }),
       );
       temporal.add(item);

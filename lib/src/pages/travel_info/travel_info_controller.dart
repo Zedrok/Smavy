@@ -46,6 +46,7 @@ class TravelInfoController{
   List<LatLng> points = [];
   
   late Position? _position;
+  // ignore: unused_field
   late StreamSubscription<Position> _positionStream;
 
   Future init(BuildContext context, Function refresh) async {
