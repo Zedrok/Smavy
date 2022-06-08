@@ -107,7 +107,7 @@ class _MainMapPageState extends State<MainMapPage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Container(
-                            padding: EdgeInsets.only(bottom: 60),
+                            padding: const EdgeInsets.only(bottom: 60),
                               margin: const EdgeInsets.symmetric(
                                 horizontal: 15,
                               ),
@@ -117,7 +117,7 @@ class _MainMapPageState extends State<MainMapPage> {
                     return Row(
                       children: [
                         Container(
-                          padding: EdgeInsets.only(bottom: 60),
+                          padding: const EdgeInsets.only(bottom: 60),
                         )
                       ],
                     );
@@ -343,7 +343,11 @@ class _MainMapPageState extends State<MainMapPage> {
                   size: 35,),
                 onPressed: () {
                   setState(() {
-                    nuevaDireccion = {'direccion': '${_con.searchText.text}'};
+                    nuevaDireccion = {
+                      'direccion': '${_con.searchText.text}',
+                      'lat': '${_con.searchLatLng.latitude}',
+                      'lng': '${_con.searchLatLng.longitude}' 
+                    };
                     _con.agregarDireccion(nuevaDireccion);
                     refresh();
                   });

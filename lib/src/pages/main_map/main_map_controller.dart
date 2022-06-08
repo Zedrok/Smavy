@@ -86,6 +86,7 @@ class MainMapController {
       'fromLatLng': fromLatLng,
       'toLatLng': toLatLng,
       'searchLatLng': searchLatLng,
+      'listaDirecciones': listaDirecciones
     });
   }
 

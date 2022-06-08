@@ -15,15 +15,22 @@ class DirectionsRepository {
   Future<Directions?> getDirections({
     required LatLng origin,
     required LatLng destination,
-    LatLng? waypoint
+    List<Map<String, dynamic>>? waypoints
   }) async {
-    if (waypoint != null) {
+    if (waypoints != null) {
+
+      String paramsWaypoints = 'optimize:true';
+
+      for (var waypoint in waypoints) {
+        paramsWaypoints = paramsWaypoints+'|${waypoint['lat']}, ${waypoint['lng']}';
+      }
+
       final response = await _dio.get(
         _baseUrl,
         queryParameters: {
           'origin': '${origin.latitude},${origin.longitude}',
           'destination': '${destination.latitude},${destination.longitude}',
-          'waypoints': 'optimize:true|${waypoint.latitude}, ${waypoint.longitude}',
+          'waypoints': paramsWaypoints,
           'key': Environment.API_KEY_MAPS
         }
       );

@@ -37,10 +37,10 @@ class TravelInfoController{
 
   late String fromText = "";
   late String toText = "";
-  late String searchText = "";
   late LatLng fromLatLng;
   late LatLng toLatLng;
-  late LatLng searchLatLng;
+  late List<Map<String, dynamic>> listaDirecciones = [];
+  late bool rutaComenzada = false;
 
   Set<Polyline> polylines = {};
   List<LatLng> points = [];
@@ -59,17 +59,15 @@ class TravelInfoController{
     
     fromText = arguments['fromText'];
     toText = arguments['toText'];
-    searchText = arguments['searchText'];
     fromLatLng = arguments['fromLatLng'];
     toLatLng = arguments['toLatLng'];
-    searchLatLng = arguments['searchLatLng'];
+    listaDirecciones = arguments['listaDirecciones'];
 
     print('fromText $fromText');
     print('toText $toText');
-    print('searchText $searchText');
     print('fromLatLng $fromLatLng');
     print('toLatLng $toLatLng');
-    print('searchLatLng $searchLatLng');
+    print('listaDirecciones = $listaDirecciones');
     
     
     markerDriver = await createMarkerImageFromAsset('assets/img/gpsDriver.png');
@@ -106,24 +104,28 @@ class TravelInfoController{
     );
 
     polylines.add(polyline);
-    refresh();
+
+    await refresh();
   }
 
   void checkGPS() async {
     bool isLocationEnabled = await Geolocator.isLocationServiceEnabled();
     if (isLocationEnabled) {
       print('GPS Activado');
-      updateLocation();
       // checkIfIsConnect(); //Utilizado en driver - check connect
     } else {
       print('GPS desactivado');
       bool locationGPS = await location.Location().requestService();
       if (locationGPS) {
-        updateLocation();
         // checkIfIsConnect(); //Utilizado en driver - check connect
         print('Activó el GPS');
       }
     }
+  }
+
+  void comenzarRuta() async {
+    rutaComenzada = true;
+    updateLocation();
   }
 
   // Esta función funciona para actualizar la posición automáticamente
@@ -167,7 +169,7 @@ class TravelInfoController{
   }
 
   void addMarker(String markerId, double lat, double lng, String title,
-  String context, BitmapDescriptor iconMarker) {
+    String context, BitmapDescriptor iconMarker) {
     // Función para crear Marker() con las propiedades indicadas, aquí se recibe
     // el iconMarker ya modificado en getBytesFromAsset
     MarkerId id = MarkerId(markerId);
@@ -189,12 +191,11 @@ class TravelInfoController{
   Future<void> addMarkerPlace() async {
     // Función para crear Marker() con las propiedades indicadas, aquí se recibe
     // el iconMarker ya modificado en getBytesFromAsset
-    MarkerId id1 = const MarkerId('markerId1');
     
     Directions respuesta = (await DirectionsRepository().getDirections(
       origin: fromLatLng,
       destination: toLatLng,
-      waypoint: searchLatLng
+      waypoints: listaDirecciones
     ))!;
   
     info =  Directions(
@@ -207,38 +208,45 @@ class TravelInfoController{
     distance = info.totalDistance;
     time = info.totalDuration;
 
+    MarkerId idMarkerFrom = const MarkerId('markerFrom');
+
     Marker marker = Marker(
-      markerId: id1,
+      markerId: idMarkerFrom,
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
       position: LatLng(fromLatLng.latitude, fromLatLng.longitude),
-      infoWindow: const InfoWindow(title: 'markerSearch'),
+      infoWindow: const InfoWindow(title: 'markerFrom'),
     );
 
-    markers[id1] = marker;
+    markers[idMarkerFrom] = marker;
 
-    MarkerId id2 = const MarkerId('markerId2');
+    int i = 0;
+    for (var element in listaDirecciones) {
+      i++;
+
+      MarkerId idMarker = MarkerId('markerWaypoint{$i}');
+
+      Marker markerWaypoint = Marker(
+        markerId: idMarker,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
+        position: LatLng(double.parse(element['lat']), double.parse(element['lng'])),
+        infoWindow: InfoWindow(title: 'markerWaypoint{$i}'),
+      );
+
+      markers[idMarker] = markerWaypoint;
+    }
+
+    MarkerId idMarkerTo = const MarkerId('markerTo');
 
     Marker marker2 = Marker(
-      markerId: id2,
+      markerId: idMarkerTo,
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
       position: LatLng(toLatLng.latitude, toLatLng.longitude),
-      infoWindow: const InfoWindow(title: 'markerSearch'),
+      infoWindow: const InfoWindow(title: 'markerTo'),
     );
 
-    markers[id2] = marker2;
-
-    MarkerId id3 = const MarkerId('markerId3');
-
-    Marker marker3 = Marker(
-      markerId: id3,
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
-      position: LatLng(searchLatLng.latitude, searchLatLng.longitude),
-      infoWindow: const InfoWindow(title: 'markerSearch'),
-    );
-
-    markers[id3] = marker3;
+    markers[idMarkerTo] = marker2;
   
-    refresh();
+    await refresh();
   }
 
   Future<BitmapDescriptor> createMarkerImageFromAsset(String path) async {

@@ -175,8 +175,11 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
                 child: ButtonApp(
                   buttonIcon: false,
                   margin: 10,
-                  onPressed: () {},
-                  text: 'Confirmar',
+                  onPressed: () {
+                    _con.comenzarRuta();
+                    refresh();
+                  },
+                  text: 'Comenzar',
                   textColor: Colors.white,
                   color: Colors.teal,
                 ),
@@ -215,10 +218,8 @@ class _TravelInfoPageState extends State<TravelInfoPage> {
   }
 
   void refresh(){
-    if(mounted){
-      setState(() {
-        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-      });
-    }
+    setState(() {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    });
   }
 }
