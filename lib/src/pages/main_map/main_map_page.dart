@@ -1,11 +1,13 @@
 // ignore_for_file: avoid_print, unnecessary_string_escapes, unnecessary_string_interpolations
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
+import 'package:smavy/src/providers/auth_provider.dart';
 import 'dart:io';
 
 import 'package:smavy/src/widgets/button_app.dart';
@@ -107,7 +109,7 @@ class _MainMapPageState extends State<MainMapPage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Container(
-                            padding: const EdgeInsets.only(bottom: 60),
+                              padding: const EdgeInsets.only(bottom: 60),
                               margin: const EdgeInsets.symmetric(
                                 horizontal: 15,
                               ),
@@ -322,7 +324,7 @@ class _MainMapPageState extends State<MainMapPage> {
           child: Container(
               padding: const EdgeInsets.all(10),
               child: const Icon(Icons.where_to_vote,
-                color: Colors.white, size: 25)),
+                  color: Colors.white, size: 25)),
         ));
   }
 
@@ -340,13 +342,14 @@ class _MainMapPageState extends State<MainMapPage> {
                 icon: const Icon(
                   Icons.add,
                   color: Colors.white,
-                  size: 35,),
+                  size: 35,
+                ),
                 onPressed: () {
                   setState(() {
                     nuevaDireccion = {
                       'direccion': '${_con.searchText.text}',
                       'lat': '${_con.searchLatLng.latitude}',
-                      'lng': '${_con.searchLatLng.longitude}' 
+                      'lng': '${_con.searchLatLng.longitude}'
                     };
                     _con.agregarDireccion(nuevaDireccion);
                     refresh();
@@ -398,6 +401,12 @@ class _MainMapPageState extends State<MainMapPage> {
         DrawerHeader(
             decoration: const BoxDecoration(color: Colors.teal),
             child: _drawerHeader()),
+        _menusDrawerinicio(context, 'Inicio'),
+        const Divider(
+          thickness: 1,
+          height: 10,
+          color: Colors.grey,
+        ),
         _menusDrawer(context, 'Perfil', 'perfil'),
         const Divider(
           thickness: 1,
@@ -417,35 +426,72 @@ class _MainMapPageState extends State<MainMapPage> {
           color: Colors.grey,
         ),
         _menusDrawer(context, 'Ajustes', 'ajustes_page'),
+        const SizedBox(
+          height: 180,
+        ),
+        Container(
+          padding: const EdgeInsets.only(
+            right: 100,
+          ),
+          alignment: Alignment.bottomLeft,
+          height: 50,
+          child: ButtonApp(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+            },
+            color: Colors.red.shade600,
+            colorIcon: const Color.fromARGB(255, 197, 27, 15),
+            text: 'Cerrar Sesion',
+            icon: Icons.logout_outlined,
+          ),
+        ),
       ],
     ));
   }
 
+  Widget _menusDrawerinicio(BuildContext context, String title) {
+    return ListTile(
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.black),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+      },
+    );
+  }
+
   Widget _drawerHeader() {
-    return Row(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const CircleAvatar(
-            radius: 40, backgroundImage: AssetImage('assets\img\profile.png')),
-        const SizedBox(
-          width: 20,
+        Container(
+          width: 90,
+          height: 100,
+          decoration: BoxDecoration(
+              border: Border.all(width: 1, color: Colors.white),
+              boxShadow: [
+                BoxShadow(
+                  spreadRadius: 2,
+                  blurRadius: 10,
+                  color: Colors.black.withOpacity(0.1),
+                ),
+              ],
+              shape: BoxShape.circle,
+              image: const DecorationImage(
+                  fit: BoxFit.cover,
+                  image: NetworkImage(
+                      'https://media.istockphoto.com/photos/icon-of-a-businessman-avatar-or-profile-pic-picture-id474001892?s=612x612'))),
         ),
-        const SizedBox(
-          height: 10,
+        Text(
+          '${AuthProvider().getUser()!.displayName}',
+          style: const TextStyle(color: Colors.white),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            Text('usuario',
-                style: TextStyle(fontSize: 14, color: Colors.white)),
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              'correo@mail.com',
-              style: TextStyle(fontSize: 14, color: Colors.white),
-            )
-          ],
-        )
+        Text(
+          '${AuthProvider().getUser()!.email}',
+          style: const TextStyle(color: Colors.white),
+        ),
       ],
     );
   }
@@ -551,16 +597,15 @@ class _MainMapPageState extends State<MainMapPage> {
 
   Widget _buttonIniciarViaje() {
     return Container(
-      alignment: Alignment.bottomCenter,
-      child: ButtonApp(
-        onPressed: () {
-          _con.goToTravelInfoPage();
-        },
-        color: Colors.teal,
-        text: 'INICIAR VIAJE',
-        icon: Icons.arrow_forward_ios,
-      )
-    );
+        alignment: Alignment.bottomCenter,
+        child: ButtonApp(
+          onPressed: () {
+            _con.goToTravelInfoPage();
+          },
+          color: Colors.teal,
+          text: 'INICIAR VIAJE',
+          icon: Icons.arrow_forward_ios,
+        ));
   }
 
   Widget _notificationButtonTrazar() {

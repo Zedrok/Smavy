@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         'travelInfo': (BuildContext context) => const TravelInfoPage(),
         'login': (BuildContext context) => const LoginPage(),
         'register': (BuildContext context) => const RegisterPage(),
-        'perfil': (BuildContext context) => const PerfilPage(),
+        'perfil': (BuildContext context) => const EditProfileUI(),
         'historial': (BuildContext context) => const HistorialPage(),
         'dir_guardadas': (BuildContext context) => const SaveAdressPage(),
         'ajustes_page': (BuildContext context) => const AjustesPage(),

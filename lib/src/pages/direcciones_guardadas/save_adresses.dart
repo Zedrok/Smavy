@@ -5,8 +5,18 @@ class SaveAdressPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Pagina de direcciones guardadas')),
-    );
+    return Scaffold(
+        appBar: AppBar(
+            title: const Text('Direcciones Guardadas'),
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            )),
+        body: Container());
   }
 }

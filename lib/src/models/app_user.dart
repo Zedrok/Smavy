@@ -5,28 +5,34 @@ AppUser appUserFromJson(String str) => AppUser.fromJson(json.decode(str));
 String appUserToJson(AppUser data) => json.encode(data.toJson());
 
 class AppUser {
-    String id;
-    String username;
-    String email;
-    String password;
+  String id;
+  String username;
+  String email;
+  String password;
 
-    AppUser({
-        required this.id,
-        required this.username,
-        required this.email,
-        required this.password,
-    });
+  AppUser({
+    required this.id,
+    required this.username,
+    required this.email,
+    required this.password,
+  });
 
-    factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
+  factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
         id: json["id"],
         username: json["username"],
         email: json["email"],
         password: json["password"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "id": id,
         "username": username,
         "email": email,
-    };
+      };
+
+  /*Map<String, dynamic> fromSnapshot(snapshot):
+        id = snapshot.data()["id"],
+        username = snapshot.data()["username"],
+        email = snapshot.data()["email"],
+        password = snapshot.data()["password"];*/
 }

@@ -9,6 +9,7 @@ class ButtonApp extends StatelessWidget {
   Function onPressed;
   double? margin;
   bool? buttonIcon;
+  Color colorIcon;
 
   ButtonApp(
       {Key? key,
@@ -18,6 +19,7 @@ class ButtonApp extends StatelessWidget {
       this.textColor = Colors.white,
       this.icon = Icons.arrow_forward_ios,
       this.text = "",
+      this.colorIcon = Colors.teal,
       required this.onPressed,
       child})
       : super(key: key);
@@ -64,25 +66,29 @@ class ButtonApp extends StatelessWidget {
             () {
               if (buttonIcon == null) {
                 return Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    height: 38,
+                    child: CircleAvatar(
+                      backgroundColor: colorIcon,
+                      radius: 14,
+                      child: Icon(icon, color: textColor, size: 18),
+                    ),
+                  ),
+                );
+              } else {
+                if (buttonIcon == true) {
+                  return Align(
                     alignment: Alignment.centerRight,
                     child: SizedBox(
                       height: 38,
                       child: CircleAvatar(
+                        backgroundColor: colorIcon,
                         radius: 14,
                         child: Icon(icon, color: textColor, size: 18),
                       ),
-                    ));
-              } else {
-                if (buttonIcon == true) {
-                  return Align(
-                      alignment: Alignment.centerRight,
-                      child: SizedBox(
-                        height: 38,
-                        child: CircleAvatar(
-                          radius: 14,
-                          child: Icon(icon, color: textColor, size: 18),
-                        ),
-                      ));
+                    ),
+                  );
                 } else {
                   return const Align();
                 }
