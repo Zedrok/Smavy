@@ -438,6 +438,7 @@ class _MainMapPageState extends State<MainMapPage> {
           child: ButtonApp(
             onPressed: () {
               FirebaseAuth.instance.signOut();
+              Navigator.pushNamed(context, 'login');
             },
             color: Colors.red.shade600,
             colorIcon: const Color.fromARGB(255, 197, 27, 15),
