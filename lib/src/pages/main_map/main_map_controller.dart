@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'dart:async';
 import 'dart:typed_data';
 // import 'package:cloud_firestore/cloud_firestore.dart'; //Utilizado en driver - check connect
+import 'package:custom_map_markers/custom_map_markers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,6 +12,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 import 'package:location/location.dart' as location;
 import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:smavy/src/pages/api/environment.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
 import 'package:smavy/src/providers/geofire_provider.dart';
@@ -33,7 +35,6 @@ class MainMapController {
 
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   late Position? _position;
-  // late StreamSubscription<Position> _positionStream;
   late BitmapDescriptor markerDriver;
   late GeoFireProvider _geoFireProvider;
   late AuthProvider _authProvider;
@@ -56,6 +57,7 @@ class MainMapController {
   LatLng searchPrev = const LatLng(-33.0452126, -71.6151596);
 
   late List<Map<String, dynamic>> listaDirecciones = [];
+  List<MarkerData> customMarkers = [];
 
   bool isFromSelected = true;
   bool isToSelected = false;
@@ -67,19 +69,20 @@ class MainMapController {
     _geoFireProvider = GeoFireProvider();
     _authProvider = AuthProvider();
     _progressDialog =
-        MyProgressDialog.createProgressDialog(context, 'Conectándose...');
+      MyProgressDialog.createProgressDialog(context, 'Conectándose...');
     checkGPS();
     _position = await Geolocator.getCurrentPosition();
     markerDriver = await createMarkerImageFromAsset('assets/img/gpsDriver.png');
   }
 
-  // void dispose(){
-  //   // _positionStream.cancel();
-  //   // _statusSuscription.cancel(); //Utilizado en driver - check connect
-  // }
-
+  void onMapCreated(GoogleMapController controller) {
+    _mapController.complete(controller);
+    print('Se creó el mapita');
+    refresh();
+  }
+  
   void goToTravelInfoPage(){
-    Navigator.pushNamed(context, 'travelInfo', arguments:{
+    Navigator.pushNamed(context, 'travelMap', arguments:{
       'fromText': fromText.text,
       'toText': toText.text,
       'searchText': searchText.text,
@@ -90,18 +93,269 @@ class MainMapController {
     });
   }
 
-  void deleteDireccion(Map<String, dynamic> dir) {
+  Future<Uint8List> convertWidgetIntoUint8List(Widget widgetMarker) async  {
+    final _controller = ScreenshotController();
+    final bytes = await _controller.captureFromWidget(widgetMarker, delay: Duration.zero);
+    return bytes;
+ }
+
+  Widget _customMarker(String text, Color color) {
+    return Stack(
+      children: [
+        SizedBox(
+          height: 45,
+          width: 45,
+          child: 
+          Center(
+            child: Icon(
+              Icons.add_location,
+              color: color,
+              size: 50,
+            ),
+          )
+        ),
+        Positioned(
+          left: 15,
+          top: 8,
+          child: Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(10)),
+            child: Center(
+              child: Text(
+                text,
+                style: TextStyle(color: Colors.teal[800],
+                fontWeight: FontWeight.bold),
+              )
+            ),
+          ),
+        )
+      ],
+    );
+  }
+  
+  Widget _customFromMarker(Color color) {
+    return Stack(
+      children: [
+        SizedBox(
+          height: 45,
+          width: 45,
+          child: 
+          Center(
+            child: Icon(
+              Icons.add_location,
+              color: color,
+              size: 50,
+            ),
+          )
+        ),
+        Positioned(
+          left: 15,
+          top: 8,
+          child: Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(10)),
+            child: const Center(
+              child: Icon(
+                Icons.home,
+                color: Colors.white,
+                size: 20
+              )
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _customToMarker(Color color) {
+    return Stack(
+      children: [
+        SizedBox(
+          height: 45,
+          width: 45,
+          child: 
+          Center(
+            child: Icon(
+              Icons.add_location,
+              color: color,
+              size: 50,
+            ),
+          )
+        ),
+        Positioned(
+          left: 15,
+          top: 8,
+          child: Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(10)),
+            child: const Center(
+              child: Icon(
+                Icons.my_location_outlined,
+                color: Colors.white,
+                size: 20,
+              )
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Future<void> setPlaceMarker(Map<String, dynamic> direccion) async {
+    MarkerId id = MarkerId('${direccion['id']}');
+    Widget widgetMarker = _customMarker('${direccion['id']}', Colors.teal);
+    Uint8List markerIcon = await convertWidgetIntoUint8List(widgetMarker);
+
+    Marker markerData = Marker(
+      markerId: id,
+      position: LatLng(direccion['lat'], direccion['lng']),
+      icon: BitmapDescriptor.fromBytes(markerIcon)
+    );
+    markers[id] = markerData;
+  }
+  
+  Future<void> agregarDireccion() async {
+    Map<String, dynamic> nuevaDireccion = {};
+    double lat = searchLatLng.latitude;
+    double lng = searchLatLng.longitude;
+    String text = searchText.text;
+    
+    if(validarDireccion(text)){
+      if (validarPosicion(LatLng(lat,lng))) {
+        if(listaDirecciones.isNotEmpty){
+          nuevaDireccion = {
+            'id': (int.parse(listaDirecciones.last['id'])+1).toString(),
+            'direccion': text,
+            'lat': lat,
+            'lng': lng
+          };
+        }else{
+          nuevaDireccion = {
+            'id': '1',
+            'direccion': text,
+            'lat': lat,
+            'lng': lng
+          };
+        }
+        
+        listaDirecciones.add(nuevaDireccion);
+        await setPlaceMarker(nuevaDireccion);
+        
+        refresh();
+      }else{
+        Snackbar.showSnackbar(context, 'Por favor, espere a que la dirección cambie antes de agregarla.', false);
+      }
+    }else{
+      Snackbar.showSnackbar(context, 'Por favor ingrese una ubicación válida.', false);
+    }
+
+    print(listaDirecciones.last);
+  }
+
+  bool validarPosicion(LatLng posicion){
+    if(screenCenter == posicion){
+      return true;
+    }
+    return false;
+  }
+  
+  bool validarDireccion(String text) {
+    var trimmed = text.trim();
+    if(trimmed[0].compareTo('#') == 0){
+      return false;
+    }
+    return true;
+  }
+
+  void setFromMarker() async {
+    double lat = fromLatLng.latitude;
+    double lng = fromLatLng.longitude;
+
+    MarkerId id = const MarkerId('markerFrom');
+    Widget widgetMarker = _customFromMarker(Colors.red);
+    Uint8List markerIcon = await convertWidgetIntoUint8List(widgetMarker);
+
+    Marker markerData = Marker(
+      markerId: id,
+      position: LatLng(lat, lng),
+      icon: BitmapDescriptor.fromBytes(markerIcon)
+    );
+    markers[id] = markerData;
+
+    await Future.delayed(const Duration(milliseconds: 200), refresh());
+    refresh();
+  }
+
+  void setToMarker() async {
+    double lat = toLatLng.latitude;
+    double lng = toLatLng.longitude;
+
+    MarkerId id = const MarkerId('markerTo');
+    Widget widgetMarker = _customToMarker(Colors.red);
+    Uint8List markerIcon = await convertWidgetIntoUint8List(widgetMarker);
+
+    Marker markerData = Marker(
+      markerId: id,
+      position: LatLng(lat, lng),
+      icon: BitmapDescriptor.fromBytes(markerIcon)
+    );
+    markers[id] = markerData;
+
+    await Future.delayed(const Duration(milliseconds: 200), refresh());
+    refresh();
+  }
+
+  Future<void> resetMarkers() async { 
+    MarkerId id = const MarkerId('markerFrom');
+    Widget widgetMarker = _customFromMarker(Colors.red);
+    Uint8List markerIcon = await convertWidgetIntoUint8List(widgetMarker);
+
+    Marker markerData = Marker(
+      markerId: id,
+      position: LatLng(fromLatLng.latitude, fromLatLng.longitude),
+      icon: BitmapDescriptor.fromBytes(markerIcon)
+    );
+    markers[id] = markerData;
+
+    for(var direccion in listaDirecciones){
+      await setPlaceMarker(direccion);
+    }
+
+    id = const MarkerId('markerTo');
+    widgetMarker = _customToMarker(Colors.red);
+    markerIcon = await convertWidgetIntoUint8List(widgetMarker);
+
+    markerData = Marker(
+      markerId: id,
+      position: LatLng(toLatLng.latitude, toLatLng.longitude),
+      icon: BitmapDescriptor.fromBytes(markerIcon)
+    );
+    markers[id] = markerData;
+
+    await Future.delayed(const Duration(milliseconds: 200), refresh());
+    refresh();
+  }
+
+  void deleteDireccion(Map<String, dynamic> dir) async {
+    for(var direccion in listaDirecciones){
+      if(int.parse(direccion['id']) > int.parse(dir['id'])){
+        direccion['id'] = (int.parse(direccion['id'])-1).toString(); 
+      }
+    }
+
     listaDirecciones.remove(dir);
-  }
-
-  void agregarDireccion(Map<String, dynamic> dir) {
-    listaDirecciones.add(dir);
-  }
-
-  void onMapCreated(GoogleMapController controller) {
-    _mapController.complete(controller);
-    // controller.setMapStyle('[{"stylers":[{"saturation":25}]},{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"labels.text","stylers":[{"visibility":"off"}]}]');
-    // controller.setMapStyle('[{"stylers":[{"saturation":25}]},{"elementType":"geometry","stylers":[{"color":"#242f3e"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#746855"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#242f3e"}]},{"featureType":"administrative.locality","elementType":"labels.text.fill","stylers":[{"color":"#d59563"}]},{"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#d59563"}]},{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#263c3f"}]},{"featureType":"poi.park","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"labels.text.fill","stylers":[{"color":"#6b9a76"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#38414e"}]},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#212a37"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#9ca5b3"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#746855"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#1f2835"}]},{"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#f3d19c"}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#2f3948"}]},{"featureType":"transit.station","elementType":"labels.text.fill","stylers":[{"color":"#d59563"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#17263c"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#515c6d"}]},{"featureType":"water","elementType":"labels.text.stroke","stylers":[{"color":"#17263c"}]}]');
+    markers.clear();
+   
+    resetMarkers();
+    
+    await Future.delayed(const Duration(milliseconds: 200), refresh());
+    refresh();
   }
 
   void checkGPS() async {
@@ -139,8 +393,6 @@ class MainMapController {
           screenCenter.latitude, screenCenter.longitude);
       Placemark address = placemark[0];
 
-      print('el address es : $address');
-
       String direction = address.thoroughfare!;
       String street = address.subThoroughfare!;
       String city = address.locality!;
@@ -150,10 +402,18 @@ class MainMapController {
       if (isFromSelected) {
         if (screenCenter.latitude.compareTo(fromPrev.latitude) != 0 ||
             screenCenter.longitude.compareTo(fromPrev.longitude) != 0) {
+          if(toText.text.isEmpty || 
+            ((toLatLng.latitude.compareTo(fromLatLng.latitude) == 0) &&
+            (toLatLng.longitude.compareTo(fromLatLng.longitude) == 0)
+          )){
+              toPrev = screenCenter;
+              toText.text = '$direction #$street, $city, $department';
+              toLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
+          }
           fromPrev = screenCenter;
           fromText.text = '$direction #$street, $city, $department';
           fromLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
-          print('FROM: $fromText.text');
+          setFromMarker();
         }
       } else {
         if (isToSelected) {
@@ -162,32 +422,36 @@ class MainMapController {
             toPrev = screenCenter;
             toText.text = '$direction #$street, $city, $department';
             toLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
+            setToMarker();
           }
         } else {
           if (screenCenter.latitude.compareTo(searchPrev.latitude) != 0 ||
               screenCenter.longitude.compareTo(searchPrev.longitude) != 0) {
             searchPrev = screenCenter;
             searchText.text = '$direction #$street, $city, $department';
-            searchLatLng =
-                LatLng(screenCenter.latitude, screenCenter.longitude);
+            searchLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
           }
         }
       }
-      refresh();
+      if(searchText.text.isEmpty){
+        searchPrev = screenCenter;
+        searchLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
+      }
     }
+
+    await Future.delayed(const Duration(milliseconds: 200), refresh());
+    refresh();
   }
 
   void changeCardBoard(int option) {
-    // 0 = From
-    // 1 = To
-    // 2 = Search
+    // 0 = From - Click en From
+    // 1 = To - Click en To
+    // 2 = Search - Click en Lupa / Casa
     if (option == 0) {
       if (!isFromSelected) {
         isFromSelected = true;
         isToSelected = false;
         isSearchSelected = false;
-        Snackbar.showSnackbar(
-            context, 'Estas seleccionando el lugar de Origen', true);
       }
     } else {
       if (option == 1) {
@@ -195,30 +459,26 @@ class MainMapController {
           isFromSelected = false;
           isToSelected = true;
           isSearchSelected = false;
-          Snackbar.showSnackbar(
-              context, 'Estas seleccionando el lugar de Destino', true);
         }
       } else {
         if (option == 2) {
           if (!isSearchSelected) {
-            animateCameraToPosition(
-                searchLatLng.latitude, searchLatLng.longitude);
+            animateCameraToPosition(searchLatLng.latitude, searchLatLng.longitude);
             isFromSelected = false;
             isToSelected = false;
             isSearchSelected = true;
-            Snackbar.showSnackbar(
-                context, 'Estas seleccionando la dirección por visitar', true);
+            setFromMarker();
+            setToMarker();
           } else {
             animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
             isFromSelected = true;
             isToSelected = false;
             isSearchSelected = false;
-            Snackbar.showSnackbar(
-                context, 'Estas seleccionando el lugar de Origen', true);
           }
         }
       }
     }
+    refresh();
   }
 
   GooglePlaceAutoCompleteTextField showGoogleAutoCompleteFrom(
@@ -334,8 +594,8 @@ class MainMapController {
           toText.selection = TextSelection.fromPosition(
               TextPosition(offset: prediction.description!.length));
         }
-        // default 600 ms ,
-        );
+      // default 600 ms ,
+      );
   }
 
   GooglePlaceAutoCompleteTextField showGoogleAutoCompleteSearch(double sizeWidth) {
@@ -488,8 +748,8 @@ class MainMapController {
         targetWidth: pixelRatio.round() * 25);
     ui.FrameInfo fi = await codec.getNextFrame();
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
-        .buffer
-        .asUint8List();
+      .buffer
+      .asUint8List();
   }
 
   // De aquí hacia abajo hay funciones relacionadas a compartir
@@ -513,6 +773,7 @@ class MainMapController {
     // _positionStream.cancel();
     _geoFireProvider.delete(_authProvider.getUser()!.uid);
   }
+  
 
   // Utilizado en driver - check connect
   // void checkIfIsConnect(){
@@ -530,43 +791,4 @@ class MainMapController {
   //    refresh();
   // }
 
-  // Esta función funciona para actualizar la posición automáticamente
-  // void updateLocation() async{
-  //   try{
-  //     await _determinePosition();
-  //     _position = await Geolocator.getLastKnownPosition();
-  //     centerPosition();
-  //     // saveLocation();
-  //     addMarker(
-  //       'driver',
-  //       _position!.latitude,
-  //       _position!.longitude,
-  //       'Tu Posición',
-  //       '',
-  //       markerDriver
-  //     );
-  //     refresh();
-  //     _positionStream = Geolocator.getPositionStream(
-  //       locationSettings: const LocationSettings(
-  //         accuracy: LocationAccuracy.best,
-  //         distanceFilter: 1
-  //       )
-  //     ).listen((Position position){
-  //       _position = position;
-  //       addMarker(
-  //         'driver',
-  //         _position!.latitude,
-  //         _position!.longitude,
-  //         'Tu Posición',
-  //         '',
-  //         markerDriver
-  //       );
-  //       animateCameraToPosition(position.latitude, position.longitude);
-  //       // saveLocation();
-  //       refresh();
-  //     });
-  //   }catch(error){
-  //     print('Error en la localización: $error');
-  //   }
-  // }
 }

@@ -18,7 +18,6 @@ class MainMapPage extends StatefulWidget {
 }
 
 class _MainMapPageState extends State<MainMapPage> {
-  Map<String, dynamic> nuevaDireccion = {};
   final MainMapController _con = MainMapController();
   final ScrollController scrollController = ScrollController();
   final double heightAddLocationB = 160.0;
@@ -296,17 +295,19 @@ class _MainMapPageState extends State<MainMapPage> {
           color: Colors.teal[400],
           shape: const CircleBorder(),
           child: Container(
-              padding: const EdgeInsets.all(10),
-              child: Icon(
-                  (() {
-                    if (!_con.isSearchSelected) {
-                      return Icons.search_outlined;
-                    } else {
-                      return Icons.house;
-                    }
-                  }()),
-                  color: Colors.white,
-                  size: 25)),
+            padding: const EdgeInsets.all(10),
+            child: Icon(
+            (() {
+              if (!_con.isSearchSelected) {
+                return Icons.search_outlined;
+              } else {
+                return Icons.house;
+              }
+            }()),
+            color: Colors.white,
+            size: 25
+            )
+          ),
         ),
       ),
     );
@@ -342,15 +343,8 @@ class _MainMapPageState extends State<MainMapPage> {
                   color: Colors.white,
                   size: 35,),
                 onPressed: () {
-                  setState(() {
-                    nuevaDireccion = {
-                      'direccion': '${_con.searchText.text}',
-                      'lat': '${_con.searchLatLng.latitude}',
-                      'lng': '${_con.searchLatLng.longitude}' 
-                    };
-                    _con.agregarDireccion(nuevaDireccion);
-                    refresh();
-                  });
+                  _con.agregarDireccion();
+                  refresh();
                 },
               ),
             )));
@@ -361,31 +355,6 @@ class _MainMapPageState extends State<MainMapPage> {
       'assets/img/location_smavy.png',
       width: 65,
       height: 65,
-    );
-  }
-
-  Widget _googleMapsWidget() {
-    return GoogleMap(
-      trafficEnabled: true,
-      rotateGesturesEnabled: false,
-      tiltGesturesEnabled: false,
-      zoomControlsEnabled: false,
-      mapType: MapType.normal,
-      initialCameraPosition: _con.initialPosition,
-      onMapCreated: _con.onMapCreated,
-      myLocationEnabled: false,
-      myLocationButtonEnabled: false,
-      markers: Set<Marker>.of(_con.markers.values),
-      onCameraMove: (position) {
-        FocusManager.instance.primaryFocus?.unfocus();
-        _con.initialPosition = position;
-        _con.screenCenter = position.target;
-        print('ON CAMERA MOVE: $position');
-      },
-      onCameraIdle: () async {
-        await _con.setLocationDraggableInfo();
-      },
-      onTap: (argument) => FocusManager.instance.primaryFocus?.unfocus(),
     );
   }
 
@@ -488,33 +457,48 @@ class _MainMapPageState extends State<MainMapPage> {
         initialChildSize: 0.07,
         builder: (context, scrollController) {
           return Material(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20)),
-              color: Colors.white,
-              child: (_con.listaDirecciones.isNotEmpty)
-                  ? ListView(
-                      padding: EdgeInsets.zero,
-                      controller: scrollController,
-                      children: [
-                        Container(child: _buttonTrazar()),
-                        const SizedBox(height: 10),
-                        const Divider(
-                          thickness: 1,
-                          indent: 10,
-                          endIndent: 10,
-                          color: Colors.grey,
-                          height: 5.0,
-                        ),
-                        ..._crearItem(),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        _buttonIniciarViaje(),
-                        // ignore: avoid_unnecessary_containers
-                      ],
-                    )
-                  : _else(scrollController));
-        });
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(20)),
+            color: Colors.white,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              controller: scrollController,
+              children: [
+                Container(child: _buttonTrazar()),
+                const SizedBox(height: 10),
+                const Divider(
+                  thickness: 1,
+                  indent: 10,
+                  endIndent: 10,
+                  color: Colors.grey,
+                  height: 5.0,
+                ),
+                _itemFrom(),
+                const Divider(
+                  thickness: 1,
+                  indent: 10,
+                  endIndent: 10,
+                  color: Colors.grey,
+                  height: 5.0,
+                ),
+                ..._crearItem(),
+                _itemTo(),
+                const Divider(
+                  thickness: 1,
+                  indent: 10,
+                  endIndent: 10,
+                  color: Colors.grey,
+                  height: 5.0,
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                _buttonIniciarViaje(),
+                // ignore: avoid_unnecessary_containers
+              ],
+            ));
+          }
+        );
   }
 
   Widget _buttonTrazar() {
@@ -583,36 +567,47 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
-  // ignore: unused_element
-  Widget _else(ScrollController scrollController) {
-    return ListView(
-      controller: scrollController,
-      children: [
-        Container(
-          child: _buttonTrazar(),
-        ),
-        const Center(
-          child: Text('No se han agregado direcciones'),
-        ),
-      ],
+  Widget _itemFrom(){
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+      title: Text("${_con.fromText.text}"),
+      leading: const Icon(Icons.home, color: Colors.teal, size: 30),
+    );
+  }
+
+  Widget _itemTo(){
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+      title: Text('${_con.toText.text}',),
+      leading: const Icon(Icons.my_location_outlined, color: Colors.teal, size: 30,),
     );
   }
 
   List<Widget> _crearItem() {
     List<Widget> temporal = [];
 
-    for (Map<String, dynamic> listaDirecciones in _con.listaDirecciones) {
+    for (Map<String, dynamic> direccion in _con.listaDirecciones) {
       Widget item = ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text("${listaDirecciones['direccion']}"),
-        leading: Icon(iconOrigenDestino()),
-        trailing: IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {
-              setState(() {
-                _con.deleteDireccion(listaDirecciones);
-              });
-            }),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+        title: Text("${direccion['direccion']}"),
+        leading: SizedBox(
+          width: 30,
+          child: Text(
+            '${direccion['id']}',
+            style: const TextStyle(color: Colors.teal, fontSize: 25,),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        trailing: SizedBox(
+          width: 50,
+          child: IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                setState(() {
+                  _con.deleteDireccion(direccion);
+                });
+              }),
+        ),
       );
       temporal.add(item);
       temporal.add(const Divider(
@@ -625,6 +620,31 @@ class _MainMapPageState extends State<MainMapPage> {
     }
 
     return temporal;
+  }
+
+  
+  Widget _googleMapsWidget() {
+    return GoogleMap(
+      trafficEnabled: true,
+      rotateGesturesEnabled: false,
+      tiltGesturesEnabled: false,
+      zoomControlsEnabled: false,
+      mapType: MapType.normal,
+      initialCameraPosition: _con.initialPosition,
+      onMapCreated: _con.onMapCreated,
+      myLocationEnabled: false,
+      myLocationButtonEnabled: false,
+      markers: Set<Marker>.of(_con.markers.values),
+      onCameraMove: (position) {
+        FocusManager.instance.primaryFocus?.unfocus();
+        _con.initialPosition = position;
+        _con.screenCenter = position.target;
+      },
+      onCameraIdle: () async {
+        await _con.setLocationDraggableInfo();
+      },
+      onTap: (argument) => FocusManager.instance.primaryFocus?.unfocus(),
+    );
   }
 
   void refresh() {

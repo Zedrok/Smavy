@@ -17,13 +17,16 @@ class DirectionsRepository {
     required LatLng destination,
     List<Map<String, dynamic>>? waypoints
   }) async {
-    if (waypoints != null) {
+    if (waypoints != null && waypoints.isNotEmpty) {
 
       String paramsWaypoints = 'optimize:true';
 
       for (var waypoint in waypoints) {
-        paramsWaypoints = paramsWaypoints+'|${waypoint['lat']}, ${waypoint['lng']}';
+        paramsWaypoints = paramsWaypoints+'|${waypoint['lat']},${waypoint['lng']}';
       }
+
+      print('waypoint != null');
+      print(_baseUrl+'origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&waypoints=$paramsWaypoints&key=${Environment.API_KEY_MAPS}');
 
       final response = await _dio.get(
         _baseUrl,
@@ -34,8 +37,6 @@ class DirectionsRepository {
           'key': Environment.API_KEY_MAPS
         }
       );
-      print('waypoint != null');
-      print(response.requestOptions.queryParameters);
       if(response.statusCode == 200){
         return Directions.fromMap(response.data);
       }

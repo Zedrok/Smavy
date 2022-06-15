@@ -4,15 +4,16 @@ import 'dart:ui' as ui;
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:custom_map_markers/custom_map_markers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_directions_api/google_directions_api.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:smavy/src/models/directions_model.dart';
 import 'package:smavy/src/models/directions_repository.dart';
-import 'package:smavy/src/pages/api/environment.dart';
 import 'package:smavy/src/utils/snackbar.dart';
 import 'package:location/location.dart' as location;
 
@@ -21,7 +22,8 @@ class TravelInfoController{
   final Completer<GoogleMapController> _mapController = Completer();
   late BuildContext context;
   late Function refresh;
-  
+  final stopwatch = Stopwatch();
+  List<Map<String, dynamic>> routeLegs = [];
 
   CameraPosition initialPosition = const CameraPosition(
     target: LatLng(-33.0452126, -71.6151596),
@@ -39,9 +41,17 @@ class TravelInfoController{
   late String toText = "";
   late LatLng fromLatLng;
   late LatLng toLatLng;
-  late List<Map<String, dynamic>> listaDirecciones = [];
-  late bool rutaComenzada = false;
+  late List<Map<String, dynamic>> listaDireccionesMainMap = [];
+  late List<Map<String, dynamic>> listaDireccionesTravelMap = [];
 
+  int currentLeg = 0;
+  late String currentStartAddress;
+  late String currentEndAddress;
+
+  bool rutaComenzada = false;
+  bool rutaTerminada = false;
+
+  List<MarkerData> customMarkers = [];
   Set<Polyline> polylines = {};
   List<LatLng> points = [];
   
@@ -56,18 +66,18 @@ class TravelInfoController{
     checkGPS();
 
     Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map <String, dynamic>;
-    
+
     fromText = arguments['fromText'];
     toText = arguments['toText'];
     fromLatLng = arguments['fromLatLng'];
     toLatLng = arguments['toLatLng'];
-    listaDirecciones = arguments['listaDirecciones'];
+    listaDireccionesMainMap = arguments['listaDirecciones'];
 
     print('fromText $fromText');
     print('toText $toText');
     print('fromLatLng $fromLatLng');
     print('toLatLng $toLatLng');
-    print('listaDirecciones = $listaDirecciones');
+    print('listaDirecciones = $listaDireccionesMainMap');
     
     
     markerDriver = await createMarkerImageFromAsset('assets/img/gpsDriver.png');
@@ -76,36 +86,104 @@ class TravelInfoController{
 
   void onMapCreated(GoogleMapController controller) async {
     _mapController.complete(controller);
-    await addMarkerPlace();
-    await setPolylines();
-    // controller.setMapStyle('[{"stylers":[{"saturation":25}]},{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"labels.text","stylers":[{"visibility":"off"}]}]');
-    // controller.setMapStyle('[{"stylers":[{"saturation":25}]},{"elementType":"geometry","stylers":[{"color":"#242f3e"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#746855"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#242f3e"}]},{"featureType":"administrative.locality","elementType":"labels.text.fill","stylers":[{"color":"#d59563"}]},{"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#d59563"}]},{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#263c3f"}]},{"featureType":"poi.park","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"labels.text.fill","stylers":[{"color":"#6b9a76"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#38414e"}]},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#212a37"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#9ca5b3"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#746855"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#1f2835"}]},{"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#f3d19c"}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#2f3948"}]},{"featureType":"transit.station","elementType":"labels.text.fill","stylers":[{"color":"#d59563"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#17263c"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#515c6d"}]},{"featureType":"water","elementType":"labels.text.stroke","stylers":[{"color":"#17263c"}]}]');
+    await getRouteData();
+    await setMarkers();
+    await setPolyline();
+    animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
+    Future.delayed(const Duration(milliseconds: 200), 
+      refresh()
+    );
   }
 
-  Future<void> setPolylines() async{
-    PointLatLng pointFromLatLng = PointLatLng(fromLatLng.latitude, fromLatLng.longitude);
-    PointLatLng pointToLatLng = PointLatLng(toLatLng.latitude, toLatLng.longitude);
-
-    PolylineResult result = await PolylinePoints().getRouteBetweenCoordinates(
-      Environment.API_KEY_MAPS,
-      pointFromLatLng,
-      pointToLatLng
+  Future<void> getRouteData() async {
+    Directions respuesta = (await DirectionsRepository().getDirections(
+      origin: fromLatLng,
+      destination: toLatLng,
+      waypoints: listaDireccionesMainMap
+    ))!;
+  
+    info =  Directions(
+      legs: respuesta.legs,
+      bounds: respuesta.bounds,
+      polylinePoints: respuesta.polylinePoints,
+      totalDistance: respuesta.totalDistance,
+      totalDuration: respuesta.totalDuration,
+      waypointsOrder: respuesta.waypointsOrder
     );
 
-    for(PointLatLng point in result.points){
-      points.add(LatLng(point.latitude, point.longitude));
+    distance = info.totalDistance;
+    time = info.totalDuration;
+    createLegsAndPolylines();
+    _reorderMarkers();
+  }
+
+  void _reorderMarkers(){
+    List<Map<String, dynamic>> listaAuxiliar = [];
+    Map<String, dynamic> direccionAux = {};
+    int i = 1;
+
+    if(listaDireccionesMainMap.isNotEmpty){
+      for(var direccion in listaDireccionesMainMap){
+        direccionAux = {
+          'id': direccion['id'],
+          'direccion': direccion['direccion'],
+          'lat': direccion['lat'],
+          'lng': direccion['lng']
+        };
+        listaAuxiliar.add(direccionAux);
+      }
+
+      for(var posicion in info.waypointsOrder){
+        listaAuxiliar[posicion]['id'] = i;
+        listaDireccionesTravelMap.add(listaAuxiliar[posicion]);
+        i++;
+      }
+    }
+  }
+
+  Future<void> createLegsAndPolylines()async {
+    Map<String, dynamic> newLeg = {};
+
+    for(var leg in info.legs){
+      List<PointLatLng> legPolyline = []; 
+      
+      for(var step in leg['steps']){
+        legPolyline += PolylinePoints().decodePolyline(step['polyline']['points']);
+      }
+
+      newLeg = {
+        'distance': leg['distance'],
+        'steps': leg['steps'],
+        'polyline': legPolyline
+      };
+
+      routeLegs.add(newLeg);
+      print('polyline: '); print(legPolyline);
+    }
+  }
+
+  Future<void> setPolyline([List<PointLatLng>? polylineList]) async {
+    polylines = {};
+
+    if(polylineList == null){
+      Polyline polyline = Polyline(
+          polylineId: const PolylineId('overview_polyline'),
+          color: Colors.teal,
+          width: 3,
+          points: info.polylinePoints.map((e) => LatLng(e.latitude, e.longitude)).toList(),
+        );
+      polylines.add(polyline);
+    }else{
+      Polyline polyline = Polyline(
+          polylineId: const PolylineId('overview_polyline'),
+          color: Colors.teal,
+          width: 3,
+          points: polylineList.map((e) => LatLng(e.latitude, e.longitude)).toList(),
+        );
+      polylines.add(polyline);
     }
 
-    Polyline polyline = Polyline(
-      polylineId: const PolylineId('overview_polyline'),
-      color: Colors.teal,
-      width: 3,
-      points: info.polylinePoints.map((e) => LatLng(e.latitude, e.longitude)).toList(),
-    );
-
-    polylines.add(polyline);
-
-    await refresh();
+     refresh();
   }
 
   void checkGPS() async {
@@ -123,7 +201,50 @@ class TravelInfoController{
     }
   }
 
+  void nextLeg() {
+    if(currentLeg < routeLegs.length-1){
+      currentLeg++;
+      print(currentLeg);
+      if(currentLeg < listaDireccionesTravelMap.length){
+        currentStartAddress = listaDireccionesTravelMap[currentLeg-1]['direccion'];
+        currentEndAddress = listaDireccionesTravelMap[currentLeg]['direccion'];
+      }else{
+        currentStartAddress = listaDireccionesTravelMap.last['direccion'];
+        currentEndAddress = toText;
+        rutaTerminada = true;
+      }
+
+      if(currentLeg < (routeLegs.length)){
+        setPolyline((routeLegs[currentLeg]['polyline'] as List<PointLatLng>));
+      }
+    }
+  }
+
+  void previousLeg() {
+    if(currentLeg > 0){
+      currentLeg--;
+      rutaTerminada = false;
+      
+      print(currentLeg);
+      if(currentLeg > 0){
+        currentStartAddress = listaDireccionesTravelMap[currentLeg-1]['direccion'];
+        currentEndAddress = listaDireccionesTravelMap[currentLeg]['direccion'];
+      }else{
+        currentStartAddress = fromText;
+        currentEndAddress = listaDireccionesTravelMap[currentLeg]['direccion'];
+      }
+
+      if(currentLeg >= 0){
+        setPolyline((routeLegs[currentLeg]['polyline'] as List<PointLatLng>));
+      }else{
+      }
+    }
+  }
+
   void comenzarRuta() async {
+    currentStartAddress = fromText;
+    currentEndAddress = listaDireccionesTravelMap[currentLeg]['direccion'];
+    setPolyline((routeLegs[currentLeg]['polyline'] as List<PointLatLng>));
     rutaComenzada = true;
     updateLocation();
   }
@@ -168,8 +289,170 @@ class TravelInfoController{
     }
   }
 
-  void addMarker(String markerId, double lat, double lng, String title,
-    String context, BitmapDescriptor iconMarker) {
+  Future<Uint8List> convertWidgetIntoUint8List(Widget widgetMarker) async  {
+    final _controller = ScreenshotController();
+    final bytes = await _controller.captureFromWidget(widgetMarker, delay: Duration.zero);
+    return bytes;
+ }
+
+  Widget _customMarker(String text, Color color) {
+    return Stack(
+      children: [
+        SizedBox(
+          height: 45,
+          width: 45,
+          child: 
+          Center(
+            child: Icon(
+              Icons.add_location,
+              color: color,
+              size: 50,
+            ),
+          )
+        ),
+        Positioned(
+          left: 15,
+          top: 8,
+          child: Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(10)),
+            child: Center(
+              child: Text(
+                text,
+                style: TextStyle(color: Colors.teal[800],
+                fontWeight: FontWeight.bold),
+              )
+            ),
+          ),
+        )
+      ],
+    );
+  }
+  
+  Widget _customFromMarker(Color color) {
+    return Stack(
+      children: [
+        SizedBox(
+          height: 45,
+          width: 45,
+          child: 
+          Center(
+            child: Icon(
+              Icons.add_location,
+              color: color,
+              size: 50,
+            ),
+          )
+        ),
+        Positioned(
+          left: 15,
+          top: 8,
+          child: Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(10)),
+            child: const Center(
+              child: Icon(
+                Icons.home,
+                color: Colors.white,
+                size: 20
+              )
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _customToMarker(Color color) {
+    return Stack(
+      children: [
+        SizedBox(
+          height: 45,
+          width: 45,
+          child: 
+          Center(
+            child: Icon(
+              Icons.add_location,
+              color: color,
+              size: 50,
+            ),
+          )
+        ),
+        Positioned(
+          left: 15,
+          top: 8,
+          child: Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(10)),
+            child: const Center(
+              child: Icon(
+                Icons.my_location_outlined,
+                color: Colors.white,
+                size: 20,
+              )
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Future<void> setPlaceMarker(Map<String, dynamic> direccion) async {
+    MarkerId id = MarkerId('${direccion['id']}');
+    Widget widgetMarker = _customMarker('${direccion['id']}', Colors.teal);
+    Uint8List markerIcon = await convertWidgetIntoUint8List(widgetMarker);
+
+    Marker markerData = Marker(
+      markerId: id,
+      position: LatLng(direccion['lat'], direccion['lng']),
+      icon: BitmapDescriptor.fromBytes(markerIcon)
+    );
+    markers[id] = markerData;
+  }
+  
+  Future<void> setMarkers() async {
+    // Función para crear Marker() con las propiedades indicadas, aquí se recibe
+    // el iconMarker ya modificado en getBytesFromAsset
+    
+    MarkerId id = const MarkerId('markerFrom');
+    Widget widgetMarker = _customFromMarker(Colors.red);
+    Uint8List markerIcon = await convertWidgetIntoUint8List(widgetMarker);
+
+    Marker markerData = Marker(
+      markerId: id,
+      position: LatLng(fromLatLng.latitude, fromLatLng.longitude),
+      icon: BitmapDescriptor.fromBytes(markerIcon)
+    );
+    markers[id] = markerData;
+
+    if(listaDireccionesTravelMap.isNotEmpty){
+      for(var direccion in listaDireccionesTravelMap){
+        await setPlaceMarker(direccion);
+      }
+    }
+
+    id = const MarkerId('markerTo');
+    widgetMarker = _customToMarker(Colors.red);
+    markerIcon = await convertWidgetIntoUint8List(widgetMarker);
+
+    markerData = Marker(
+      markerId: id,
+      position: LatLng(toLatLng.latitude, toLatLng.longitude),
+      icon: BitmapDescriptor.fromBytes(markerIcon)
+    );
+    markers[id] = markerData;
+
+    await Future.delayed(const Duration(milliseconds: 200), refresh());
+    refresh();
+  }
+
+  void addMarker(String markerId, double lat, double lng, String title, String context, BitmapDescriptor iconMarker) {
     // Función para crear Marker() con las propiedades indicadas, aquí se recibe
     // el iconMarker ya modificado en getBytesFromAsset
     MarkerId id = MarkerId(markerId);
@@ -186,67 +469,6 @@ class TravelInfoController{
         rotation: _position!.heading);
 
     markers[id] = marker;
-  }
-
-  Future<void> addMarkerPlace() async {
-    // Función para crear Marker() con las propiedades indicadas, aquí se recibe
-    // el iconMarker ya modificado en getBytesFromAsset
-    
-    Directions respuesta = (await DirectionsRepository().getDirections(
-      origin: fromLatLng,
-      destination: toLatLng,
-      waypoints: listaDirecciones
-    ))!;
-  
-    info =  Directions(
-      bounds: respuesta.bounds,
-      polylinePoints: respuesta.polylinePoints,
-      totalDistance: respuesta.totalDistance,
-      totalDuration: respuesta.totalDuration
-    );
-
-    distance = info.totalDistance;
-    time = info.totalDuration;
-
-    MarkerId idMarkerFrom = const MarkerId('markerFrom');
-
-    Marker marker = Marker(
-      markerId: idMarkerFrom,
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
-      position: LatLng(fromLatLng.latitude, fromLatLng.longitude),
-      infoWindow: const InfoWindow(title: 'markerFrom'),
-    );
-
-    markers[idMarkerFrom] = marker;
-
-    int i = 0;
-    for (var element in listaDirecciones) {
-      i++;
-
-      MarkerId idMarker = MarkerId('markerWaypoint{$i}');
-
-      Marker markerWaypoint = Marker(
-        markerId: idMarker,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
-        position: LatLng(double.parse(element['lat']), double.parse(element['lng'])),
-        infoWindow: InfoWindow(title: 'markerWaypoint{$i}'),
-      );
-
-      markers[idMarker] = markerWaypoint;
-    }
-
-    MarkerId idMarkerTo = const MarkerId('markerTo');
-
-    Marker marker2 = Marker(
-      markerId: idMarkerTo,
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
-      position: LatLng(toLatLng.latitude, toLatLng.longitude),
-      infoWindow: const InfoWindow(title: 'markerTo'),
-    );
-
-    markers[idMarkerTo] = marker2;
-  
-    await refresh();
   }
 
   Future<BitmapDescriptor> createMarkerImageFromAsset(String path) async {
@@ -272,7 +494,6 @@ class TravelInfoController{
         .asUint8List();
   }
 
-  
   Future<Position> _determinePosition() async {
     // Determina la posición actual del dispositivo.
     bool serviceEnabled;
@@ -311,6 +532,6 @@ class TravelInfoController{
     // Función para animar la cámara a la posición indicada
     GoogleMapController controller = await _mapController.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        bearing: 0, target: LatLng(latitude, longitude), zoom: 15)));
+        bearing: 0, target: LatLng(latitude, longitude), zoom: 16)));
   }
 }

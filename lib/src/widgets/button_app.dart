@@ -49,7 +49,6 @@ class ButtonApp extends StatelessWidget {
             Align(
               alignment: Alignment.center,
               child: Container(
-                color: color,
                 alignment: Alignment.center,
                 height: 40,
                 child: Text(

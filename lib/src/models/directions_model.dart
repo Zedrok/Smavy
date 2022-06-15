@@ -6,12 +6,16 @@ class Directions {
   final List<PointLatLng> polylinePoints;
   final String totalDistance;
   final String totalDuration;
+  List<dynamic> waypointsOrder = [];
+  List<dynamic> legs = [];
 
-  const Directions({
+  Directions({
     required this.bounds,
     required this.polylinePoints,
     required this.totalDistance,
-    required this.totalDuration
+    required this.totalDuration,
+    required this.waypointsOrder,
+    required this.legs
   });
 
   factory Directions.fromMap(Map<String, dynamic> map){
@@ -33,6 +37,8 @@ class Directions {
     }
 
     return Directions(
+      waypointsOrder: data['waypoint_order'],
+      legs: data['legs'],
       bounds: bounds,
       polylinePoints: PolylinePoints().decodePolyline(data['overview_polyline']['points']),
       totalDistance: distance,
