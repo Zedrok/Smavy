@@ -273,9 +273,9 @@ class MainMapController {
     return true;
   }
 
-  void setFromMarker() async {
-    double lat = fromLatLng.latitude;
-    double lng = fromLatLng.longitude;
+  Future<void> setFromMarker() async {
+    double lat = screenCenter.latitude;
+    double lng = screenCenter.longitude;
 
     MarkerId id = const MarkerId('markerFrom');
     Widget widgetMarker = _customFromMarker(Colors.red);
@@ -287,14 +287,12 @@ class MainMapController {
       icon: BitmapDescriptor.fromBytes(markerIcon)
     );
     markers[id] = markerData;
-
-    await Future.delayed(const Duration(milliseconds: 200), refresh());
     refresh();
   }
 
-  void setToMarker() async {
-    double lat = toLatLng.latitude;
-    double lng = toLatLng.longitude;
+  Future<void> setToMarker() async {
+    double lat = screenCenter.latitude;
+    double lng = screenCenter.longitude;
 
     MarkerId id = const MarkerId('markerTo');
     Widget widgetMarker = _customToMarker(Colors.red);
@@ -306,8 +304,6 @@ class MainMapController {
       icon: BitmapDescriptor.fromBytes(markerIcon)
     );
     markers[id] = markerData;
-
-    await Future.delayed(const Duration(milliseconds: 200), refresh());
     refresh();
   }
 
@@ -338,7 +334,6 @@ class MainMapController {
     );
     markers[id] = markerData;
 
-    await Future.delayed(const Duration(milliseconds: 200), refresh());
     refresh();
   }
 
@@ -354,8 +349,7 @@ class MainMapController {
    
     resetMarkers();
     
-    await Future.delayed(const Duration(milliseconds: 200), refresh());
-    refresh();
+   Future.delayed(Duration.zero, refresh());
   }
 
   void checkGPS() async {
@@ -391,6 +385,8 @@ class MainMapController {
     if (initialPosition != null) {
       List<Placemark> placemark = await placemarkFromCoordinates(
           screenCenter.latitude, screenCenter.longitude);
+
+      print(placemark);
       Placemark address = placemark[0];
 
       String direction = address.thoroughfare!;
@@ -413,7 +409,6 @@ class MainMapController {
           fromPrev = screenCenter;
           fromText.text = '$direction #$street, $city, $department';
           fromLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
-          setFromMarker();
         }
       } else {
         if (isToSelected) {
@@ -422,7 +417,6 @@ class MainMapController {
             toPrev = screenCenter;
             toText.text = '$direction #$street, $city, $department';
             toLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
-            setToMarker();
           }
         } else {
           if (screenCenter.latitude.compareTo(searchPrev.latitude) != 0 ||
@@ -439,8 +433,7 @@ class MainMapController {
       }
     }
 
-    await Future.delayed(const Duration(milliseconds: 200), refresh());
-    refresh();
+   refresh();
   }
 
   void changeCardBoard(int option) {
@@ -478,7 +471,7 @@ class MainMapController {
         }
       }
     }
-    refresh();
+   Future.delayed(Duration.zero, refresh());
   }
 
   GooglePlaceAutoCompleteTextField showGoogleAutoCompleteFrom(
@@ -641,17 +634,16 @@ class MainMapController {
         countries: const ["cl"],
         isLatLngRequired: true,
         getPlaceDetailWithLatLng: (Prediction prediction) {
-          toLatLng = LatLng(
+          searchLatLng = LatLng(
               double.parse(prediction.lat!), double.parse(prediction.lng!));
           animateCameraToPosition(
               searchLatLng.latitude, searchLatLng.longitude);
           print("placeDetails " + searchLatLng.toString());
         },
         itmClick: (Prediction prediction) {
-          changeCardBoard(1);
           searchText.text = prediction.description!;
           searchText.selection = TextSelection.fromPosition(
-              TextPosition(offset: prediction.description!.length));
+            TextPosition(offset: prediction.description!.length));
         }
         // default 600 ms ,
         );

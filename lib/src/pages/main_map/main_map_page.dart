@@ -697,6 +697,9 @@ class _MainMapPageState extends State<MainMapPage> {
         _con.screenCenter = position.target;
       },
       onCameraIdle: () async {
+        if(_con.isFromSelected) await _con.setFromMarker();
+        if(_con.isToSelected) await _con.setToMarker();
+        
         await _con.setLocationDraggableInfo();
       },
       onTap: (argument) => FocusManager.instance.primaryFocus?.unfocus(),
