@@ -54,6 +54,8 @@ dependencies:
   google_directions_api: ^0.9.1
   custom_map_markers: ^0.0.2+1
   screenshot: ^1.2.3
+  image_picker: ^0.8.5+3
+  firebase_storage: ^10.2.17
 
   
 dev_dependencies:

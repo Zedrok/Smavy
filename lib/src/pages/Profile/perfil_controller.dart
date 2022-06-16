@@ -1,140 +1,145 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
+import 'package:smavy/src/models/app_user.dart';
+import 'package:smavy/src/providers/auth_provider.dart';
+import 'package:smavy/src/providers/storage_provider.dart';
 import 'package:smavy/src/providers/user_provider.dart';
 import 'package:smavy/src/utils/my_progress_dialog.dart';
-import 'package:smavy/src/utils/snackbar.dart';
+import 'package:smavy/src/utils/snackbar.dart' as utils;
 
 class PerfilController {
-  late final BuildContext context;
+  late BuildContext context;
+  GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
+  late Function refresh;
 
+  TextEditingController usernameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  TextEditingController providerIdController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController displayNameController = TextEditingController();
-  final UserProvider _userProvider = UserProvider();
+  TextEditingController confirmPasswordController = TextEditingController();
 
-  ProgressDialog? _progressDialog;
+  late AuthProvider _authProvider;
+  late UserProvider _userProvider;
+  late ProgressDialog _progressDialog;
+  late StorageProvider _storageProvider;
 
-  Future? init(BuildContext context) {
+  late PickedFile? pickedFile;
+  late File? imageFile;
+  AppUser? user;
+
+  Future? init(BuildContext context, Function refresh) {
     this.context = context;
+    this.refresh = refresh;
+    imageFile = File('assets/img/profile.png');
+    pickedFile = PickedFile('assets/img/profile.png');
+    _authProvider = AuthProvider();
+    _userProvider = UserProvider();
+    _storageProvider = StorageProvider();
+    getUserInfo();
     _progressDialog =
         MyProgressDialog.createProgressDialog(context, 'Espere un momento...');
     return null;
   }
 
-  void updateEmail() async {
+  Future<void> getUserInfo() async {
+    user = await _userProvider.getbyId(_authProvider.getUser()!.uid);
+  }
+
+  void update() async {
+    String username = usernameController.text;
     String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    String confirmPassword = confirmPasswordController.text.trim();
+
     // ignore: avoid_print
     print('Email: $email');
-
-    verifyEmail(email);
-
-    _progressDialog!.show();
-
-    try {
-      bool isUpdate = await _userProvider.updateUserData(1, email);
-
-      if (isUpdate) {
-        // ignore: avoid_print
-        print('Se ha cambiado el correo');
-      } else {
-        // ignore: avoid_print
-        print('No se cambio el correo');
-      }
-    } catch (error) {
-      // ignore: avoid_print
-      print('Error: $error');
-      Snackbar.showSnackbar(context, 'Error al actualizar Email');
-    }
-    _progressDialog!.hide();
-  }
-
-  void updateProviderId() async {
-    String providerId = providerIdController.text.trim();
-    String confirmPassword = passwordController.text.trim();
     // ignore: avoid_print
-    print('PrviderId: $providerId');
+    print('Password: $password');
 
-    isValidPass(providerId);
+    _progressDialog.show();
 
-    verifyPass(providerId, confirmPassword);
+    TaskSnapshot snapshot = await _storageProvider.uploadFile(pickedFile!);
+    String imageUrl = await snapshot.ref.getDownloadURL();
 
-    _progressDialog!.show();
+    Map<String, dynamic> data = {'image': imageUrl};
 
-    try {
-      bool isUpdate = await _userProvider.updateUserData(2, providerId);
+    await _userProvider.update(data, _authProvider.getUser()!.uid);
 
-      if (isUpdate) {
-        // ignore: avoid_print
-        print('Se ha cambiado la contraseña');
-      } else {
-        // ignore: avoid_print
-        print('No se cambio la contraseña');
-      }
-    } catch (error) {
-      // ignore: avoid_print
-      print('Error: $error');
-      Snackbar.showSnackbar(context, 'Error al actualizar contraseña');
-    }
-    _progressDialog!.hide();
-  }
+    _progressDialog.hide();
 
-  void updateDisplayName() async {
-    String userName = displayNameController.text.trim();
-    // ignore: avoid_print
-    print('PrviderId: $userName');
+    utils.Snackbar.showSnackbar(
+        context, 'Se actualizo la imagen correctamente');
 
-    _progressDialog!.show();
-
-    try {
-      bool isUpdate = await _userProvider.updateUserData(0, userName);
-
-      if (isUpdate) {
-        // ignore: avoid_print
-        print('Se ha cambiado el nombre de usuario');
-      } else {
-        // ignore: avoid_print
-        print('No se cambio el nombre de usuario');
-      }
-    } catch (error) {
-      // ignore: avoid_print
-      print('Error: $error');
-      Snackbar.showSnackbar(context, 'Error al actualizar userName');
-    }
-    _progressDialog!.hide();
-  }
-
-  bool isValidPass(String password) {
-    if (password.length < 6) {
-      String msgError = 'La contraseña debe tener al menos 6 caracteres.';
+    /*if (username.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
+      String msgError = 'Por favor, ingrese todos los campos.';
       // ignore: avoid_print
       print(msgError);
       Snackbar.showSnackbar(context, msgError);
-      return true;
-    }
-    return false;
-  }
+      return;
+    }*/
 
-  bool verifyPass(String password, String confirmPassword) {
     if (confirmPassword != password) {
       String msgError = 'Las contraseñas no coinciden.';
       // ignore: avoid_print
       print(msgError);
-      Snackbar.showSnackbar(context, msgError);
-      return true;
+      utils.Snackbar.showSnackbar(context, msgError);
+      return;
     }
-    return false;
-  }
 
-  bool verifyEmail(String email) {
+    if (password.length < 6) {
+      String msgError = 'La contraseña debe tener al menos 6 caracteres.';
+      // ignore: avoid_print
+      print(msgError);
+      utils.Snackbar.showSnackbar(context, msgError);
+      return;
+    }
+
     if (!email.isValidEmail()) {
       String msgError = 'Por favor, ingrese un email válido.';
       // ignore: avoid_print
       print(msgError);
-      Snackbar.showSnackbar(context, msgError);
-      return false;
+      utils.Snackbar.showSnackbar(context, msgError);
+      return;
     }
-    return true;
+
+    _progressDialog.show();
+
+    try {
+      bool isRegister = await _authProvider.register(email, password);
+
+      if (isRegister) {
+        // ignore: avoid_print
+        print('El usuario está registrado');
+      } else {
+        // ignore: avoid_print
+        print('El usuario no se pudo registrar');
+      }
+    } catch (error) {
+      // ignore: avoid_print
+      print('Error: $error');
+      utils.Snackbar.showSnackbar(
+          context, 'El usuario ya se encuentra registrado');
+    }
+    _progressDialog.hide();
+  }
+
+  Future getImageFromGallery() async {
+    // ignore: deprecated_member_use
+    pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+    // ignore: unnecessary_null_comparison
+    if (pickedFile != null) {
+      imageFile = File(pickedFile!.path);
+    } else {
+      // ignore: avoid_print
+      print('No se selecciono un archivo');
+    }
+    refresh();
   }
 }
 
