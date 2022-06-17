@@ -7,7 +7,6 @@ class UserProvider {
 
   late CollectionReference _ref;
   // ignore: unused_field
-  Map<String, dynamic>? _listaUsuarios = {};
 
   UserProvider() {
     _ref = FirebaseFirestore.instance.collection('AppUsers');
@@ -24,12 +23,6 @@ class UserProvider {
       errorMessage = error.hashCode as String;
       return Future.error(errorMessage);
     }
-  }
-
-  Future getUserData() async {
-    var data =
-        await FirebaseFirestore.instance.collection('AppUsers').doc(uid).get();
-    return _listaUsuarios = data.data();
   }
 
   Future<bool> updateUserData(int n, String text) async {
@@ -51,5 +44,28 @@ class UserProvider {
     }
 
     return false;
+  }
+
+  Stream<DocumentSnapshot<Object?>> getByIdStream(String id) {
+    return _ref.doc(id).snapshots(includeMetadataChanges: true);
+  }
+
+  Future<AppUser?> getbyId(String id) async {
+    DocumentSnapshot document = await _ref.doc(id).get();
+    Map<String, dynamic> map = document.data() as Map<String, dynamic>;
+
+    if (document.exists) {
+      AppUser appUser = AppUser.fromJson(map);
+      return appUser;
+    }
+    return null;
+  }
+
+  Future<void> update(Map<String, dynamic> data, String id) async {
+    return _ref.doc(id).update(data);
+  }
+
+  Future<void> delete(String id) {
+    return _ref.doc(id).delete();
   }
 }

@@ -6,8 +6,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:smavy/src/models/app_user.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
+import 'package:smavy/src/providers/user_provider.dart';
 import 'dart:io';
 
 import 'package:smavy/src/widgets/button_app.dart';
@@ -24,6 +26,7 @@ class _MainMapPageState extends State<MainMapPage> {
   final ScrollController scrollController = ScrollController();
   final double heightAddLocationB = 160.0;
   bool isTrazarB = true;
+  AppUser? user;
 
   @override
   void initState() {
@@ -297,19 +300,17 @@ class _MainMapPageState extends State<MainMapPage> {
           color: Colors.teal[400],
           shape: const CircleBorder(),
           child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Icon(
-            (() {
-              if (!_con.isSearchSelected) {
-                return Icons.search_outlined;
-              } else {
-                return Icons.house;
-              }
-            }()),
-            color: Colors.white,
-            size: 25
-            )
-          ),
+              padding: const EdgeInsets.all(10),
+              child: Icon(
+                  (() {
+                    if (!_con.isSearchSelected) {
+                      return Icons.search_outlined;
+                    } else {
+                      return Icons.house;
+                    }
+                  }()),
+                  color: Colors.white,
+                  size: 25)),
         ),
       ),
     );
@@ -432,6 +433,7 @@ class _MainMapPageState extends State<MainMapPage> {
   }
 
   Widget _drawerHeader() {
+    getUser();
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -440,26 +442,27 @@ class _MainMapPageState extends State<MainMapPage> {
           width: 90,
           height: 100,
           decoration: BoxDecoration(
-              border: Border.all(width: 1, color: Colors.white),
-              boxShadow: [
-                BoxShadow(
-                  spreadRadius: 2,
-                  blurRadius: 10,
-                  color: Colors.black.withOpacity(0.1),
-                ),
-              ],
-              shape: BoxShape.circle,
-              image: const DecorationImage(
-                  fit: BoxFit.cover,
-                  image: NetworkImage(
-                      'https://media.istockphoto.com/photos/icon-of-a-businessman-avatar-or-profile-pic-picture-id474001892?s=612x612'))),
+            border: Border.all(width: 1, color: Colors.white),
+            boxShadow: [
+              BoxShadow(
+                spreadRadius: 2,
+                blurRadius: 10,
+                color: Colors.black.withOpacity(0.1),
+              ),
+            ],
+            shape: BoxShape.circle,
+            image: DecorationImage(
+              fit: BoxFit.cover,
+              image: AssetImage(user!.image as String),
+            ),
+          ),
         ),
         Text(
-          '${AuthProvider().getUser()!.displayName}',
+          '${user?.username}',
           style: const TextStyle(color: Colors.white),
         ),
         Text(
-          '${AuthProvider().getUser()!.email}',
+          '${user?.email}',
           style: const TextStyle(color: Colors.white),
         ),
       ],
@@ -504,48 +507,47 @@ class _MainMapPageState extends State<MainMapPage> {
         initialChildSize: 0.07,
         builder: (context, scrollController) {
           return Material(
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(20)),
-            color: Colors.white,
-            child: ListView(
-              padding: EdgeInsets.zero,
-              controller: scrollController,
-              children: [
-                Container(child: _buttonTrazar()),
-                const SizedBox(height: 10),
-                const Divider(
-                  thickness: 1,
-                  indent: 10,
-                  endIndent: 10,
-                  color: Colors.grey,
-                  height: 5.0,
-                ),
-                _itemFrom(),
-                const Divider(
-                  thickness: 1,
-                  indent: 10,
-                  endIndent: 10,
-                  color: Colors.grey,
-                  height: 5.0,
-                ),
-                ..._crearItem(),
-                _itemTo(),
-                const Divider(
-                  thickness: 1,
-                  indent: 10,
-                  endIndent: 10,
-                  color: Colors.grey,
-                  height: 5.0,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                _buttonIniciarViaje(),
-                // ignore: avoid_unnecessary_containers
-              ],
-            ));
-          }
-        );
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+              color: Colors.white,
+              child: ListView(
+                padding: EdgeInsets.zero,
+                controller: scrollController,
+                children: [
+                  Container(child: _buttonTrazar()),
+                  const SizedBox(height: 10),
+                  const Divider(
+                    thickness: 1,
+                    indent: 10,
+                    endIndent: 10,
+                    color: Colors.grey,
+                    height: 5.0,
+                  ),
+                  _itemFrom(),
+                  const Divider(
+                    thickness: 1,
+                    indent: 10,
+                    endIndent: 10,
+                    color: Colors.grey,
+                    height: 5.0,
+                  ),
+                  ..._crearItem(),
+                  _itemTo(),
+                  const Divider(
+                    thickness: 1,
+                    indent: 10,
+                    endIndent: 10,
+                    color: Colors.grey,
+                    height: 5.0,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  _buttonIniciarViaje(),
+                  // ignore: avoid_unnecessary_containers
+                ],
+              ));
+        });
   }
 
   Widget _buttonTrazar() {
@@ -613,7 +615,7 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
-  Widget _itemFrom(){
+  Widget _itemFrom() {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 15),
       title: Text("${_con.fromText.text}"),
@@ -621,11 +623,17 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
-  Widget _itemTo(){
+  Widget _itemTo() {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 15),
-      title: Text('${_con.toText.text}',),
-      leading: const Icon(Icons.my_location_outlined, color: Colors.teal, size: 30,),
+      title: Text(
+        '${_con.toText.text}',
+      ),
+      leading: const Icon(
+        Icons.my_location_outlined,
+        color: Colors.teal,
+        size: 30,
+      ),
     );
   }
 
@@ -640,7 +648,10 @@ class _MainMapPageState extends State<MainMapPage> {
           width: 30,
           child: Text(
             '${direccion['id']}',
-            style: const TextStyle(color: Colors.teal, fontSize: 25,),
+            style: const TextStyle(
+              color: Colors.teal,
+              fontSize: 25,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -668,7 +679,6 @@ class _MainMapPageState extends State<MainMapPage> {
     return temporal;
   }
 
-  
   Widget _googleMapsWidget() {
     return GoogleMap(
       trafficEnabled: true,
@@ -694,6 +704,10 @@ class _MainMapPageState extends State<MainMapPage> {
       },
       onTap: (argument) => FocusManager.instance.primaryFocus?.unfocus(),
     );
+  }
+
+  Future<void> getUser() async {
+    user = await UserProvider().getbyId(AuthProvider().getUser()!.uid);
   }
 
   void refresh() {
