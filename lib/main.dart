@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smavy/src/pages/about/about.dart';
+import 'package:smavy/src/pages/contactos/contacto.dart';
 import 'package:smavy/src/pages/home/home_page.dart';
 import 'package:smavy/src/pages/login/login_page.dart';
 import 'package:smavy/src/pages/main_map/main_map_page.dart';
@@ -46,7 +47,8 @@ class MyApp extends StatelessWidget {
         'terminos_condiciones_page': (BuildContext context) =>
             const TerminosyCondicionesPage(),
         'about_page': (BuildContext context) => const AboutPage(),
-        'travelSummary': (BuildContext context) => const TravelSummaryPage()
+        'travelSummary': (BuildContext context) => const TravelSummaryPage(),
+        'contactos_page': (BuildContext context) => const ContactosPage()
       },
     );
   }

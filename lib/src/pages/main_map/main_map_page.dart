@@ -424,7 +424,7 @@ class _MainMapPageState extends State<MainMapPage> {
         ),
         Container(
           padding: const EdgeInsets.only(
-            right: 100,
+            right: 70,
           ),
           alignment: Alignment.bottomLeft,
           height: 50,

@@ -42,7 +42,7 @@ class AjustesPage extends StatelessWidget {
             leading: const Icon(Icons.info_outline),
             trailing: const Icon(Icons.keyboard_arrow_right),
             onTap: () {
-              Navigator.of(context).pushNamed('about_page');
+              Navigator.of(context).pushNamed('contactos_page');
             },
           ),
         ],

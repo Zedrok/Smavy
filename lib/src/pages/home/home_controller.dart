@@ -9,13 +9,13 @@ class HomePageController {
 
   late AuthProvider _authProvider;
 
-  Future? init(BuildContext context){
+  Future? init(BuildContext context) {
     this.context = context;
     _authProvider = AuthProvider();
     _sharedPref = SharedPref();
     _typeUser = 'driver';
     _sharedPref.save('typeUser', _typeUser);
-    
+
     // ignore: avoid_print
     print('==home_cont====INIT=========');
     _authProvider.checkIfUserIsLogged(context);
