@@ -9,8 +9,10 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   final HomePageController _con = HomePageController();
+  late AnimationController _animation;
 
   @override
   void initState() {
@@ -20,6 +22,8 @@ class _HomePageState extends State<HomePage> {
     // ignore: avoid_print
     print('INIT STATE - HomePage');
     _con.init(context);
+    _animation = AnimationController(
+        vsync: this, duration: const Duration(seconds: 2), value: 360);
 
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       _con.init(context);
@@ -30,9 +34,21 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: (Text('Esto es el home c: después pondremos una imagen uwu')),
+        // ignore: avoid_unnecessary_containers
+        child: AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            return Transform.rotate(
+              angle: _animation.value,
+              child: const Image(
+                image: AssetImage(
+                    'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png'),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
