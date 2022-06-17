@@ -6,10 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:smavy/src/models/app_user.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
-import 'package:smavy/src/providers/user_provider.dart';
 import 'dart:io';
 
 import 'package:smavy/src/widgets/button_app.dart';
@@ -26,7 +24,7 @@ class _MainMapPageState extends State<MainMapPage> {
   final ScrollController scrollController = ScrollController();
   final double heightAddLocationB = 160.0;
   bool isTrazarB = true;
-  AppUser? user;
+  User? user = AuthProvider().getUser();
 
   @override
   void initState() {
@@ -60,83 +58,99 @@ class _MainMapPageState extends State<MainMapPage> {
           key: _globalKey,
           drawer: _drawer(
               context), //drawer guardado en funcion para simplificar codigo
-          body: Stack(children: [
-            _googleMapsWidget(),
-            SafeArea(
-              child: Column(children: [
-                // CardBoard de ubicaciones
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 5),
-                      child: (() {
-                        if (!_con.isSearchSelected) {
-                          return _cardGooglePlacesFromTo();
-                        } else {
-                          return _cardGooglePlacesSearch();
-                        }
-                      }()),
-                    ),
-                  ],
-                ),
+          body: Stack(
+            children: [
+              _googleMapsWidget(),
+              SafeArea(
+                child: Column(children: [
+                  // CardBoard de ubicaciones
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        child: (() {
+                          if (!(_con.isSearchSelected)) {
+                            return _cardGooglePlacesFromTo();
+                          } else {
+                            return _cardGooglePlacesSearch();
+                          }
+                        }()),
+                      ),
+                    ],
+                  ),
 
-                // Botón de Búsqueda y Cambio origen/destino
-                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 15),
-                      child: _buttonSwitchToSearch()),
-                ]),
+                  // Botón de Búsqueda y Cambio origen/destino
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 15),
+                        child: _buttonSwitchToSearch(),
+                      ),
+                    ],
+                  ),
 
-                Expanded(child: Container()),
+                  Expanded(child: Container()),
 
-                // Boton Centrar mapa
-                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 15),
-                      child: _buttonCenterPosition()),
-                ]),
+                  // Boton Centrar mapa
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 15),
+                        child: _buttonCenterPosition(),
+                      ),
+                    ],
+                  ),
 
-                // Boton direcciones guardadas
-                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 15),
-                      child: _buttonSavedLocations()),
-                ]),
+                  // Boton direcciones guardadas
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 15),
+                        child: _buttonSavedLocations(),
+                      ),
+                    ],
+                  ),
 
-                // Boton Agregar dirección
-                () {
-                  if (_con.isSearchSelected) {
-                    return Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
+                  // Boton Agregar dirección
+                  () {
+                    if (_con.isSearchSelected) {
+                      return Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
                               padding: const EdgeInsets.only(bottom: 60),
                               margin: const EdgeInsets.symmetric(
                                 horizontal: 15,
                               ),
-                              child: _buttonAddLocation()),
-                        ]);
-                  } else {
-                    return Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.only(bottom: 60),
-                        )
-                      ],
-                    );
-                  }
-                }(),
-              ]),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Container(
+                              child: _buttonAddLocation(),
+                            ),
+                          ]);
+                    } else {
+                      return Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.only(bottom: 60),
+                          )
+                        ],
+                      );
+                    }
+                  }(),
+                ]),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: Container(
                   margin: const EdgeInsets.fromLTRB(0, 0, 0, 50),
-                  child: _iconMyLocation()),
-            ),
-            _notificationButtonTrazar(),
-          ]),
+                  child: _iconMyLocation(),
+                ),
+              ),
+              _notificationButtonTrazar(),
+            ],
+          ),
         ),
       ),
     );
@@ -169,50 +183,56 @@ class _MainMapPageState extends State<MainMapPage> {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.95,
       child: Card(
-          shadowColor: Colors.teal,
-          elevation: 5,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: Colors.teal, width: 0.2)),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              children: [
-                SizedBox(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buttonMenu(),
-                    ],
-                  ),
+        shadowColor: Colors.teal,
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Colors.teal, width: 0.2),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            children: [
+              SizedBox(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buttonMenu(),
+                  ],
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.75,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Origen',
-                          style:
-                              TextStyle(color: Colors.grey[750], fontSize: 13)),
-                      _fromTextField(),
-                      const SizedBox(height: 3),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.75,
-                        child: const Divider(
-                            color: Colors.teal, thickness: 1, height: 10),
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.75,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Origen',
+                      style: TextStyle(color: Colors.grey[750], fontSize: 13),
+                    ),
+                    _fromTextField(),
+                    const SizedBox(height: 3),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.75,
+                      child: const Divider(
+                        color: Colors.teal,
+                        thickness: 1,
+                        height: 10,
                       ),
-                      Text(
-                        'Destino',
-                        style: TextStyle(color: Colors.grey[750], fontSize: 13),
-                        maxLines: 2,
-                      ),
-                      _toTextField(),
-                    ],
-                  ),
+                    ),
+                    Text(
+                      'Destino',
+                      style: TextStyle(color: Colors.grey[750], fontSize: 13),
+                      maxLines: 2,
+                    ),
+                    _toTextField(),
+                  ],
                 ),
-              ],
-            ),
-          )),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -220,38 +240,41 @@ class _MainMapPageState extends State<MainMapPage> {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.95,
       child: Card(
-          shadowColor: Colors.teal,
-          elevation: 5,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: Colors.teal, width: 0.2)),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              children: [
-                SizedBox(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buttonMenu(),
-                    ],
-                  ),
+        shadowColor: Colors.teal,
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Colors.teal, width: 0.2),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            children: [
+              SizedBox(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buttonMenu(),
+                  ],
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.75,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Dirección por visitar',
-                          style:
-                              TextStyle(color: Colors.grey[750], fontSize: 13)),
-                      _searchTextField(),
-                    ],
-                  ),
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.75,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Dirección por visitar',
+                      style: TextStyle(color: Colors.grey[750], fontSize: 13),
+                    ),
+                    _searchTextField(),
+                  ],
                 ),
-              ],
-            ),
-          )),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -303,7 +326,7 @@ class _MainMapPageState extends State<MainMapPage> {
               padding: const EdgeInsets.all(10),
               child: Icon(
                   (() {
-                    if (!_con.isSearchSelected) {
+                    if (!(_con.isSearchSelected)) {
                       return Icons.search_outlined;
                     } else {
                       return Icons.house;
@@ -433,7 +456,6 @@ class _MainMapPageState extends State<MainMapPage> {
   }
 
   Widget _drawerHeader() {
-    getUser();
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -453,16 +475,16 @@ class _MainMapPageState extends State<MainMapPage> {
             shape: BoxShape.circle,
             image: DecorationImage(
               fit: BoxFit.cover,
-              image: AssetImage(user!.image as String),
+              image: AssetImage('${user?.providerData[0].photoURL}'),
             ),
           ),
         ),
         Text(
-          '${user?.username}',
+          '${user!.displayName}',
           style: const TextStyle(color: Colors.white),
         ),
         Text(
-          '${user?.email}',
+          '${user?.providerData[0].email}',
           style: const TextStyle(color: Colors.white),
         ),
       ],
@@ -697,17 +719,13 @@ class _MainMapPageState extends State<MainMapPage> {
         _con.screenCenter = position.target;
       },
       onCameraIdle: () async {
-        if(_con.isFromSelected) await _con.setFromMarker();
-        if(_con.isToSelected) await _con.setToMarker();
-        
+        if (_con.isFromSelected) await _con.setFromMarker();
+        if (_con.isToSelected) await _con.setToMarker();
+
         await _con.setLocationDraggableInfo();
       },
       onTap: (argument) => FocusManager.instance.primaryFocus?.unfocus(),
     );
-  }
-
-  Future<void> getUser() async {
-    user = await UserProvider().getbyId(AuthProvider().getUser()!.uid);
   }
 
   void refresh() {

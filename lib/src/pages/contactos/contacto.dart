@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AjustesPage extends StatelessWidget {
-  const AjustesPage({Key? key}) : super(key: key);
+class ContactosPage extends StatelessWidget {
+  const ContactosPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +19,13 @@ class AjustesPage extends StatelessWidget {
           )),
       body: ListView(
         children: [
+          const Text('Contactos'),
+          Row(
+            children: const [
+              Text('Telefono :'),
+              Text('+56931260191'),
+            ],
+          ),
           ListTile(
             title: const Text('Terminos y condiciones'),
             leading: const Icon(Icons.perm_device_information_outlined),
@@ -28,22 +35,6 @@ class AjustesPage extends StatelessWidget {
             trailing: const Icon(
               Icons.keyboard_arrow_right,
             ),
-          ),
-          ListTile(
-            title: const Text('Sobre nosotros'),
-            leading: const Icon(Icons.info_outline),
-            trailing: const Icon(Icons.keyboard_arrow_right),
-            onTap: () {
-              Navigator.of(context).pushNamed('about_page');
-            },
-          ),
-          ListTile(
-            title: const Text('Contacto'),
-            leading: const Icon(Icons.info_outline),
-            trailing: const Icon(Icons.keyboard_arrow_right),
-            onTap: () {
-              Navigator.of(context).pushNamed('about_page');
-            },
           ),
         ],
       ),

@@ -3,7 +3,7 @@ import 'package:smavy/src/models/app_user.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
 
 class UserProvider {
-  final uid = AuthProvider().getUser()!.uid;
+  final uid = AuthProvider().getUser()?.uid;
 
   late CollectionReference _ref;
   // ignore: unused_field
@@ -50,15 +50,12 @@ class UserProvider {
     return _ref.doc(id).snapshots(includeMetadataChanges: true);
   }
 
-  Future<AppUser?> getbyId(String id) async {
+  Future<AppUser> getbyId(String id) async {
     DocumentSnapshot document = await _ref.doc(id).get();
     Map<String, dynamic> map = document.data() as Map<String, dynamic>;
 
-    if (document.exists) {
-      AppUser appUser = AppUser.fromJson(map);
-      return appUser;
-    }
-    return null;
+    AppUser appUser = AppUser.fromJson(map);
+    return appUser;
   }
 
   Future<void> update(Map<String, dynamic> data, String id) async {
@@ -67,5 +64,13 @@ class UserProvider {
 
   Future<void> delete(String id) {
     return _ref.doc(id).delete();
+  }
+
+  Future<String> getUserName(String id) async {
+    DocumentSnapshot document = await _ref.doc(id).get();
+
+    Map<String, dynamic> map = document.data() as Map<String, dynamic>;
+
+    return Future.sync(() => map[{'username'}]);
   }
 }

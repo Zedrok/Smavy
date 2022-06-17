@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
@@ -16,8 +15,6 @@ class _EditProfileUIState extends State<EditProfileUI> {
 
   @override
   void initState() {
-    // ignore: todo
-    // TODO: implement initState
     super.initState();
     // ignore: avoid_print
     print('INIT STATE');
@@ -28,6 +25,8 @@ class _EditProfileUIState extends State<EditProfileUI> {
       // ignore: avoid_print
       print('METODO SCHEDULER');
     });
+
+    refresh();
   }
 
   bool isObscurePassword = true;
@@ -74,9 +73,9 @@ class _EditProfileUIState extends State<EditProfileUI> {
                             color: Colors.black.withOpacity(0.1))
                       ],
                       shape: BoxShape.circle,
-                      image: DecorationImage(
+                      image: const DecorationImage(
                         fit: BoxFit.cover,
-                        image: NetworkImage('${_con.user?.image}'),
+                        image: NetworkImage('assets/img/profile.png'),
                       ),
                     ),
                   ),
@@ -105,15 +104,11 @@ class _EditProfileUIState extends State<EditProfileUI> {
             const SizedBox(
               height: 30,
             ),
-            buildTextField('Nombre de usuario', '${_getDisplayName()}', false,
+            buildTextField(
+                'Nombre de usuario',
+                '${AuthProvider().getUser()?.displayName}',
+                false,
                 _con.usernameController),
-            buildTextField(
-                'Email', '${_getEmail()}', false, _con.emailController),
-            buildTextField(
-                'Contraseña', 'password', true, _con.passwordController),
-            buildTextField('Confirmar contraseña', 'password', true,
-                _con.confirmPasswordController),
-            //buildTextField('Direccion', 'Av brasil', false),
             const SizedBox(
               height: 30,
             ),
@@ -186,28 +181,6 @@ class _EditProfileUIState extends State<EditProfileUI> {
                 fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey)),
       ),
     );
-  }
-
-  Future<String> _getEmail() async {
-    String email;
-
-    var data =
-        await FirebaseFirestore.instance.collection('AppUsers').doc(id).get();
-
-    email = data.data()!['email'];
-
-    return email;
-  }
-
-  Future<String> _getDisplayName() async {
-    String username;
-
-    var data =
-        await FirebaseFirestore.instance.collection('AppUsers').doc(id).get();
-
-    username = data.data()!['username'];
-
-    return username;
   }
 
   void refresh() {

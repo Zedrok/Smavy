@@ -12,6 +12,7 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final RegisterController _con = RegisterController();
+  bool isCheck = false;
 
   @override
   void initState() {
@@ -54,6 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
             _textFieldPassword(),
             _textFieldConfirmPassword(),
             _buttonRegister(),
+            _checkBox(),
             _textHaveAccount(),
             // Expanded(child: Container()), Esto es para crear un objeto infinito
           ],
@@ -179,6 +181,35 @@ class _RegisterPageState extends State<RegisterPage> {
           onPressed: _con.register,
         ),
       ),
+    );
+  }
+
+  Widget _checkBox() {
+    return CheckboxListTile(
+      title: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pushNamed('terminos_condiciones_page');
+        },
+        child: Text(
+          'He leído los terminos de condiciones y servicio.',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.teal[700],
+            decoration: TextDecoration.underline,
+          ),
+          textAlign: TextAlign.end,
+        ),
+      ),
+      subtitle: const Text(
+        'Campo obligatorio *',
+        style: TextStyle(color: Colors.black54),
+        textAlign: TextAlign.end,
+      ),
+      value: isCheck,
+      onChanged: (newValue) => setState(() {
+        isCheck = newValue!;
+        _con.isCheck = newValue;
+      }),
     );
   }
 

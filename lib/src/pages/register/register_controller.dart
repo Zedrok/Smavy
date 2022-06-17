@@ -7,7 +7,6 @@ import 'package:smavy/src/utils/my_progress_dialog.dart';
 import 'package:smavy/src/utils/snackbar.dart';
 
 class RegisterController {
-  
   late BuildContext context;
 
   TextEditingController usernameController = TextEditingController();
@@ -18,16 +17,18 @@ class RegisterController {
   late AuthProvider _authProvider;
   late UserProvider _userProvider;
   late ProgressDialog _progressDialog;
+  bool isCheck = false;
 
-  Future? init(BuildContext context){
+  Future? init(BuildContext context) {
     this.context = context;
     _authProvider = AuthProvider();
     _userProvider = UserProvider();
-    _progressDialog = MyProgressDialog.createProgressDialog(context, 'Espere un momento...');
+    _progressDialog =
+        MyProgressDialog.createProgressDialog(context, 'Espere un momento...');
     return null;
   }
 
-  void goToLogin(){
+  void goToLogin() {
     Navigator.pushNamed(context, 'login');
   }
 
@@ -42,74 +43,84 @@ class RegisterController {
     // ignore: avoid_print
     print('Password: $password');
 
-    if(username.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty){
+    if (username.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       String msgError = 'Por favor, ingrese todos los campos.';
       // ignore: avoid_print
       print(msgError);
-      Snackbar.showSnackbar(context, msgError );
+      Snackbar.showSnackbar(context, msgError);
       return;
     }
 
-    if(confirmPassword != password){
+    if (confirmPassword != password) {
       String msgError = 'Las contraseñas no coinciden.';
       // ignore: avoid_print
       print(msgError);
-      Snackbar.showSnackbar(context, msgError );
+      Snackbar.showSnackbar(context, msgError);
       return;
     }
 
-    if(password.length <6){
+    if (password.length < 6) {
       String msgError = 'La contraseña debe tener al menos 6 caracteres.';
       // ignore: avoid_print
       print(msgError);
-      Snackbar.showSnackbar(context, msgError );
+      Snackbar.showSnackbar(context, msgError);
       return;
     }
 
-    if(!email.isValidEmail()){
+    if (!email.isValidEmail()) {
       String msgError = 'Por favor, ingrese un email válido.';
       // ignore: avoid_print
       print(msgError);
-      Snackbar.showSnackbar(context, msgError );
+      Snackbar.showSnackbar(context, msgError);
       return;
     }
 
-    _progressDialog.show();
-
+    if (isCheck == false) {
+      String msgError =
+          'Por favor, lea los Terminos de condiciones y servicios.';
+      Snackbar.showSnackbar(context, msgError);
+      return;
+    }
     try {
+      _progressDialog.show();
+
       bool isRegister = await _authProvider.register(email, password);
 
-
-      if(isRegister){
-        
+      if (isRegister) {
         AppUser appUser = AppUser(
           id: _authProvider.getUser()!.uid,
           username: username,
           email: _authProvider.getUser()!.email!,
-          password: password
+          password: password,
+          image: 'image',
         );
-        
+
         await _userProvider.create(appUser);
         // ignore: avoid_print
-        print('El usuario está registrado');
-      }else{
+        Snackbar.showSnackbar(context, 'Usuario registrado con exito', true);
+        _progressDialog.hide();
+        goToLogin();
+      } else {
         // ignore: avoid_print
-        print('El usuario no se pudo registrar');
+        Snackbar.showSnackbar(context, 'Error al registrar usuario');
       }
-    } catch(error){
+    } catch (error) {
       // ignore: avoid_print
       print('Error: $error');
       Snackbar.showSnackbar(context, 'El usuario ya se encuentra registrado');
+    } finally {
+      _progressDialog.hide();
     }
-    _progressDialog.hide();
-    
   }
 }
 
 extension EmailValidator on String {
   bool isValidEmail() {
     return RegExp(
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
+            r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
         .hasMatch(this);
   }
 }
