@@ -7,7 +7,7 @@ class ContactosPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Ajustes'),
+          title: const Text('Contactos'),
           leading: IconButton(
             icon: const Icon(
               Icons.arrow_back,
@@ -17,26 +17,76 @@ class ContactosPage extends StatelessWidget {
               Navigator.pop(context);
             },
           )),
-      body: ListView(
-        children: [
-          const Text('Contactos'),
-          Row(
-            children: const [
-              Text('Telefono :'),
-              Text('+56931260191'),
-            ],
-          ),
-          ListTile(
-            title: const Text('Terminos y condiciones'),
-            leading: const Icon(Icons.perm_device_information_outlined),
-            onTap: () {
-              Navigator.of(context).pushNamed('terminos_condiciones_page');
-            },
-            trailing: const Icon(
-              Icons.keyboard_arrow_right,
+      body: Padding(
+        padding: const EdgeInsets.only(top: 20, left: 20),
+        child: ListView(
+          children: [
+            const Text(
+              'Contactos : ',
+              style: TextStyle(fontSize: 28),
             ),
-          ),
-        ],
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: const [
+                Text(
+                  'Telefono :',
+                  style: TextStyle(fontSize: 28),
+                ),
+                Text(
+                  '+56931260191',
+                  style: TextStyle(fontSize: 28),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Divider(
+              height: 5,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Text(
+              'Correo :',
+              style: TextStyle(fontSize: 28),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Divider(
+              height: 5,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Text(
+              'correo1@gmail.com',
+              style: TextStyle(fontSize: 28),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Divider(
+              height: 5,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Text(
+              'correo2@gmail.com',
+              style: TextStyle(fontSize: 28),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Divider(
+              height: 5,
+            ),
+          ],
+        ),
       ),
     );
   }

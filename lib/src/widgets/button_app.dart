@@ -51,10 +51,12 @@ class ButtonApp extends StatelessWidget {
             Align(
               alignment: Alignment.center,
               child: Container(
-                alignment: Alignment.center,
+                alignment: Alignment.centerLeft,
+                width: MediaQuery.of(context).size.width * 1.0,
                 height: 40,
                 child: Text(
                   text,
+                  textAlign: TextAlign.start,
                   style: TextStyle(
                     color: textColor,
                     fontSize: 16,
@@ -68,6 +70,7 @@ class ButtonApp extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: SizedBox(
                     height: 38,
+                    width: MediaQuery.of(context).size.width * 0.07,
                     child: CircleAvatar(
                       backgroundColor: colorIcon,
                       radius: 14,

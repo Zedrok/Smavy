@@ -23,7 +23,8 @@ class AuthProvider {
         // ignore: avoid_print
         print('El usuario está logeado de antes');
         Future.delayed(const Duration(seconds: 2), () {
-          Navigator.pushNamedAndRemoveUntil(context, 'mainMap', (route) => false);
+          Navigator.pushNamedAndRemoveUntil(
+              context, 'mainMap', (route) => false);
         });
         // Navigator.pushNamed(context, 'login');
       } else {
