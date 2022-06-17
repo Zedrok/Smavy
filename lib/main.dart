@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:smavy/src/pages/about/about.dart';
 import 'package:smavy/src/pages/home/home_page.dart';
 import 'package:smavy/src/pages/login/login_page.dart';
 import 'package:smavy/src/pages/main_map/main_map_page.dart';
@@ -8,6 +9,7 @@ import 'package:smavy/src/pages/ajustes/ajustes_page.dart';
 import 'package:smavy/src/pages/historial/historial.dart';
 import 'package:smavy/src/pages/Profile/perfil.dart';
 import 'package:smavy/src/pages/direcciones_guardadas/save_adresses.dart';
+import 'package:smavy/src/pages/terms_and_conditions/terms_and_conditions.dart';
 import 'package:smavy/src/pages/travel_info/travel_info_page.dart';
 
 void main() async {
@@ -26,8 +28,9 @@ class MyApp extends StatelessWidget {
       title: 'Smavy',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          primarySwatch: Colors.teal,
-          appBarTheme: const AppBarTheme(elevation: 0)),
+        primarySwatch: Colors.teal,
+        appBarTheme: const AppBarTheme(elevation: 0),
+      ),
       initialRoute: 'home',
       routes: {
         'home': (BuildContext context) => const HomePage(),
@@ -39,6 +42,9 @@ class MyApp extends StatelessWidget {
         'historial': (BuildContext context) => const HistorialPage(),
         'dir_guardadas': (BuildContext context) => const SaveAdressPage(),
         'ajustes_page': (BuildContext context) => const AjustesPage(),
+        'terminos_condiciones_page': (BuildContext context) =>
+            const TerminosyCondicionesPage(),
+        'about_page': (BuildContext context) => const AboutPage(),
       },
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
+import 'package:smavy/src/pages/forgot_password/forgot_password_page.dart';
 import 'package:smavy/src/pages/login/login_controller.dart';
 import 'package:smavy/src/widgets/button_app.dart';
 
@@ -60,6 +61,23 @@ class _LoginPageState extends State<LoginPage> {
             _textFieldPassword(),
             _textDontHaveAccount(),
             _buttonLogin(),
+            const SizedBox(height: 24),
+            GestureDetector(
+              child: const Text(
+                '¿Olvido su contraseña?',
+                style: TextStyle(
+                  decoration: TextDecoration.none,
+                  color: Colors.teal,
+                  fontSize: 16,
+                ),
+              ),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ForgotPassword(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             // Expanded(child: Container()), Esto es para crear un objeto infinito
           ],
         ),

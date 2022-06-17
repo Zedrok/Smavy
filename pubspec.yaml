@@ -56,6 +56,8 @@ dependencies:
   screenshot: ^1.2.3
   image_picker: ^0.8.5+3
   firebase_storage: ^10.2.17
+  email_validator: ^2.0.1
+  image: ^3.2.0
 
   
 dev_dependencies:
@@ -86,6 +88,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/img/
+    - assets/textfiles/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -6,13 +6,13 @@ import 'package:image_picker/image_picker.dart';
 
 class StorageProvider {
   Future<TaskSnapshot> uploadFile(PickedFile file) async {
-    String name = UniqueKey().toString();
+    String name = '${UniqueKey().toString()}.jpg';
 
     Reference ref =
         FirebaseStorage.instance.ref().child('images').child('/$name');
 
     final metadata = SettableMetadata(
-      contentType: 'image/jpeg',
+      contentType: 'image/jpg',
       customMetadata: {'picked-file-path': file.path},
     );
 
