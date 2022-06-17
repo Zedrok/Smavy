@@ -39,7 +39,7 @@ class MainMapController {
   late GeoFireProvider _geoFireProvider;
   late AuthProvider _authProvider;
   bool isConnect = false;
-  late ProgressDialog _progressDialog;
+  late ProgressDialog progressDialog;
 
   late LatLng screenCenter = const LatLng(-33.0452126, -71.6151596);
 
@@ -68,8 +68,7 @@ class MainMapController {
     this.context = context;
     _geoFireProvider = GeoFireProvider();
     _authProvider = AuthProvider();
-    _progressDialog =
-      MyProgressDialog.createProgressDialog(context, 'Conectándose...');
+    progressDialog = MyProgressDialog.createProgressDialog(context, 'Obteniendo ubicación...');
     checkGPS();
     _position = await Geolocator.getCurrentPosition();
     markerDriver = await createMarkerImageFromAsset('assets/img/gpsDriver.png');
@@ -82,15 +81,18 @@ class MainMapController {
   }
   
   void goToTravelInfoPage(){
-    Navigator.pushNamed(context, 'travelMap', arguments:{
-      'fromText': fromText.text,
-      'toText': toText.text,
-      'searchText': searchText.text,
-      'fromLatLng': fromLatLng,
-      'toLatLng': toLatLng,
-      'searchLatLng': searchLatLng,
-      'listaDirecciones': listaDirecciones
-    });
+    if(validarDireccion(fromText.text) && validarDireccion(toText.text)){
+      Navigator.pushNamed(context, 'travelMap', arguments:{
+        'fromText': fromText.text,
+        'toText': toText.text,
+        'fromLatLng': fromLatLng,
+        'toLatLng': toLatLng,
+        'listaDirecciones': listaDirecciones,
+        'rutaRepetida': false
+      });
+    }else{
+      Snackbar.showSnackbar(context, 'Por favor, revise el origen y el destino.');
+    }
   }
 
   Future<Uint8List> convertWidgetIntoUint8List(Widget widgetMarker) async  {
@@ -385,9 +387,7 @@ class MainMapController {
     if (initialPosition != null) {
       List<Placemark> placemark = await placemarkFromCoordinates(
           screenCenter.latitude, screenCenter.longitude);
-
       Placemark address = placemark[0];
-
       String direction = address.thoroughfare!;
       String street = address.subThoroughfare!;
       String city = address.locality!;
@@ -431,14 +431,14 @@ class MainMapController {
         searchLatLng = LatLng(screenCenter.latitude, screenCenter.longitude);
       }
     }
-
-   refresh();
+    refresh();
   }
 
   void changeCardBoard(int option) {
     // 0 = From - Click en From
     // 1 = To - Click en To
     // 2 = Search - Click en Lupa / Casa
+    
     if (option == 0) {
       if (!isFromSelected) {
         isFromSelected = true;
@@ -468,7 +468,7 @@ class MainMapController {
         }
       }
     }
-   Future.delayed(Duration.zero, refresh());
+    Future.delayed(Duration.zero, refresh());
   }
 
   GooglePlaceAutoCompleteTextField showGoogleAutoCompleteFrom(
@@ -654,7 +654,7 @@ class MainMapController {
   void saveLocation() async {
     await _geoFireProvider.create(_authProvider.getUser()!.uid,
         _position!.latitude, _position!.longitude);
-    _progressDialog.hide();
+    progressDialog.hide();
   }
 
   void centerPosition() {
@@ -746,16 +746,16 @@ class MainMapController {
   // los datos de Firestore, un botón debería ejecutar la función connect()
   // y esto ejecutaría el código que hay hacia abajo.
 
-  void connect() {
-    // Esta función se ejecuta cuando se presiona un botón, esto
-    // habilita o deshabilita el rastreo del dispositivo.
-    if (isConnect) {
-      disconnect();
-    } else {
-      _progressDialog.show();
-      updateLocation();
-    }
-  }
+  // void connect() {
+  //   // Esta función se ejecuta cuando se presiona un botón, esto
+  //   // habilita o deshabilita el rastreo del dispositivo.
+  //   if (isConnect) {
+  //     disconnect();
+  //   } else {
+  //     progressDialog.show();
+  //     updateLocation();
+  //   }
+  // }
 
   void disconnect() {
     // Esta función deja de actualizar la posición y elimina la posición de la db

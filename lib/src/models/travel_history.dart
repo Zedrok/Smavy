@@ -56,7 +56,7 @@ class TravelHistory {
     "id_usuario": idUsuario,
     "fromText": fromText,
     "fromLat": fromLatLng.latitude,
-    "fromLng": fromLatLng.latitude,
+    "fromLng": fromLatLng.longitude,
     "toText": toText,
     "toLat": toLatLng.latitude,
     "toLng": toLatLng.longitude,

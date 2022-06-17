@@ -6,9 +6,10 @@ import 'package:smavy/src/pages/login/login_page.dart';
 import 'package:smavy/src/pages/main_map/main_map_page.dart';
 import 'package:smavy/src/pages/register/register_page.dart';
 import 'package:smavy/src/pages/ajustes/ajustes_page.dart';
-import 'package:smavy/src/pages/historial/historial.dart';
+import 'package:smavy/src/pages/historial/historial_page.dart';
 import 'package:smavy/src/pages/Profile/perfil.dart';
 import 'package:smavy/src/pages/direcciones_guardadas/save_adresses.dart';
+import 'package:smavy/src/pages/route_details/route_details_page.dart';
 import 'package:smavy/src/pages/terms_and_conditions/terms_and_conditions.dart';
 import 'package:smavy/src/pages/travel/travel_map_page.dart';
 import 'package:smavy/src/pages/travel/travel_summary_page.dart';
@@ -43,10 +44,11 @@ class MyApp extends StatelessWidget {
         'historial': (BuildContext context) => const HistorialPage(),
         'dir_guardadas': (BuildContext context) => const SaveAdressPage(),
         'ajustes_page': (BuildContext context) => const AjustesPage(),
-        'terminos_condiciones_page': (BuildContext context) =>
-            const TerminosyCondicionesPage(),
+        'terminos_condiciones_page': (BuildContext context) => const TerminosyCondicionesPage(),
         'about_page': (BuildContext context) => const AboutPage(),
-        'travelSummary': (BuildContext context) => const TravelSummaryPage()
+        'travelSummary': (BuildContext context) => const TravelSummaryPage(),
+        'routeDetails': (BuildContext context) => const RouteDetailsPage(),
+        
       },
     );
   }

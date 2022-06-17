@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:smavy/src/models/travel_history.dart';
+import 'package:smavy/src/providers/auth_provider.dart';
 
 class TravelHistoryProvider {
 
   late CollectionReference _ref;
+  late AuthProvider _authProvider;
 
   TravelHistoryProvider() {
+    _authProvider = AuthProvider();
     _ref = FirebaseFirestore.instance.collection('TravelHistory');
   }
 
@@ -47,6 +50,24 @@ class TravelHistoryProvider {
       return travelHistory;
     }
     return null;
+  }
+
+  Future<List<TravelHistory>?> getUserTravels() async {
+    List<TravelHistory> _travelHistoryList = [];
+    List<DocumentSnapshot> docs = [];
+
+    await _ref.where('id_usuario', isEqualTo: _authProvider.getUser()!.uid).get().then((query) {
+      return docs = query.docs;
+    });
+
+    if (docs.isNotEmpty) {
+      for(var document in docs){
+        TravelHistory travelHistory = TravelHistory.fromJson(document.data() as Map<String,dynamic>);
+        _travelHistoryList.add(travelHistory);
+      }
+    }
+    
+    return _travelHistoryList;
   }
 
   Future<void> update(Map<String, dynamic> data, String id) {

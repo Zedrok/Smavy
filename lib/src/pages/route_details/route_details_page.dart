@@ -1,24 +1,21 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:smavy/src/models/travel_history.dart';
-import 'package:smavy/src/pages/travel/travel_summary_controller.dart';
+import 'package:smavy/src/pages/route_details/route_details_controller.dart';
 import 'package:smavy/src/widgets/button_app.dart';
 
-class TravelSummaryPage extends StatefulWidget {
-  const TravelSummaryPage({Key? key}) : super(key: key);
+class RouteDetailsPage extends StatefulWidget {
+  const RouteDetailsPage({Key? key}) : super(key: key);
 
   @override
-  State<TravelSummaryPage> createState() => _TravelSummaryPageState();
+  State<RouteDetailsPage> createState() => _RouteDetailsPageState();
 }
 
-class _TravelSummaryPageState extends State<TravelSummaryPage> {
-  final TravelSummaryController _con = TravelSummaryController();
+class _RouteDetailsPageState extends State<RouteDetailsPage> {
+  final RouteDetailsController _con = RouteDetailsController();
 
   @override
   void initState() {
@@ -33,83 +30,95 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
   @override
   Widget build(BuildContext context) {
     return 
-    WillPopScope(
-      onWillPop: _onWillPopScope,
-      child: Scaffold(
-        bottomNavigationBar: _buttonClose(),
-        body: Stack(
-          children: [
-            _bannerSuccess(),
-            Column(
-              children: [
-                SizedBox(height: 150),
-                _listTileTravelFrom(),
-                _listTileTravelTo(),
-                SizedBox(height: 5,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    SizedBox(
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            child: Icon(
-                              CupertinoIcons.time
-                            )
-                          ),
-                          SizedBox(height: 10,),
-                          SizedBox(
-                            child: Text(
-                              (_con.datosCargados)?_con.travelHistory.totalDuration.inMinutes.remainder(60).toString().padLeft(2,'0')+':'+
-                              _con.travelHistory.totalDuration.inSeconds.remainder(60).toString().padLeft(2,'0'):'',
-                            )
-                          ),
-                        ],
-                      ),
-                    ),
-                    Column(
+    Scaffold(
+      appBar: AppBar(
+        title: (_con.datosCargados)?
+        Text('Historial - ${_con.readTimestamp(_con.travelHistory.timestamp)}'):
+        Text('Historial'),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        )
+      ),
+      bottomNavigationBar: _bottomButtons(),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              SizedBox(height: 15),
+              _listTileTravelFrom(),
+              _listTileTravelTo(),
+              SizedBox(height: 0,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  SizedBox(
+                    child: Column(
                       children: [
                         SizedBox(
                           child: Icon(
-                            Icons.directions_walk
+                            CupertinoIcons.time
                           )
                         ),
                         SizedBox(height: 10,),
                         SizedBox(
                           child: Text(
-                            (_con.datosCargados)?_con.transformarDistancia(_con.travelHistory.totalDistance):''
+                            (_con.datosCargados)?
+                            _con.travelHistory.totalDuration.inMinutes.remainder(60).toString().padLeft(2,'0')+':'+
+                            _con.travelHistory.totalDuration.inSeconds.remainder(60).toString().padLeft(2,'0'):
+                            '',
                           )
                         ),
                       ],
                     ),
-                  ],
-                ),
-                SizedBox(height: 10,),
-                (_con.datosCargados)?SizedBox(
-                  height: MediaQuery.of(context).size.height*0.33,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(horizontal:20),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: 
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
-                      itemCount: _con.travelHistory.legs.length,
-                      itemBuilder: (BuildContext context, int index) =>
-                        _buildList(_con.travelHistory.legs[index], index)
-                    ),
                   ),
-                ):
-                SizedBox()
-              ],
-            ),
-          ]
-        ),
+                  Column(
+                    children: [
+                      SizedBox(
+                        child: Icon(
+                          Icons.directions_walk
+                        )
+                      ),
+                      SizedBox(height: 10,),
+                      SizedBox(
+                        child: Text(
+                          (_con.datosCargados)?_con.transformarDistancia(_con.travelHistory.totalDistance):''
+                        )
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 10,),
+              (_con.datosCargados)?SizedBox(
+                height: MediaQuery.of(context).size.height*0.45,
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal:20),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: 
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: BouncingScrollPhysics(),
+                    itemCount: _con.travelHistory.legs.length,
+                    itemBuilder: (BuildContext context, int index) =>
+                      _buildList(_con.travelHistory.legs[index], index)
+                  ),
+                ),
+              ):
+              SizedBox()
+            ],
+          ),
+        ]
       ),
     );
   }
@@ -243,16 +252,39 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
   }
 
 
-  Widget _buttonClose() {
-    return Container(
-      height: 50,
-      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
-      child: ButtonApp(
-        onPressed: () {
-          _con.goToHomePage();
-        },
-        text: 'Volver al Inicio',
-      ),
+  Widget _bottomButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        
+        Container(
+          height: 50,
+          width: 150,
+          margin: EdgeInsets.only(bottom: 10),
+          child: ButtonApp(
+            margin: 0,
+            color: Colors.red,
+            buttonIcon: false,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            text: 'Volver',
+          ),
+        ),
+        Container(
+          height: 50,
+          width: 150,
+          margin: EdgeInsets.only(bottom: 10),
+          child: ButtonApp(
+            buttonIcon: false,
+            margin: 0,
+            onPressed: () {
+              _con.goToTravelMap();
+            },
+            text: 'Repetir Ruta',
+          ),
+        ),
+      ],
     );
   }
 
@@ -310,54 +342,6 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
           maxLines: 2,
         ),
         leading: Icon(Icons.my_location, color: Colors.teal,),
-      ),
-    );
-  }
-
-  Widget _bannerSuccess() {
-    return ClipPath(
-      clipper: ArcClipper(),
-      child: Container(
-        height: 220,
-        width: double.infinity,
-        color: Colors.teal,
-        child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Icon(
-                  Icons.check_circle,
-                  color: Colors.white,
-                  size: 70
-                ),
-              ),
-              const Text(
-                'TU VIAJE HA FINALIZADO',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white
-                ),
-              ),
-              const SizedBox(height: 10),
-            ]
-          )
-        ),
-    );
-  }
-
-    Future<bool> _onWillPopScope() async {
-    return await showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('¿Desea salir de la aplicación?'),
-        actions: [
-          FloatingActionButton(
-              onPressed: () => exit(0), child: const Text('Si')),
-          FloatingActionButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('No')),
-        ],
       ),
     );
   }

@@ -11,6 +11,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_directions_api/google_directions_api.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:smavy/src/models/directions_model.dart';
 import 'package:smavy/src/models/directions_repository.dart';
@@ -58,6 +59,7 @@ class TravelMapController{
 
   bool rutaComenzada = false;
   bool rutaTerminada = false;
+  bool rutaRepetida = false;
 
   List<MarkerData> customMarkers = [];
   Set<Polyline> polylines = {};
@@ -83,7 +85,7 @@ class TravelMapController{
     fromLatLng = arguments['fromLatLng'];
     toLatLng = arguments['toLatLng'];
     listaDireccionesMainMap = arguments['listaDirecciones'];
-    
+    rutaRepetida = arguments['rutaRepetida'];
     markerDriver = await createMarkerImageFromAsset('assets/img/gpsDriver.png');
     _position = await Geolocator.getCurrentPosition();
   }
@@ -138,7 +140,7 @@ class TravelMapController{
         listaAuxiliar.add(direccionAux);
       }
 
-      for(var posicion in info.waypointsOrder){
+      for(var posicion in info.waypointsOrder!){
         listaAuxiliar[posicion]['id'] = i;
         listaDireccionesTravelMap.add(listaAuxiliar[posicion]);
         i++;
@@ -546,6 +548,7 @@ class TravelMapController{
   }
 
   void finishRoute(Duration totalDuration) {
+    
     saveTravelHistory(totalDuration);
   }
 
@@ -563,13 +566,6 @@ class TravelMapController{
       legs: routeLegs,
       timestamp: DateTime.now().millisecondsSinceEpoch
     );
-
-    print('idUsuario: ${travelHistory.idUsuario}');
-    print('fromText: ${travelHistory.fromText}');
-    print('toText: ${travelHistory.toText}');
-    print('totalDistance: ${travelHistory.totalDistance}');
-    print('totalDuration: ${travelHistory.totalDuration}');
-    print('timestamp: ${travelHistory.timestamp}');
 
     String id = await _travelHistoryProvider.create(travelHistory);
      
