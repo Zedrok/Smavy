@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:smavy/src/pages/travel_info/travel_info_controller.dart';
+import 'package:smavy/src/pages/travel/travel_map_controller.dart';
 import 'package:smavy/src/widgets/button_app.dart';
 
 class TravelMapPage extends StatefulWidget {
@@ -16,7 +16,7 @@ class TravelMapPage extends StatefulWidget {
 }
 
 class _TravelMapPageState extends State<TravelMapPage> {
-  final TravelInfoController _con = TravelInfoController();
+  final TravelMapController _con = TravelMapController();
   Timer? timer;
   Duration duration = const Duration();
 
@@ -152,10 +152,11 @@ class _TravelMapPageState extends State<TravelMapPage> {
                     fontSize: 13
                   )
                 ),
-                leading: const SizedBox(
+                leading: SizedBox(
                   width: 38,
                   height: 38,
-                  child: Icon(Icons.home, size: 38,)),
+                  child: _con.legStartIcon()
+                ),
               ),
             ),
           ),
@@ -181,10 +182,11 @@ class _TravelMapPageState extends State<TravelMapPage> {
                     fontSize: 13
                   )
                 ),
-                leading: const SizedBox(
+                leading: SizedBox(
                   width: 38,
                   height: 38,
-                  child: Icon(Icons.my_location, size: 38,)),
+                  child: _con.legEndIcon()
+                ),
               ),
             ),
           ),
@@ -269,7 +271,9 @@ class _TravelMapPageState extends State<TravelMapPage> {
         margin: 10,
         onPressed: () {
           refresh();
-          Navigator.pushNamed(context, 'mainMap');
+          _con.setLastLegDuration(duration);
+          timer!.cancel();
+          _con.finishRoute(duration);
         },
         text: 'Finalizar',
         textColor: Colors.white,
@@ -285,6 +289,7 @@ class _TravelMapPageState extends State<TravelMapPage> {
         buttonIcon: false,
         margin: 10,
         onPressed: () {
+          _con.setLastLegDuration(duration);
           _con.nextLeg();
           refresh();
         },
@@ -354,9 +359,12 @@ class _TravelMapPageState extends State<TravelMapPage> {
     }
   }
 
-  void refresh(){
-    setState(() {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    });
+  void refresh() async {
+    if(mounted){
+      setState(() {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+      });
+    }
+    
   }
 }

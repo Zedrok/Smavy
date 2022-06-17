@@ -4,12 +4,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class Directions {
   final LatLngBounds bounds;
   final List<PointLatLng> polylinePoints;
+  final String encodedPolyline;
   final String totalDistance;
   final String totalDuration;
   List<dynamic> waypointsOrder = [];
   List<dynamic> legs = [];
 
   Directions({
+    required this.encodedPolyline,
     required this.bounds,
     required this.polylinePoints,
     required this.totalDistance,
@@ -40,6 +42,7 @@ class Directions {
       waypointsOrder: data['waypoint_order'],
       legs: data['legs'],
       bounds: bounds,
+      encodedPolyline: data['overview_polyline']['points'],
       polylinePoints: PolylinePoints().decodePolyline(data['overview_polyline']['points']),
       totalDistance: distance,
       totalDuration: duration
