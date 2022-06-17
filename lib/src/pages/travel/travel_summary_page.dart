@@ -86,7 +86,7 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
                 ),
                 SizedBox(height: 10,),
                 (_con.datosCargados)?SizedBox(
-                  height: MediaQuery.of(context).size.height*0.33,
+                  height: MediaQuery.of(context).size.height*0.3,
                   child: Container(
                     margin: EdgeInsets.symmetric(horizontal:20),
                     decoration: BoxDecoration(

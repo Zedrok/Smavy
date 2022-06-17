@@ -18,6 +18,7 @@ import 'package:smavy/src/models/directions_repository.dart';
 import 'package:smavy/src/models/travel_history.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
 import 'package:smavy/src/providers/travel_history_provider.dart';
+import 'package:smavy/src/utils/my_progress_dialog.dart';
 import 'package:smavy/src/utils/snackbar.dart';
 import 'package:location/location.dart' as location;
 
@@ -28,6 +29,7 @@ class TravelMapController{
   late Function refresh;
   final stopwatch = Stopwatch();
   List<RouteLeg> routeLegs = [];
+  late ProgressDialog progressDialog;
 
   CameraPosition initialPosition = const CameraPosition(
     target: LatLng(-33.0452126, -71.6151596),
@@ -77,7 +79,7 @@ class TravelMapController{
     _travelHistoryProvider = TravelHistoryProvider();
 
     checkGPS();
-
+    progressDialog = MyProgressDialog.createProgressDialog(context, 'Guardando...');
     Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map <String, dynamic>;
 
     fromText = arguments['fromText'];
@@ -548,7 +550,7 @@ class TravelMapController{
   }
 
   void finishRoute(Duration totalDuration) {
-    
+    progressDialog.show();
     saveTravelHistory(totalDuration);
   }
 

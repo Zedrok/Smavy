@@ -116,34 +116,40 @@ class _EditProfileUIState extends State<EditProfileUI> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                OutlinedButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'CANCELAR',
-                    style: TextStyle(
-                        fontSize: 15, letterSpacing: 2, color: Colors.black),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 50),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20))),
-                ),
-                GestureDetector(
-                  onTap: _con.update,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _con.update();
-                    },
+                SizedBox(
+                  width: 150,
+                  child: OutlinedButton(
+                    onPressed: () {},
                     child: const Text(
-                      'GUARDAR',
+                      'CANCELAR',
                       style: TextStyle(
-                          fontSize: 15, letterSpacing: 2, color: Colors.white),
+                          fontSize: 15, letterSpacing: 2, color: Colors.black),
                     ),
-                    style: ElevatedButton.styleFrom(
-                        primary: Colors.teal,
-                        padding: const EdgeInsets.symmetric(horizontal: 50),
+                    style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20))),
+                  ),
+                ),
+                SizedBox(
+                  width: 150,
+                  child: GestureDetector(
+                    onTap: _con.update,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _con.update();
+                      },
+                      child: const Text(
+                        'GUARDAR',
+                        style: TextStyle(
+                            fontSize: 15, letterSpacing: 2, color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                          primary: Colors.teal,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20))),
+                    ),
                   ),
                 )
               ],
