@@ -14,21 +14,28 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:smavy/src/models/directions_model.dart';
 import 'package:smavy/src/models/directions_repository.dart';
+import 'package:smavy/src/models/travel_history.dart';
+import 'package:smavy/src/providers/auth_provider.dart';
+import 'package:smavy/src/providers/travel_history_provider.dart';
 import 'package:smavy/src/utils/snackbar.dart';
 import 'package:location/location.dart' as location;
 
-class TravelInfoController{
+class TravelMapController{
   final DirectionsService directionsService = DirectionsService();
   final Completer<GoogleMapController> _mapController = Completer();
   late BuildContext context;
   late Function refresh;
   final stopwatch = Stopwatch();
-  List<Map<String, dynamic>> routeLegs = [];
+  List<RouteLeg> routeLegs = [];
 
   CameraPosition initialPosition = const CameraPosition(
     target: LatLng(-33.0452126, -71.6151596),
     zoom: 14.4746,
   );
+
+  
+  late AuthProvider _authProvider;
+  late TravelHistoryProvider _travelHistoryProvider;
 
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   late BitmapDescriptor markerDriver;
@@ -36,6 +43,7 @@ class TravelInfoController{
   late String time = "";
   late String distance = "";
   late Directions info;
+  int accumulatedDuration = 0;
 
   late String fromText = "";
   late String toText = "";
@@ -62,6 +70,9 @@ class TravelInfoController{
   Future init(BuildContext context, Function refresh) async {
     this.context = context;
     this.refresh = refresh;
+    
+    _authProvider = AuthProvider();
+    _travelHistoryProvider = TravelHistoryProvider();
 
     checkGPS();
 
@@ -72,13 +83,6 @@ class TravelInfoController{
     fromLatLng = arguments['fromLatLng'];
     toLatLng = arguments['toLatLng'];
     listaDireccionesMainMap = arguments['listaDirecciones'];
-
-    print('fromText $fromText');
-    print('toText $toText');
-    print('fromLatLng $fromLatLng');
-    print('toLatLng $toLatLng');
-    print('listaDirecciones = $listaDireccionesMainMap');
-    
     
     markerDriver = await createMarkerImageFromAsset('assets/img/gpsDriver.png');
     _position = await Geolocator.getCurrentPosition();
@@ -105,6 +109,7 @@ class TravelInfoController{
     info =  Directions(
       legs: respuesta.legs,
       bounds: respuesta.bounds,
+      encodedPolyline: respuesta.encodedPolyline,
       polylinePoints: respuesta.polylinePoints,
       totalDistance: respuesta.totalDistance,
       totalDuration: respuesta.totalDuration,
@@ -142,23 +147,31 @@ class TravelInfoController{
   }
 
   Future<void> createLegsAndPolylines()async {
-    Map<String, dynamic> newLeg = {};
+    RouteLeg newLeg;
 
     for(var leg in info.legs){
-      List<PointLatLng> legPolyline = []; 
+      List<PointLatLng> legPolyline = [];
+      String encodedLegPolyline = "";
       
       for(var step in leg['steps']){
         legPolyline += PolylinePoints().decodePolyline(step['polyline']['points']);
+        encodedLegPolyline += step['polyline']['points'];
       }
 
-      newLeg = {
-        'distance': leg['distance'],
-        'steps': leg['steps'],
-        'polyline': legPolyline
-      };
+      newLeg = RouteLeg(
+        distance: leg['distance']['value'],
+        startAddress: leg['start_address'],
+        startLocation: LatLng(leg['start_location']['lat'].toDouble(), leg['start_location']['lng'].toDouble()),
+        endAddress: leg['end_address'],
+        endLocation: LatLng(leg['end_location']['lat'].toDouble(), leg['end_location']['lng'].toDouble()),
+        polyline: legPolyline,
+        encodedPolyline: encodedLegPolyline,
+        duration: const Duration(seconds: 0),
+      );
+
+      leg['polyline'] = legPolyline;
 
       routeLegs.add(newLeg);
-      print('polyline: '); print(legPolyline);
     }
   }
 
@@ -201,50 +214,48 @@ class TravelInfoController{
     }
   }
 
-  void nextLeg() {
-    if(currentLeg < routeLegs.length-1){
-      currentLeg++;
-      print(currentLeg);
-      if(currentLeg < listaDireccionesTravelMap.length){
-        currentStartAddress = listaDireccionesTravelMap[currentLeg-1]['direccion'];
-        currentEndAddress = listaDireccionesTravelMap[currentLeg]['direccion'];
-      }else{
-        currentStartAddress = listaDireccionesTravelMap.last['direccion'];
-        currentEndAddress = toText;
-        rutaTerminada = true;
-      }
-
-      if(currentLeg < (routeLegs.length)){
-        setPolyline((routeLegs[currentLeg]['polyline'] as List<PointLatLng>));
-      }
+  void setLastLegDuration(Duration duration) {
+    if(currentLeg == 0){
+      routeLegs[currentLeg].duration = duration;
+      accumulatedDuration += routeLegs[currentLeg].duration.inMilliseconds;
+      print('duración del tramo $currentLeg: ${routeLegs[currentLeg].duration.inMilliseconds}');
+      print('duracion total: ${duration.inMilliseconds}');
+      print('duracion acumulada: $accumulatedDuration');
+    }else{
+      routeLegs[currentLeg].duration = Duration(milliseconds: ((duration.inMilliseconds) - accumulatedDuration));
+      accumulatedDuration += routeLegs[currentLeg].duration.inMilliseconds;
+      print('duración del tramo $currentLeg: ${routeLegs[currentLeg].duration.inMilliseconds}');
+      print('duracion total: ${duration.inMilliseconds}');
+      print('duracion acumulada: $accumulatedDuration');
     }
   }
 
-  void previousLeg() {
-    if(currentLeg > 0){
-      currentLeg--;
+  void nextLeg() {
+    currentLeg++;
+    currentStartAddress = routeLegs[currentLeg].startAddress;
+    currentEndAddress = routeLegs[currentLeg].endAddress;
+    if(currentLeg >= routeLegs.length-1){
+      rutaTerminada = true;
+    }else{
       rutaTerminada = false;
-      
-      print(currentLeg);
-      if(currentLeg > 0){
-        currentStartAddress = listaDireccionesTravelMap[currentLeg-1]['direccion'];
-        currentEndAddress = listaDireccionesTravelMap[currentLeg]['direccion'];
-      }else{
-        currentStartAddress = fromText;
-        currentEndAddress = listaDireccionesTravelMap[currentLeg]['direccion'];
-      }
-
-      if(currentLeg >= 0){
-        setPolyline((routeLegs[currentLeg]['polyline'] as List<PointLatLng>));
-      }else{
-      }
     }
+    setPolyline(routeLegs[currentLeg].polyline);
+    refresh();
+  }
+
+  void previousLeg() {
+    currentLeg--;
+    rutaTerminada = false;
+    currentStartAddress = routeLegs[currentLeg].startAddress;
+    currentEndAddress = routeLegs[currentLeg].endAddress;
+    setPolyline(routeLegs[currentLeg].polyline);
+    refresh();
   }
 
   void comenzarRuta() async {
     currentStartAddress = fromText;
     currentEndAddress = listaDireccionesTravelMap[currentLeg]['direccion'];
-    setPolyline((routeLegs[currentLeg]['polyline'] as List<PointLatLng>));
+    setPolyline(routeLegs[currentLeg].polyline);
     rutaComenzada = true;
     updateLocation();
   }
@@ -448,7 +459,6 @@ class TravelInfoController{
     );
     markers[id] = markerData;
 
-    await Future.delayed(const Duration(milliseconds: 200), refresh());
     refresh();
   }
 
@@ -533,5 +543,150 @@ class TravelInfoController{
     GoogleMapController controller = await _mapController.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         bearing: 0, target: LatLng(latitude, longitude), zoom: 16)));
+  }
+
+  void finishRoute(Duration totalDuration) {
+    saveTravelHistory(totalDuration);
+  }
+
+  void saveTravelHistory(Duration totalDuration) async {
+    int totalDistance = calculateTotalDistance();
+    TravelHistory travelHistory = TravelHistory(
+      idUsuario: _authProvider.getUser()!.uid,
+      fromText: fromText,
+      fromLatLng: fromLatLng,
+      toText: toText,
+      toLatLng: toLatLng,
+      totalDuration: totalDuration,
+      totalDistance: totalDistance,
+      overviewPolyline: info.encodedPolyline,
+      legs: routeLegs,
+      timestamp: DateTime.now().millisecondsSinceEpoch
+    );
+
+    print('idUsuario: ${travelHistory.idUsuario}');
+    print('fromText: ${travelHistory.fromText}');
+    print('toText: ${travelHistory.toText}');
+    print('totalDistance: ${travelHistory.totalDistance}');
+    print('totalDuration: ${travelHistory.totalDuration}');
+    print('timestamp: ${travelHistory.timestamp}');
+
+    String id = await _travelHistoryProvider.create(travelHistory);
+     
+    Navigator.pushNamedAndRemoveUntil(context, 'travelSummary', (route) => false, arguments: id);
+  }
+
+  int calculateTotalDistance(){
+    int totalDistance = 0;
+    for(RouteLeg leg in routeLegs){
+      totalDistance += leg.distance;
+    }
+    return totalDistance;
+  }
+
+  Widget legStartIcon(){
+    if(currentLeg == 0){
+      return Container(
+        decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: BorderRadius.circular(360),  
+        ),
+        child: Container(
+          alignment: Alignment.topCenter,
+          child: const Center(
+            child: Icon(
+              Icons.home,
+              color: Colors.white,
+              size: 28,
+            )
+          )
+        )
+      );
+    }
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(360),
+        border: Border.all(
+          color: Colors.teal.shade400,
+          width: 3
+        )
+      ),
+      child: Container(
+        alignment: Alignment.topCenter,
+        child: Text(
+          (currentLeg).toString(),
+          textAlign: ui.TextAlign.center,
+          style: TextStyle(
+            color: Colors.teal.shade500,
+            fontWeight: FontWeight.bold,
+            fontSize: 28,
+          ),
+        ),
+      )
+    );
+  }
+
+  Widget legEndIcon(){
+    if(currentLeg == routeLegs.length-1){
+      return Container(
+        decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: BorderRadius.circular(360),  
+        ),
+        child: Container(
+          alignment: Alignment.topCenter,
+          child: const Center(
+            child: Icon(
+              Icons.my_location,
+              color: Colors.white,
+              size: 28,
+            )
+          )
+        )
+      );
+    }
+    return ((){
+      if(rutaComenzada){
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(360),
+            border: Border.all(
+              color: Colors.teal.shade400,
+              width: 3
+            )
+          ),
+          child: Container(
+            alignment: Alignment.topCenter,
+            child: Text(
+              (currentLeg+1).toString(),
+              textAlign: ui.TextAlign.center,
+              style: TextStyle(
+                color: Colors.teal.shade500,
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+              ),
+            ),
+          )
+        );
+      }
+      return Container(
+        decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: BorderRadius.circular(360),  
+        ),
+        child: Container(
+          alignment: Alignment.topCenter,
+          child: const Center(
+            child: Icon(
+              Icons.my_location,
+              color: Colors.white,
+              size: 28,
+            )
+          )
+        )
+      );
+    }());
   }
 }

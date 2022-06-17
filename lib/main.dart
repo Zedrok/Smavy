@@ -11,6 +11,8 @@ import 'package:smavy/src/pages/Profile/perfil.dart';
 import 'package:smavy/src/pages/direcciones_guardadas/save_adresses.dart';
 import 'package:smavy/src/pages/terms_and_conditions/terms_and_conditions.dart';
 import 'package:smavy/src/pages/travel_info/travel_info_page.dart';
+import 'package:smavy/src/pages/travel/travel_map_page.dart';
+import 'package:smavy/src/pages/travel/travel_summary_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +47,7 @@ class MyApp extends StatelessWidget {
         'terminos_condiciones_page': (BuildContext context) =>
             const TerminosyCondicionesPage(),
         'about_page': (BuildContext context) => const AboutPage(),
+        'travelSummary': (BuildContext context) => const TravelSummaryPage()
       },
     );
   }

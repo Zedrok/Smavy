@@ -386,7 +386,6 @@ class MainMapController {
       List<Placemark> placemark = await placemarkFromCoordinates(
           screenCenter.latitude, screenCenter.longitude);
 
-      print(placemark);
       Placemark address = placemark[0];
 
       String direction = address.thoroughfare!;
@@ -460,8 +459,6 @@ class MainMapController {
             isFromSelected = false;
             isToSelected = false;
             isSearchSelected = true;
-            setFromMarker();
-            setToMarker();
           } else {
             animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
             isFromSelected = true;
