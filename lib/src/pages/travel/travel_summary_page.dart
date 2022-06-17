@@ -60,8 +60,8 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
                           SizedBox(height: 10,),
                           SizedBox(
                             child: Text(
-                              _con.travelHistory.totalDuration.inMinutes.remainder(60).toString().padLeft(2,'0')+':'+
-                              _con.travelHistory.totalDuration.inSeconds.remainder(60).toString().padLeft(2,'0'),
+                              (_con.datosCargados)?_con.travelHistory.totalDuration.inMinutes.remainder(60).toString().padLeft(2,'0')+':'+
+                              _con.travelHistory.totalDuration.inSeconds.remainder(60).toString().padLeft(2,'0'):'',
                             )
                           ),
                         ],
@@ -77,7 +77,7 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
                         SizedBox(height: 10,),
                         SizedBox(
                           child: Text(
-                            _con.transformarDistancia(_con.travelHistory.totalDistance)
+                            (_con.datosCargados)?_con.transformarDistancia(_con.travelHistory.totalDistance):''
                           )
                         ),
                       ],
@@ -85,8 +85,8 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
                   ],
                 ),
                 SizedBox(height: 10,),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height*0.35,
+                (_con.datosCargados)?SizedBox(
+                  height: MediaQuery.of(context).size.height*0.33,
                   child: Container(
                     margin: EdgeInsets.symmetric(horizontal:20),
                     decoration: BoxDecoration(
@@ -101,10 +101,11 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
                       physics: BouncingScrollPhysics(),
                       itemCount: _con.travelHistory.legs.length,
                       itemBuilder: (BuildContext context, int index) =>
-                        _buildList(_con.travelHistory.legs[index])
+                        _buildList(_con.travelHistory.legs[index], index)
                     ),
                   ),
-                )
+                ):
+                SizedBox()
               ],
             ),
           ]
@@ -113,36 +114,129 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
     );
   }
 
-//  Widget myWidget(BuildContext context) {
-//    return MediaQuery.removePadding(
-//      context: context,
-//      removeTop: true,
-//      child: GridView.builder(
-//        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//          crossAxisCount: 3,
-//        ),
-//        itemCount: 300,
-//        itemBuilder: (BuildContext context, int index) {
-//          return Card(
-//            color: Colors.amber,
-//            child: Center(child: Text('$index')),
-//          );
-//        }
-//      ),
-//    );
-//  }
-
-  Widget _buildList(RouteLeg data) {
-    
+  Widget _buildList(RouteLeg data, int index) {
     return ExpansionTile(
       leading: Icon(Icons.location_on),
       title: Text(
-        'Tiempo',
+        'Tramo ${index+1}',
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
       children: [
-        Text(
-          _con.transformarDistancia(data.distance)
+        const Divider(
+          thickness: 1,
+          indent: 10,
+          endIndent: 10,
+          color: Colors.grey,
+          height: 5.0,
+        ),
+        Column(
+          children: [
+            Row(
+              children: [
+                Column(
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width*0.2,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        child: Text(
+                          'Desde',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                Column(
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width*0.67,
+                      child: Flexible(
+                        fit: FlexFit.loose,
+                        child: Text(
+                          data.startAddress,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+            Row(
+              children: [
+                Column(
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width*0.2,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        child: Text(
+                          'Hasta',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                Column(
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width*0.67,
+                      child: Flexible(
+                        fit: FlexFit.loose,
+                        child: Text(
+                          data.endAddress,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+            SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          child: Icon(
+                            CupertinoIcons.timer,
+                            size: 20,
+                          ),
+                        ),
+                        Text(
+                          data.duration.inMinutes.remainder(60).toString().padLeft(2,'0')+':'+
+                          data.duration.inSeconds.remainder(60).toString().padLeft(2,'0')
+                        ),
+                        SizedBox(width: 30),
+                        SizedBox(
+                          width: 30,
+                          child: Icon(
+                            Icons.directions_walk,
+                            size: 20,
+                          ),
+                        ),
+                        Text(
+                          _con.transformarDistancia(data.distance)
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 5),
+          ],
         )
       ]
     );
@@ -154,7 +248,9 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
       height: 50,
       margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
       child: ButtonApp(
-        onPressed: () {},
+        onPressed: () {
+          _con.goToHomePage();
+        },
         text: 'Volver al Inicio',
       ),
     );
@@ -176,7 +272,7 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
           maxLines: 1,
         ),
         subtitle: Text(
-          _con.travelHistory.fromText,
+          (_con.datosCargados)?_con.travelHistory.fromText:'',
           style: const TextStyle(
               color: Colors.grey,
               fontWeight: FontWeight.bold,
@@ -205,7 +301,7 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
           maxLines: 1,
         ),
         subtitle: Text(
-          _con.travelHistory.fromText,
+          (_con.datosCargados)?_con.travelHistory.fromText:'',
           style: const TextStyle(
               color: Colors.grey,
               fontWeight: FontWeight.bold,

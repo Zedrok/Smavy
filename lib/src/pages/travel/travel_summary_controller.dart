@@ -9,6 +9,7 @@ class TravelSummaryController {
 
   late TravelHistoryProvider _travelHistoryProvider;
   late TravelHistory travelHistory;
+  bool datosCargados = false;
 
   Future init(BuildContext context, refresh) async {
     this.context = context;
@@ -20,6 +21,7 @@ class TravelSummaryController {
 
   void getTravelHistory() async {
     travelHistory = (await _travelHistoryProvider.getById(idTravelHistory))!;
+    datosCargados = true;
     refresh();
   }
 
@@ -32,5 +34,9 @@ class TravelSummaryController {
     }else{
       return '${totalDistance.toString()} m';
     }
+  }
+
+  void goToHomePage() {
+    Navigator.pushNamedAndRemoveUntil(context, 'mainMap', (route) => false);
   }
 }
