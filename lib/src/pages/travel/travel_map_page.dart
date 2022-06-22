@@ -193,14 +193,12 @@ class _TravelMapPageState extends State<TravelMapPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              
               (_con.currentLeg > 0)?
               _buttonPreviousLeg():
               _buttonCancel(),
-
               (!_con.rutaComenzada)?
                 _buttonStart():
-                  (!_con.rutaTerminada)?
+                  (!_con.rutaTerminada && _con.listaDireccionesTravelMap.isNotEmpty)?
                   _buttonNextLeg():
                   _buttonFinish()
             ],

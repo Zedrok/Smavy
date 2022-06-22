@@ -412,31 +412,32 @@ class _MainMapPageState extends State<MainMapPage> {
           height: 10,
           color: Colors.grey,
         ),
-        _menusDrawer(context, 'Direcciones Guardadas', 'dir_guardadas'),
-        const Divider(
-          thickness: 1,
-          height: 10,
-          color: Colors.grey,
-        ),
-        _menusDrawer(context, 'Ajustes', 'ajustes_page'),
+        // _menusDrawer(context, 'Direcciones Guardadas', 'dir_guardadas'),
+        // const Divider(
+        //   thickness: 1,
+        //   height: 10,
+        //   color: Colors.grey,
+        // ),
+        _menusDrawer(context, 'Ayuda', 'ajustes_page'),
         const SizedBox(
-          height: 180,
+          height: 150,
         ),
-        Container(
-          padding: const EdgeInsets.only(
-            right: 70,
-          ),
-          alignment: Alignment.bottomLeft,
-          height: 50,
-          child: ButtonApp(
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-              Navigator.pushNamed(context, 'login');
-            },
-            color: Colors.red.shade600,
-            colorIcon: const Color.fromARGB(255, 197, 27, 15),
-            text: 'Cerrar Sesion',
-            icon: Icons.logout_outlined,
+        Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            alignment: Alignment.bottomLeft,
+            height: 50,
+            child: ButtonApp(
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+                Navigator.pushNamed(context, 'login');
+              },
+              buttonIcon: false,
+              color: const Color.fromARGB(255, 197, 27, 15),
+              colorIcon: const Color.fromARGB(255, 197, 27, 15),
+              text: 'Cerrar Sesion',
+              icon: Icons.logout_outlined,
+            ),
           ),
         ),
       ],

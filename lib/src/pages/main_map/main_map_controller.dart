@@ -82,17 +82,31 @@ class MainMapController {
   
   void goToTravelInfoPage(){
     if(validarDireccion(fromText.text) && validarDireccion(toText.text)){
-      Navigator.pushNamed(context, 'travelMap', arguments:{
-        'fromText': fromText.text,
-        'toText': toText.text,
-        'fromLatLng': fromLatLng,
-        'toLatLng': toLatLng,
-        'listaDirecciones': listaDirecciones,
-        'rutaRepetida': false
-      });
+      if(validarFromTo())
+      {
+        Navigator.pushNamed(context, 'travelMap', arguments:{
+          'fromText': fromText.text,
+          'toText': toText.text,
+          'fromLatLng': fromLatLng,
+          'toLatLng': toLatLng,
+          'listaDirecciones': listaDirecciones,
+          'rutaRepetida': false
+        });
+      }else{
+        Snackbar.showSnackbar(context, 'Por favor, revise el origen y el destino.');
+      }
     }else{
       Snackbar.showSnackbar(context, 'Por favor, revise el origen y el destino.');
     }
+    
+  }
+
+  bool validarFromTo(){
+    if((fromLatLng.latitude.compareTo(toLatLng.latitude) == 0 &&
+      fromLatLng.longitude.compareTo(toLatLng.longitude) == 0)){
+      return false;
+    }
+    return true;
   }
 
   Future<Uint8List> convertWidgetIntoUint8List(Widget widgetMarker) async  {

@@ -98,9 +98,7 @@ class TravelMapController{
     await setMarkers();
     await setPolyline();
     animateCameraToPosition(fromLatLng.latitude, fromLatLng.longitude);
-    Future.delayed(const Duration(milliseconds: 200), 
-      refresh()
-    );
+    refresh();
   }
 
   Future<void> getRouteData() async {
@@ -258,8 +256,12 @@ class TravelMapController{
 
   void comenzarRuta() async {
     currentStartAddress = fromText;
-    currentEndAddress = listaDireccionesTravelMap[currentLeg]['direccion'];
-    setPolyline(routeLegs[currentLeg].polyline);
+    if(listaDireccionesTravelMap.isNotEmpty){
+      currentEndAddress = listaDireccionesTravelMap[currentLeg]['direccion'];
+      setPolyline(routeLegs[currentLeg].polyline);
+    }else{
+      currentEndAddress = toText;
+    }
     rutaComenzada = true;
     updateLocation();
   }
