@@ -98,8 +98,8 @@ class AboutPage extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * 0.8,
                 width: MediaQuery.of(context).size.width * 0.7,
                 child: const Text(
-                  'La presente aplicación corresponde a un proyecto de software realizado por dos estudiantes de la Pontificia Universidad Católica de Valparaíso, cuyo objetivo es '
-                  'desarrollar una aplicación móvil dirigida a empresas o personas, que necesiten realizar múltiples transportes, ya sea de productos o personas, la cual facilite el proceso de planificación de su recorrido.',
+                  'La presente aplicación corresponde a un proyecto de software desarrollado por dos estudiantes de la Pontificia Universidad Católica de Valparaíso'
+                  ', la cual está dirigida a empresas o personas, que realicen múltiples transportes y busquen facilitar el proceso de planificación de su recorrido.',
                   textAlign: TextAlign.justify,
                 ),
               )
