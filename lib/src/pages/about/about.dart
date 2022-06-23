@@ -7,7 +7,7 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Editar Perfil'),
+          title: const Text('Sobre nosotros'),
           leading: IconButton(
             icon: const Icon(
               Icons.arrow_back,
@@ -92,13 +92,14 @@ class AboutPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(
-                height: 50,
+                height: 30,
               ),
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.8,
                 width: MediaQuery.of(context).size.width * 0.7,
                 child: const Text(
-                  'Proyecto realizado por dos estudiantes de la Universidad Católica de Valparaíso.',
+                  'La presente aplicación corresponde a un proyecto de software realizado por dos estudiantes de la Pontificia Universidad Católica de Valparaíso, cuyo objetivo es '
+                  'desarrollar una aplicación móvil dirigida a empresas o personas, que necesiten realizar múltiples transportes, ya sea de productos o personas, la cual facilite el proceso de planificación de su recorrido.',
                   textAlign: TextAlign.justify,
                 ),
               )

@@ -18,72 +18,61 @@ class ContactosPage extends StatelessWidget {
             },
           )),
       body: Padding(
-        padding: const EdgeInsets.only(top: 20, left: 20),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
         child: ListView(
           children: [
-            const Text(
-              'Contactos : ',
-              style: TextStyle(fontSize: 28),
+            SizedBox(
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: const [
+                    SizedBox(width: 40,child: Icon(Icons.whatsapp)),
+                      Text(
+                        'WhatsApp',
+                        style: TextStyle(fontSize: 28),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: const [
+                      Text(
+                        ' +56931260191',
+                        style: TextStyle(fontSize: 24),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10,)
+                ],
+              ),
             ),
-            const SizedBox(
-              height: 10,
+            const Divider(
+              thickness: 2,
+              indent: 10,
+              endIndent: 10,
+              color: Colors.grey,
+              height: 5.0,
             ),
-            Row(
-              children: const [
-                Text(
-                  'Telefono :',
-                  style: TextStyle(fontSize: 28),
+            Column(
+              children: [
+                Row(
+                  children: const [
+                    SizedBox(width: 40,child: Icon(Icons.mail_outline)),
+                    Text(
+                      'Correo',
+                      style: TextStyle(fontSize: 28),
+                    ),
+                  ],
                 ),
-                Text(
-                  '+56931260191',
-                  style: TextStyle(fontSize: 28),
+                const SizedBox(
+                  height: 40,
+                  child: Text(
+                    'contacto.smavy@gmail.com',
+                    style: TextStyle(fontSize: 24),
+                  ),
                 ),
               ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Divider(
-              height: 5,
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text(
-              'Correo :',
-              style: TextStyle(fontSize: 28),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Divider(
-              height: 5,
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text(
-              'correo1@gmail.com',
-              style: TextStyle(fontSize: 28),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Divider(
-              height: 5,
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text(
-              'correo2@gmail.com',
-              style: TextStyle(fontSize: 28),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Divider(
-              height: 5,
             ),
           ],
         ),

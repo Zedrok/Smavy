@@ -7,6 +7,7 @@ class Snackbar{
     FocusScope.of(context).requestFocus(FocusNode());
     
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      behavior: SnackBarBehavior.fixed,
       content: Text(
         text,
         textAlign: TextAlign.center,

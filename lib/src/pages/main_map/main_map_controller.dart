@@ -93,7 +93,7 @@ class MainMapController {
           'rutaRepetida': false
         });
       }else{
-        Snackbar.showSnackbar(context, 'Por favor, revise el origen y el destino.');
+        Snackbar.showSnackbar(context, 'El origen y el destino no pueden ser el mismo.');
       }
     }else{
       Snackbar.showSnackbar(context, 'Por favor, revise el origen y el destino.');
@@ -365,7 +365,7 @@ class MainMapController {
    
     resetMarkers();
     
-   Future.delayed(Duration.zero, refresh());
+    refresh();
   }
 
   void checkGPS() async {

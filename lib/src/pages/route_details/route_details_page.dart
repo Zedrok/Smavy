@@ -46,79 +46,81 @@ class _RouteDetailsPageState extends State<RouteDetailsPage> {
         )
       ),
       bottomNavigationBar: _bottomButtons(),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              SizedBox(height: 15),
-              _listTileTravelFrom(),
-              _listTileTravelTo(),
-              SizedBox(height: 0,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  SizedBox(
-                    child: Column(
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                SizedBox(height: 15),
+                _listTileTravelFrom(),
+                _listTileTravelTo(),
+                SizedBox(height: 0,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    SizedBox(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            child: Icon(
+                              CupertinoIcons.time
+                            )
+                          ),
+                          SizedBox(height: 10,),
+                          SizedBox(
+                            child: Text(
+                              (_con.datosCargados)?
+                              _con.travelHistory.totalDuration.inMinutes.remainder(60).toString().padLeft(2,'0')+':'+
+                              _con.travelHistory.totalDuration.inSeconds.remainder(60).toString().padLeft(2,'0'):
+                              '',
+                            )
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
                       children: [
                         SizedBox(
                           child: Icon(
-                            CupertinoIcons.time
+                            Icons.directions_walk
                           )
                         ),
                         SizedBox(height: 10,),
                         SizedBox(
                           child: Text(
-                            (_con.datosCargados)?
-                            _con.travelHistory.totalDuration.inMinutes.remainder(60).toString().padLeft(2,'0')+':'+
-                            _con.travelHistory.totalDuration.inSeconds.remainder(60).toString().padLeft(2,'0'):
-                            '',
+                            (_con.datosCargados)?_con.transformarDistancia(_con.travelHistory.totalDistance):''
                           )
                         ),
                       ],
                     ),
-                  ),
-                  Column(
-                    children: [
-                      SizedBox(
-                        child: Icon(
-                          Icons.directions_walk
-                        )
-                      ),
-                      SizedBox(height: 10,),
-                      SizedBox(
-                        child: Text(
-                          (_con.datosCargados)?_con.transformarDistancia(_con.travelHistory.totalDistance):''
-                        )
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 10,),
-              (_con.datosCargados)?SizedBox(
-                height: MediaQuery.of(context).size.height*0.45,
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal:20),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: 
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: BouncingScrollPhysics(),
-                    itemCount: _con.travelHistory.legs.length,
-                    itemBuilder: (BuildContext context, int index) =>
-                      _buildList(_con.travelHistory.legs[index], index)
-                  ),
+                  ],
                 ),
-              ):
-              SizedBox()
-            ],
-          ),
-        ]
+                SizedBox(height: 10,),
+                (_con.datosCargados)?SizedBox(
+                  height: MediaQuery.of(context).size.height*0.45,
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal:20),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: 
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: BouncingScrollPhysics(),
+                      itemCount: _con.travelHistory.legs.length,
+                      itemBuilder: (BuildContext context, int index) =>
+                        _buildList(_con.travelHistory.legs[index], index)
+                    ),
+                  ),
+                ):
+                SizedBox()
+              ],
+            ),
+          ]
+        ),
       ),
     );
   }
@@ -295,7 +297,7 @@ class _RouteDetailsPageState extends State<RouteDetailsPage> {
       margin: const EdgeInsets.symmetric(horizontal: 10),
       child: ListTile(
         title: Text(
-          'Desde',
+          'Inicio',
           style: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -333,7 +335,7 @@ class _RouteDetailsPageState extends State<RouteDetailsPage> {
           maxLines: 1,
         ),
         subtitle: Text(
-          (_con.datosCargados)?_con.travelHistory.fromText:'',
+          (_con.datosCargados)?_con.travelHistory.toText:'',
           style: TextStyle(
               color: Colors.grey.shade700,
               fontWeight: FontWeight.bold,

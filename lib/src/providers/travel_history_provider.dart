@@ -67,6 +67,10 @@ class TravelHistoryProvider {
       }
     }
     
+    _travelHistoryList.sort((a, b) {
+      return b.timestamp.compareTo(a.timestamp);
+    });
+
     return _travelHistoryList;
   }
 

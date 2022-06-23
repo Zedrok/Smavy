@@ -263,7 +263,7 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
       margin: const EdgeInsets.symmetric(horizontal: 10),
       child: ListTile(
         title: Text(
-          'Desde',
+          'Inicio',
           style: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -301,7 +301,7 @@ class _TravelSummaryPageState extends State<TravelSummaryPage> {
           maxLines: 1,
         ),
         subtitle: Text(
-          (_con.datosCargados)?_con.travelHistory.fromText:'',
+          (_con.datosCargados)?_con.travelHistory.toText:'',
           style: TextStyle(
               color: Colors.grey.shade700,
               fontWeight: FontWeight.bold,

@@ -19,7 +19,7 @@ class MainMapPage extends StatefulWidget {
   State<MainMapPage> createState() => _MainMapPageState();
 }
 
-class _MainMapPageState extends State<MainMapPage> {
+class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStateMixin {
   final MainMapController _con = MainMapController();
   final ScrollController scrollController = ScrollController();
   final double heightAddLocationB = 160.0;
@@ -30,7 +30,6 @@ class _MainMapPageState extends State<MainMapPage> {
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     super.initState();
-
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       _con.init(context, refresh);
     });
@@ -148,7 +147,15 @@ class _MainMapPageState extends State<MainMapPage> {
                   child: _iconMyLocation(),
                 ),
               ),
-              _notificationButtonTrazar(),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                    child:_notificationButtonTrazar(),
+                  ),
+                ],
+              )
             ],
           ),
         ),
@@ -355,26 +362,28 @@ class _MainMapPageState extends State<MainMapPage> {
 
   Widget _buttonAddLocation() {
     return Container(
-        alignment: Alignment.centerRight,
-        child: Card(
-            elevation: 3,
-            color: Colors.teal[400],
-            shape: const CircleBorder(),
-            child: Positioned(
-              right: 20,
-              bottom: heightAddLocationB,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 35,
-                ),
-                onPressed: () {
-                  _con.agregarDireccion();
-                  refresh();
-                },
-              ),
-            )));
+      alignment: Alignment.centerRight,
+      child: Card(
+        elevation: 3,
+        color: Colors.teal[400],
+        shape: const CircleBorder(),
+        child: Positioned(
+          right: 20,
+          bottom: heightAddLocationB,
+          child: IconButton(
+            icon: const Icon(
+              Icons.add,
+              color: Colors.white,
+              size: 35,
+            ),
+            onPressed: () {
+              _con.agregarDireccion();
+              refresh();
+            },
+          ),
+        )
+      )
+    );
   }
 
   Widget _iconMyLocation() {
@@ -523,13 +532,17 @@ class _MainMapPageState extends State<MainMapPage> {
     );
   }
 
-  Widget panelUp() {
-    return DraggableScrollableSheet(
-        maxChildSize: 0.9,
-        minChildSize: 0.07,
-        initialChildSize: 0.07,
-        builder: (context, scrollController) {
-          return Material(
+  void panelUp() {
+     showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) { 
+        return DraggableScrollableSheet(
+          maxChildSize: 1,
+          minChildSize: 1,
+          initialChildSize: 1,
+          builder: (context, scrollController) {
+            return Material(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(20)),
               color: Colors.white,
@@ -537,7 +550,8 @@ class _MainMapPageState extends State<MainMapPage> {
                 padding: EdgeInsets.zero,
                 controller: scrollController,
                 children: [
-                  Container(child: _buttonTrazar()),
+                  const SizedBox(height: 30),
+                  Container(child: _buttonTrazar(true)),
                   const SizedBox(height: 10),
                   const Divider(
                     thickness: 1,
@@ -569,19 +583,32 @@ class _MainMapPageState extends State<MainMapPage> {
                   _buttonIniciarViaje(),
                   // ignore: avoid_unnecessary_containers
                 ],
-              ));
-        });
+              )
+            );
+          }
+      );
+      }
+    );
   }
 
-  Widget _buttonTrazar() {
+  Widget _buttonTrazar(bool isOpen) {
     return Container(
         alignment: Alignment.topCenter,
         child: ButtonApp(
-          onPressed: () {},
+          onPressed: () {
+            if(isOpen){
+              Navigator.pop(context);
+              isTrazarB = true;
+            }else{
+              panelUp();  
+              isTrazarB = false;
+            }
+          },
           color: Colors.teal,
           text: '${_con.listaDirecciones.length} Lugares seleccionados',
           icon: _iconButtonTrazar(),
-        ));
+        )
+        );
   }
 
   IconData iconOrigenDestino() {
@@ -607,15 +634,17 @@ class _MainMapPageState extends State<MainMapPage> {
 
   Widget _buttonIniciarViaje() {
     return Container(
-        alignment: Alignment.bottomCenter,
-        child: ButtonApp(
-          onPressed: () {
-            _con.goToTravelInfoPage();
-          },
-          color: Colors.teal,
-          text: 'INICIAR VIAJE',
-          icon: Icons.arrow_forward_ios,
-        ));
+      alignment: Alignment.bottomCenter,
+      child: ButtonApp(
+        onPressed: () {
+          Navigator.pop(context);
+          _con.goToTravelInfoPage();
+        },
+        color: Colors.teal,
+        text: 'INICIAR VIAJE',
+        icon: Icons.arrow_forward_ios,
+      )
+    );
   }
 
   Widget _notificationButtonTrazar() {
@@ -634,7 +663,7 @@ class _MainMapPageState extends State<MainMapPage> {
         }
         return true;
       },
-      child: panelUp(),
+      child: Container(child: _buttonTrazar(false)),
     );
   }
 
@@ -685,6 +714,8 @@ class _MainMapPageState extends State<MainMapPage> {
               onPressed: () {
                 setState(() {
                   _con.deleteDireccion(direccion);
+                  Navigator.pop(context);
+                  panelUp();
                 });
               }),
         ),

@@ -250,6 +250,7 @@ class TravelMapController{
     rutaTerminada = false;
     currentStartAddress = routeLegs[currentLeg].startAddress;
     currentEndAddress = routeLegs[currentLeg].endAddress;
+    accumulatedDuration -= routeLegs[currentLeg].duration.inMilliseconds;
     setPolyline(routeLegs[currentLeg].polyline);
     refresh();
   }

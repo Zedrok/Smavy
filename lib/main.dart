@@ -6,7 +6,7 @@ import 'package:smavy/src/pages/home/home_page.dart';
 import 'package:smavy/src/pages/login/login_page.dart';
 import 'package:smavy/src/pages/main_map/main_map_page.dart';
 import 'package:smavy/src/pages/register/register_page.dart';
-import 'package:smavy/src/pages/ajustes/ajustes_page.dart';
+import 'package:smavy/src/pages/ayuda/ayuda_page.dart';
 import 'package:smavy/src/pages/historial/historial_page.dart';
 import 'package:smavy/src/pages/Profile/perfil.dart';
 import 'package:smavy/src/pages/direcciones_guardadas/save_adresses.dart';
@@ -14,6 +14,7 @@ import 'package:smavy/src/pages/route_details/route_details_page.dart';
 import 'package:smavy/src/pages/terms_and_conditions/terms_and_conditions.dart';
 import 'package:smavy/src/pages/travel/travel_map_page.dart';
 import 'package:smavy/src/pages/travel/travel_summary_page.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,12 +25,17 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
+  // This widget is t.he root of your application.
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return MaterialApp(
       title: 'Smavy',
       debugShowCheckedModeBanner: false,
+
       theme: ThemeData(
         primarySwatch: Colors.teal,
         appBarTheme: const AppBarTheme(elevation: 0),
