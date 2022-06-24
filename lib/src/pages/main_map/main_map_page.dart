@@ -104,15 +104,15 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
                   ),
 
                   // Boton direcciones guardadas
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 15),
-                        child: _buttonSavedLocations(),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.end,
+                  //   children: [
+                  //     Container(
+                  //       margin: const EdgeInsets.symmetric(horizontal: 15),
+                  //       child: _buttonSavedLocations(),
+                  //     ),
+                  //   ],
+                  // ),
 
                   // Boton Agregar dirección
                   () {
