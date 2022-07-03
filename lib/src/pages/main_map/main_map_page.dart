@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:smavy/src/models/direccion_guardada.dart';
 import 'package:smavy/src/pages/main_map/main_map_controller.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
 import 'dart:io';
@@ -104,15 +105,15 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
                   ),
 
                   // Boton direcciones guardadas
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.end,
-                  //   children: [
-                  //     Container(
-                  //       margin: const EdgeInsets.symmetric(horizontal: 15),
-                  //       child: _buttonSavedLocations(),
-                  //     ),
-                  //   ],
-                  // ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 15),
+                        child: _buttonSavedLocations(),
+                      ),
+                    ],
+                  ),
 
                   // Boton Agregar dirección
                   () {
@@ -353,10 +354,15 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
           elevation: 0,
           color: Colors.teal[400],
           shape: const CircleBorder(),
-          child: Container(
-              padding: const EdgeInsets.all(10),
-              child: const Icon(Icons.where_to_vote,
-                  color: Colors.white, size: 25)),
+          child: GestureDetector(
+            onTap: (){
+              savedLocationsPanelUp();
+            },
+            child: Container(
+                padding: const EdgeInsets.all(10),
+                child: const Icon(Icons.where_to_vote,
+                    color: Colors.white, size: 25)),
+          ),
         ));
   }
 
@@ -374,7 +380,7 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
             icon: const Icon(
               Icons.add,
               color: Colors.white,
-              size: 35,
+              size: 30,
             ),
             onPressed: () {
               _con.agregarDireccion();
@@ -421,16 +427,23 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
           height: 10,
           color: Colors.grey,
         ),
-        // _menusDrawer(context, 'Direcciones Guardadas', 'dir_guardadas'),
-        // const Divider(
-        //   thickness: 1,
-        //   height: 10,
-        //   color: Colors.grey,
-        // ),
+        _menusDrawer(context, 'Rutas Guardadas', 'rutas_guardadas'),
+        const Divider(
+          thickness: 1,
+          height: 10,
+          color: Colors.grey,
+        ),
+        _menusDrawer(context, 'Direcciones Guardadas', 'dir_guardadas'),
+        const Divider(
+          thickness: 1,
+          height: 10,
+          color: Colors.grey,
+        ),
         _menusDrawer(context, 'Ayuda', 'ajustes_page'),
         const SizedBox(
-          height: 150,
+          height: 30,
         ),
+        
         Center(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -483,9 +496,9 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
               ),
             ],
             shape: BoxShape.circle,
-            image: DecorationImage(
+            image: const DecorationImage(
               fit: BoxFit.cover,
-              image: AssetImage('${user?.providerData[0].photoURL}'),
+              image: AssetImage('assets/img/profile.png'),
             ),
           ),
         ),
@@ -586,6 +599,79 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
               )
             );
           }
+      );
+      }
+    );
+  }
+
+  void savedLocationsPanelUp() {
+    showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) { 
+      return DraggableScrollableSheet(
+        maxChildSize: 1,
+        minChildSize: 1,
+        initialChildSize: 1,
+        builder: (context, scrollController) {
+          return Material(
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(20)),
+            color: Colors.white,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              controller: scrollController,
+              children: [
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Icon(Icons.arrow_back_ios,
+                          size: 22,
+                          color: Colors.grey[800],),
+                        )
+                      ],
+                    ),
+                    const SizedBox(width: 5),
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width*0.75,
+                          child: const Flexible(
+                            fit: FlexFit.loose,
+                            child: Text(
+                              'Direcciones guardadas',
+                              style: TextStyle(
+                                fontSize: 18
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+                const SizedBox(height: 15),
+                const Divider(
+                  thickness: 1,
+                  indent: 10,
+                  endIndent: 10,
+                  color: Colors.grey,
+                  height: 5.0,
+                ),
+                ..._crearSavedLocationItem(),
+                const SizedBox(
+                  height: 10,
+                ),
+              ],
+            )
+          );
+        }
       );
       }
     );
@@ -695,7 +781,13 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
     for (Map<String, dynamic> direccion in _con.listaDirecciones) {
       Widget item = ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 15),
-        title: Text("${direccion['direccion']}"),
+        title: ((){
+          if(direccion['alias']!=null){
+            return Text('${direccion['alias']}');
+          }else{
+            return Text("${direccion['direccion']}");
+          }
+        }()),
         leading: SizedBox(
           width: 30,
           child: Text(
@@ -733,6 +825,57 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
     return temporal;
   }
 
+  List<Widget> _crearSavedLocationItem(){
+    List<Widget> temporal = [];
+
+    for (DireccionGuardada direccion in _con.direccionesGuardadas) {
+      Widget item = ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 30),
+        title: Text("${direccion.alias}"),
+        trailing: SizedBox(
+          width: 50,
+          child: Container(
+            alignment: Alignment.centerLeft,
+            child: Card(
+              elevation: 3,
+              color: Colors.green[700],
+              shape: const CircleBorder(),
+              child: Positioned(
+                bottom: heightAddLocationB,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 27,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                    _con.agregarSavedLocation(direccion);
+                    Navigator.pop(context);
+                    panelUp();
+                  },);
+                }
+              )
+            )
+          ),
+        ),
+      )
+      );
+      temporal.add(item);
+      temporal.add(const Divider(
+        indent: 10,
+        endIndent: 10,
+        color: Colors.grey,
+        height: 5.0,
+        thickness: 1,
+      ));
+    }
+
+    return temporal;
+  }
+
+  
+
   Widget _googleMapsWidget() {
     return GoogleMap(
       trafficEnabled: true,
@@ -762,7 +905,6 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
 
   void refresh() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-
     setState(() {});
   }
 }

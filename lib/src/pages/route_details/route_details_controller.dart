@@ -51,7 +51,6 @@ class RouteDetailsController {
 
   List<Map<String, dynamic>> getWaypointsFromRoute(){
     List<Map<String, dynamic>> listaDirecciones = [];
-    
     int i=0;
     while(i<(travelHistory.legs.length-1)){
       listaDirecciones.add({
@@ -65,18 +64,32 @@ class RouteDetailsController {
     return listaDirecciones;
   }
 
-  void goToTravelMap() {
+  void goToAdvancedDetails(){
     List<Map<String, dynamic>> listaDirecciones = getWaypointsFromRoute();
 
-    Navigator.pushNamed(context, 'travelMap', arguments:{
+    Navigator.pushNamed(context, 'advanced_details', arguments:{
       'fromText': travelHistory.fromText,
       'toText': travelHistory.toText,
       'fromLatLng': travelHistory.fromLatLng,
       'toLatLng': travelHistory.toLatLng,
       'listaDirecciones': listaDirecciones,
-      'routeLegs': travelHistory.legs,
+      'travelHistory': travelHistory,
       'rutaRepetida': true,
-      'encodedPolyline': travelHistory.overviewPolyline
     });
   }
+
+  // void goToTravelMap() {
+  //   List<Map<String, dynamic>> listaDirecciones = getWaypointsFromRoute();
+
+  //   Navigator.pushNamed(context, 'travelMap', arguments:{
+  //     'fromText': travelHistory.fromText,
+  //     'toText': travelHistory.toText,
+  //     'fromLatLng': travelHistory.fromLatLng,
+  //     'toLatLng': travelHistory.toLatLng,
+  //     'listaDirecciones': listaDirecciones,
+  //     'routeLegs': travelHistory.legs,
+  //     'rutaRepetida': true,
+  //     'encodedPolyline': travelHistory.overviewPolyline
+  //   });
+  // }
 }

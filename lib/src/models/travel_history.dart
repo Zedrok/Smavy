@@ -13,6 +13,7 @@ String travelHistoryToJson(TravelHistory data) => json.encode(data.toJson());
 class TravelHistory {
   TravelHistory({
       this.id,
+      this.alias,
       required this.idUsuario,
       required this.fromText,
       required this.fromLatLng,
@@ -26,6 +27,7 @@ class TravelHistory {
   });
 
   String? id;
+  String? alias;
   String idUsuario;
   String fromText;
   LatLng fromLatLng;

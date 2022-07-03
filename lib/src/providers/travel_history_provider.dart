@@ -1,15 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:smavy/src/models/ruta_guardada.dart';
 import 'package:smavy/src/models/travel_history.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
 
 class TravelHistoryProvider {
 
   late CollectionReference _ref;
+  late CollectionReference _refRuta;
   late AuthProvider _authProvider;
 
   TravelHistoryProvider() {
     _authProvider = AuthProvider();
     _ref = FirebaseFirestore.instance.collection('TravelHistory');
+    _refRuta = FirebaseFirestore.instance.collection('RutaGuardada');
   }
 
   Future<String> create(TravelHistory travelHistory) async {
@@ -73,6 +76,42 @@ class TravelHistoryProvider {
 
     return _travelHistoryList;
   }
+  
+  Future<List<TravelHistory>?> getUserSavedRoutes() async {
+    List<TravelHistory> _travelHistoryList = [];
+    List<RutaGuardada> _rutaGuardadaList = [];
+    List<DocumentSnapshot> docs = [];
+
+    await _refRuta.where('id_usuario', isEqualTo: _authProvider.getUser()!.uid).get().then((query) {
+      return docs = query.docs;
+    });
+
+    if (docs.isNotEmpty) {
+      for(var document in docs){
+        RutaGuardada rutaGuardada = RutaGuardada.fromJson(document.data() as Map<String,dynamic>);
+        _rutaGuardadaList.add(rutaGuardada);
+      }
+    }
+
+    for(var rutaGuardada in _rutaGuardadaList){
+      await _ref.where('id', isEqualTo: rutaGuardada.idRuta).get().then((query) {
+        return docs = query.docs;
+      });  
+      if(docs.isNotEmpty){
+        for(var document in docs){
+          TravelHistory travelHistory = TravelHistory.fromJson(document.data() as Map<String,dynamic>);
+          travelHistory.alias = rutaGuardada.alias;
+          _travelHistoryList.add(travelHistory);
+        }
+      }
+    }
+    
+    _travelHistoryList.sort((a, b) {
+      return a.alias!.compareTo(b.alias!);
+    });
+
+    return _travelHistoryList;
+  }
 
   Future<void> update(Map<String, dynamic> data, String id) {
     return _ref.doc(id).update(data);
@@ -81,5 +120,4 @@ class TravelHistoryProvider {
   Future<void> delete(String id) {
     return _ref.doc(id).delete();
   }
-
 }

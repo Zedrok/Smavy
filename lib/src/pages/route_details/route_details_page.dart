@@ -258,7 +258,6 @@ class _RouteDetailsPageState extends State<RouteDetailsPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        
         Container(
           height: 50,
           width: 150,
@@ -281,9 +280,9 @@ class _RouteDetailsPageState extends State<RouteDetailsPage> {
             buttonIcon: false,
             margin: 0,
             onPressed: () {
-              _con.goToTravelMap();
+              _con.goToAdvancedDetails();
             },
-            text: 'Repetir Ruta',
+            text: 'Ver detalles',
           ),
         ),
       ],

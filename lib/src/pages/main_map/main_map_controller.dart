@@ -13,8 +13,10 @@ import 'package:google_places_flutter/model/prediction.dart';
 import 'package:location/location.dart' as location;
 import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:smavy/src/models/direccion_guardada.dart';
 import 'package:smavy/src/pages/api/environment.dart';
 import 'package:smavy/src/providers/auth_provider.dart';
+import 'package:smavy/src/providers/direccion_guardada_provider.dart';
 import 'package:smavy/src/providers/geofire_provider.dart';
 
 import 'package:smavy/src/models/google_places_flutter2.dart';
@@ -38,6 +40,8 @@ class MainMapController {
   late BitmapDescriptor markerDriver;
   late GeoFireProvider _geoFireProvider;
   late AuthProvider _authProvider;
+  late DireccionGuardadaProvider _direccionGuardadaProvider;
+  late List<DireccionGuardada> direccionesGuardadas = [];
   bool isConnect = false;
   late ProgressDialog progressDialog;
 
@@ -68,6 +72,8 @@ class MainMapController {
     this.context = context;
     _geoFireProvider = GeoFireProvider();
     _authProvider = AuthProvider();
+    _direccionGuardadaProvider = DireccionGuardadaProvider();
+    cargarDireccionesGuardadas();
     progressDialog = MyProgressDialog.createProgressDialog(context, 'Obteniendo ubicación...');
     checkGPS();
     _position = await Geolocator.getCurrentPosition();
@@ -79,35 +85,34 @@ class MainMapController {
     print('Se creó el mapita');
     refresh();
   }
+
+  void cargarDireccionesGuardadas() async {
+    direccionesGuardadas = (await _direccionGuardadaProvider.getUserSavedLocationsMainMap())!;
+  }
   
   void goToTravelInfoPage(){
     if(validarDireccion(fromText.text) && validarDireccion(toText.text)){
-      if(validarFromTo())
-      {
-        Navigator.pushNamed(context, 'travelMap', arguments:{
-          'fromText': fromText.text,
-          'toText': toText.text,
-          'fromLatLng': fromLatLng,
-          'toLatLng': toLatLng,
-          'listaDirecciones': listaDirecciones,
-          'rutaRepetida': false
-        });
-      }else{
-        Snackbar.showSnackbar(context, 'El origen y el destino no pueden ser el mismo.');
-      }
+      Navigator.pushNamed(context, 'travelMap', arguments:{
+        'fromText': fromText.text,
+        'toText': toText.text,
+        'fromLatLng': fromLatLng,
+        'toLatLng': toLatLng,
+        'listaDirecciones': listaDirecciones,
+        'rutaRepetida': false
+      });
     }else{
       Snackbar.showSnackbar(context, 'Por favor, revise el origen y el destino.');
     }
     
   }
 
-  bool validarFromTo(){
-    if((fromLatLng.latitude.compareTo(toLatLng.latitude) == 0 &&
-      fromLatLng.longitude.compareTo(toLatLng.longitude) == 0)){
-      return false;
-    }
-    return true;
-  }
+  // bool validarFromTo(){
+  //   if((fromLatLng.latitude.compareTo(toLatLng.latitude) == 0 &&
+  //     fromLatLng.longitude.compareTo(toLatLng.longitude) == 0)){
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
   Future<Uint8List> convertWidgetIntoUint8List(Widget widgetMarker) async  {
     final _controller = ScreenshotController();
@@ -272,6 +277,36 @@ class MainMapController {
     }
 
     print(listaDirecciones.last);
+  }
+
+  Future<void> agregarSavedLocation(DireccionGuardada direccionGuardada) async {
+    Map<String, dynamic> nuevaDireccion = {};
+    double lat = direccionGuardada.lat;
+    double lng = direccionGuardada.lng;
+    String text = direccionGuardada.direccion;
+
+    if(listaDirecciones.isNotEmpty){
+      nuevaDireccion = {
+        'id': (int.parse(listaDirecciones.last['id'])+1).toString(),
+        'alias': direccionGuardada.alias,
+        'direccion': text,
+        'lat': lat,
+        'lng': lng
+      };
+    }else{
+      nuevaDireccion = {
+        'id': '1',
+        'alias': direccionGuardada.alias,
+        'direccion': text,
+        'lat': lat,
+        'lng': lng
+      };
+    }
+    
+    listaDirecciones.add(nuevaDireccion);
+    await setPlaceMarker(nuevaDireccion);
+    
+    refresh();
   }
 
   bool validarPosicion(LatLng posicion){
