@@ -68,7 +68,7 @@ class _RutasGuardadasPageState extends State<RutasGuardadasPage> {
       title: Row(
         children: [
           SizedBox(
-            width: 153,
+            width: 143,
             child: Text(
               data.alias!,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

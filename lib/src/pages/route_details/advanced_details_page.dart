@@ -120,7 +120,7 @@ class _AdvancedDetailsPageState extends State<AdvancedDetailsPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 15),
                     Row(
                       children: [
                         Icon(
@@ -190,7 +190,7 @@ class _AdvancedDetailsPageState extends State<AdvancedDetailsPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 15),
                     Row(
                       children: [
                         Icon(
@@ -294,7 +294,7 @@ class _AdvancedDetailsPageState extends State<AdvancedDetailsPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 15),
                     Row(
                       children: [
                         Icon(
@@ -347,53 +347,85 @@ class _AdvancedDetailsPageState extends State<AdvancedDetailsPage> {
               height: 45,
               width: 320,
               margin: EdgeInsets.only(top: 10, left: 10, right: 10),
-              child: ButtonApp(
-                margin: 0,
-                color: Colors.teal,
-                icon: Icons.star,
-                onPressed: () {
-                  setState(() {
-                    _con.aliasText.text = "Ruta guardada ${_con.readTimestamp(_con.travelHistory.timestamp)}";
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('¿Marcar como favorita?'),
-                        content: SizedBox(
-                          height: 60,
-                          child: Column(
-                            children: [
-                              Row(
+              child: ((){
+                if(_con.boolSaved == false){
+                  return ButtonApp(
+                    margin: 0,
+                    color: Colors.teal,
+                    icon: Icons.star,
+                    onPressed: () {
+                      setState(() {
+                        _con.aliasText.text = "Ruta guardada ${_con.readTimestamp(_con.travelHistory.timestamp)}";
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('¿Marcar como favorita?'),
+                            content: SizedBox(
+                              height: 60,
+                              child: Column(
                                 children: [
-                                  SizedBox(
-                                    width: 230,
-                                    child: TextField(
-                                      controller: _con.aliasText,
-                                      decoration: InputDecoration(
-                                        labelText: 'Alias',
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 230,
+                                        child: TextField(
+                                          controller: _con.aliasText,
+                                          decoration: InputDecoration(
+                                            labelText: 'Alias',
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
                                 ],
                               ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text('CANCELAR')
+                              ),
+                              TextButton(
+                                onPressed: () => _con.guardarRuta(),
+                                child: Text('GUARDAR')
+                              ),
                             ],
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text('CANCELAR')
-                          ),
-                          TextButton(
-                            onPressed: () => _con.guardarRuta(),
-                            child: Text('GUARDAR')
-                          ),
-                        ],
-                      )
-                    );
-                  });
-                },
-                text: 'Guardar ruta como favorita',
-              ),
+                          )
+                        );
+                      });
+                    },
+                    text: 'Guardar ruta como favorita',
+                  );
+                }else{
+                  return ButtonApp(
+                    margin: 0,
+                    color: Colors.red[900]!,
+                    colorIcon: Colors.red[900]!,
+                    icon: Icons.delete,
+                    onPressed: () {
+                      setState(() {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('Quitar ruta de favoritos?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text('CANCELAR')
+                              ),
+                              TextButton(
+                                onPressed: () => _con.eliminarRuta(),
+                                child: Text('ELIMINAR')
+                              ),
+                            ],
+                          )
+                        );
+                      });
+                    },
+                    text: 'Quitar ruta de favoritos',
+                  );
+                }
+              }())
             ),
           ],
         ),

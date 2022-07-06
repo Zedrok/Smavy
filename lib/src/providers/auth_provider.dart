@@ -30,7 +30,10 @@ class AuthProvider {
       } else {
         // ignore: avoid_print
         print('El usuario no está logeado');
-        Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+        
+        Future.delayed(const Duration(seconds: 2), () {
+          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+        });
       }
     });
   }

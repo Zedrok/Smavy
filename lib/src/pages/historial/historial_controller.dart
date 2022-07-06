@@ -47,7 +47,11 @@ class HistorialController {
   }
 
   void goToSummaryPage(String id) {
-    Navigator.pushNamed(context, 'routeDetails', arguments: id);
+     Navigator.pushNamed(
+      context, 'routeDetails', arguments:{
+        'id': id,
+        'boolSaved': false
+    });
   }
 
 }

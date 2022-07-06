@@ -11,12 +11,16 @@ class RouteDetailsController {
   late TravelHistoryProvider _travelHistoryProvider;
   late TravelHistory travelHistory;
   bool datosCargados = false;
+  late bool boolSaved;
 
   Future init(BuildContext context, refresh) async {
     this.context = context;
     this.refresh = refresh;
 
-    idTravelHistory = ModalRoute.of(context)!.settings.arguments as String;
+    Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map <String, dynamic>;
+
+    idTravelHistory = arguments['id'];
+    boolSaved = arguments['boolSaved'];
     
     _travelHistoryProvider = TravelHistoryProvider();
     getTravelHistory();
@@ -75,6 +79,8 @@ class RouteDetailsController {
       'listaDirecciones': listaDirecciones,
       'travelHistory': travelHistory,
       'rutaRepetida': true,
+      'boolSaved': boolSaved,
+      'idTravelHistory': idTravelHistory
     });
   }
 

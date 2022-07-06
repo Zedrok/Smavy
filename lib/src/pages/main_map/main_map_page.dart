@@ -502,10 +502,7 @@ class _MainMapPageState extends State<MainMapPage> with SingleTickerProviderStat
             ),
           ),
         ),
-        Text(
-          '${user!.displayName}',
-          style: const TextStyle(color: Colors.white),
-        ),
+        // .00.
         Text(
           '${user?.providerData[0].email}',
           style: const TextStyle(color: Colors.white),

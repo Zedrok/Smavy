@@ -28,6 +28,7 @@ class AdvancedDetailsController {
   late RutaGuardadaProvider rutaGuardadaProvider;
   late ProgressDialog progressDialog;
   late DireccionGuardadaProvider direccionGuardadaProvider;
+  late bool boolSaved = false;
   
 
   Future init(BuildContext context, refresh) async {
@@ -43,6 +44,8 @@ class AdvancedDetailsController {
     toLatLng = arguments['toLatLng'];
     rutaRepetida = arguments['rutaRepetida'];
     travelHistory = arguments['travelHistory'];
+    boolSaved = arguments['boolSaved'];
+    idTravelHistory = arguments['idTravelHistory'];
 
     rutaGuardadaProvider = RutaGuardadaProvider();
     direccionGuardadaProvider = DireccionGuardadaProvider();
@@ -95,6 +98,12 @@ class AdvancedDetailsController {
     rutaGuardadaProvider.create(rutaGuardada);
     Navigator.pushNamed(context, 'rutas_guardadas');
     Snackbar.showSnackbar(context, 'Ruta agregada con éxito!', true);
+  }
+
+  void eliminarRuta(){
+    rutaGuardadaProvider.delete(idTravelHistory);
+    Navigator.pushNamed(context, 'rutas_guardadas');
+    Snackbar.showSnackbar(context, 'Ruta eliminada con exito!', true);
   }
 
   void guardarDireccion(Map<String, dynamic> direccion) {

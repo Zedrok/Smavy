@@ -54,8 +54,8 @@ class _RegisterPageState extends State<RegisterPage> {
             _textFieldEmail(),
             _textFieldPassword(),
             _textFieldConfirmPassword(),
-            _buttonRegister(),
             _checkBox(),
+            _buttonRegister(),
             _textHaveAccount(),
             // Expanded(child: Container()), Esto es para crear un objeto infinito
           ],
@@ -79,7 +79,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget _textHaveAccount() {
     return Container(
       alignment: Alignment.center,
-      margin: const EdgeInsets.symmetric(vertical: 30, horizontal: 40),
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -175,7 +175,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return GestureDetector(
       onTap: _con.goToLogin,
       child: Container(
-        margin: const EdgeInsets.only(top: 30),
+        margin: const EdgeInsets.only(top: 10),
         child: ButtonApp(
           text: 'Continuar',
           onPressed: _con.register,
@@ -185,31 +185,34 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _checkBox() {
-    return CheckboxListTile(
-      title: GestureDetector(
-        onTap: () {
-          Navigator.of(context).pushNamed('terminos_condiciones_page');
-        },
-        child: Text(
-          'He leído los terminos de condiciones y servicio.',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.teal[700],
-            decoration: TextDecoration.underline,
+    return SizedBox(
+      width: 360,
+      child: CheckboxListTile(
+        title: GestureDetector(
+          onTap: () {
+            Navigator.of(context).pushNamed('terminos_condiciones_page');
+          },
+          child: Text(
+            'He leído los terminos de condiciones y servicio.',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.teal[700],
+              decoration: TextDecoration.underline,
+            ),
+            textAlign: TextAlign.end,
           ),
+        ),
+        subtitle: const Text(
+          'Campo obligatorio *',
+          style: TextStyle(color: Colors.black54),
           textAlign: TextAlign.end,
         ),
+        value: isCheck,
+        onChanged: (newValue) => setState(() {
+          isCheck = newValue!;
+          _con.isCheck = newValue;
+        }),
       ),
-      subtitle: const Text(
-        'Campo obligatorio *',
-        style: TextStyle(color: Colors.black54),
-        textAlign: TextAlign.end,
-      ),
-      value: isCheck,
-      onChanged: (newValue) => setState(() {
-        isCheck = newValue!;
-        _con.isCheck = newValue;
-      }),
     );
   }
 

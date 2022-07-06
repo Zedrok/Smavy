@@ -17,7 +17,6 @@ class HomePageController {
     _sharedPref.save('typeUser', _typeUser);
 
     // ignore: avoid_print
-    print('==home_cont====INIT=========');
     _authProvider.checkIfUserIsLogged(context);
     // ignore: avoid_print
     print(_typeUser);
